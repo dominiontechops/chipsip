@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chip &amp; Sip 2026</title>
+<style>
+:root{--bg:#0e1512;--panel:#152019;--panel2:#1b2a21;--line:#26382c;--ink:#e8f0e9;--dim:#8fa596;
+--acc:#3f9e63;--acc2:#6fd39a;--blue:#3d7fd6;--blue2:#8bb8f0;--red:#c8503f;--red2:#e79486;--warn:#e0a83c;
+--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{padding:16px;border-bottom:1px solid var(--line);background:linear-gradient(160deg,#18261d,#0e1512)}
+.hrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:20px;letter-spacing:.4px}h1 span{color:var(--acc2)}
+.sub{color:var(--dim);font-size:12.5px;margin-top:3px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:var(--panel)}
+.seg button{background:none;border:0;color:var(--dim);padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer}
+.seg button.on{background:var(--acc);color:#06120b}
+nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20}
+nav button{flex:0 0 auto;background:none;border:0;color:var(--dim);padding:13px 15px;font-size:13.5px;
+font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav button.on{color:var(--ink);border-bottom-color:var(--acc)}
+main{padding:16px;max-width:1100px;margin:0 auto}
+section{display:none}section.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{margin:0 0 4px;font-size:15px}
+.card h3{margin:14px 0 6px;font-size:12px;color:var(--acc2);text-transform:uppercase;letter-spacing:.6px}
+.note{color:var(--dim);font-size:12.5px;margin:6px 0 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid #1e2b23;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{overflow-x:auto;margin:0 -14px;padding:0 14px}
+.pos{color:var(--acc2)}.neg{color:var(--red)}.warn{color:var(--warn)}
+.tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
+.tag.low{border-color:#5a4a1f;color:var(--warn)}
+.tag.nd{border-color:#6d2f26;color:var(--red2)}
+.tag.blue{border-color:#26507f;color:var(--blue2);background:#13243a}
+.tag.red{border-color:#6d2f26;color:var(--red2);background:#2e1512}
+input,select,textarea,button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);
+border-radius:8px;padding:7px 9px}
+input[type=number]{width:74px;text-align:right;font-family:var(--mono)}
+textarea{width:100%;min-height:110px;font-family:var(--mono);font-size:12.5px}
+button.go{background:var(--acc);border-color:var(--acc);color:#06120b;font-weight:700;cursor:pointer}
+button.ghost{cursor:pointer}button.ghost:hover{border-color:var(--acc)}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center;background:var(--panel2);
+border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:14px}
+.filters label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.filters select,.filters input{padding:6px 8px;font-size:13px}
+.kpi{display:flex;gap:10px;flex-wrap:wrap}
+.kpi div{flex:1;min-width:104px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.kpi b{display:block;font-size:19px;font-family:var(--mono)}
+.kpi span{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px}
+.locked{text-align:center;padding:40px 16px}.locked svg{width:88px;height:88px}
+.count{font-family:var(--mono);font-size:28px;margin:10px 0 4px}
+.bar{height:5px;background:#1e2b23;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc)}
+.split{height:9px;border-radius:99px;overflow:hidden;display:flex;margin:8px 0}
+.split i{display:block;height:100%}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--panel2)}
+summary{cursor:pointer;font-weight:600;font-size:13.5px}
+ul{margin:8px 0;padding-left:20px}li{margin:4px 0;font-size:13.5px}
+.small{font-size:12px;color:var(--dim)}
+.err{color:var(--red);font-size:12.5px;margin-top:6px}
+.ok{color:var(--acc2);font-size:12.5px;margin-top:6px}
+.day{border-left:3px solid var(--acc);padding:2px 0 2px 12px;margin:14px 0}
+.day b{font-size:14px}.day .t{font-family:var(--mono);color:var(--acc2)}
+.pay{display:inline-block;background:var(--acc);color:#06120b;font-weight:700;text-decoration:none;
+padding:10px 18px;border-radius:8px}
+@media(max-width:560px){main{padding:12px}.card{padding:12px}h1{font-size:17px}}
+</style></head>
+<body>
+
+<header><div class="hrow">
+  <div><h1>CHIP &amp; SIP <span>2026</span></h1>
+  <div class="sub" id="hdr">loading&hellip;</div></div>
+  <div class="seg" id="oddsFmt"><button data-f="frac">Fractions</button><button data-f="dec">Decimals</button></div>
+</div></header>
+
+<nav>
+  <button data-t="pools" class="on">Pools</button>
+  <button data-t="form">Form Book</button>
+  <button data-t="sched">Schedule</button>
+  <button data-t="rules">Rules</button>
+  <button data-t="blue">Blue Room</button>
+  <button data-t="admin">Admin</button>
+</nav>
+
+<main>
+
+<section id="pools" class="on">
+  <div class="card">
+    <h2>Tote pools</h2>
+    <p class="note">Everyone buys in, the pool splits between backers of the winner, the house takes
+    <b>nothing</b>. Implied odds move as money lands; the model price beside each is what the simulation
+    says is fair. Where implied is longer than fair, that outcome is underbacked.</p>
+    <div id="payWrap"></div>
+  </div>
+
+  <div class="filters">
+    <label>Market <select id="fMarket"></select></label>
+    <label>Team <select id="fTeam"><option value="">All</option><option>Blue</option><option>Red</option></select></label>
+    <label>Round <select id="fRound">
+      <option value="">All</option><option value="1">R1 Marbella</option><option value="2">R2 Cabopino</option>
+      <option value="3">R3 La Cala</option><option value="4">R4 Santa Maria</option></select></label>
+    <label>Type <select id="fType"><option value="">All</option><option value="model">Model priced</option>
+      <option value="novelty">Novelty</option></select></label>
+    <label>Hcp <input type="number" id="fHmin" placeholder="min" style="width:64px">
+      <input type="number" id="fHmax" placeholder="max" style="width:64px"></label>
+    <button class="ghost" id="fClear">Clear</button>
+  </div>
+  <div id="poolWrap"></div>
+</section>
+
+<section id="form">
+  <div class="card">
+    <h2>Form book</h2>
+    <p class="note">Built from <b>461 individual rounds</b> pulled from Squabbit across every player's whole
+    history. Pairs-format rounds are excluded — identical scores across a pairing say nothing about one player.</p>
+    <div class="kpi" id="kpis"></div>
+  </div>
+  <div class="filters">
+    <label>Team <select id="gTeam"><option value="">All</option><option>Blue</option><option>Red</option></select></label>
+    <label>Hcp <input type="number" id="gHmin" placeholder="min" style="width:64px">
+      <input type="number" id="gHmax" placeholder="max" style="width:64px"></label>
+    <label>Data <select id="gData"><option value="">All</option><option value="good">10+ rounds</option>
+      <option value="low">Thin / none</option></select></label>
+    <label>Sort <select id="gSort"><option value="gap">Handicap value</option><option value="mvp">MVP price</option>
+      <option value="hcp">Handicap</option><option value="sd">Volatility</option><option value="name">Name</option></select></label>
+    <button class="ghost" id="gClear">Clear</button>
+  </div>
+  <div class="card">
+    <h2>Players</h2>
+    <p class="note"><b>Form</b> is a recency-weighted scoring differential, lower is better. <b>Raw</b> is form
+    minus handicap straight from the data; <b>Gap</b> is that after thin samples are discounted toward the field
+    median — three rounds should not carry the same weight as sixty-eight. <b>Spread</b> is day-to-day volatility.</p>
+    <div class="wrap"><table id="formTbl"></table></div>
+  </div>
+  <div class="card">
+    <h2>Model prices</h2>
+    <p class="note">Monte Carlo of the full Ryder Cup: foursomes, fourball, scramble and singles, hole by hole,
+    with pairings redrawn every simulation so the prices average over who ends up with whom.</p>
+    <div class="row">
+      <label class="small">Simulations <select id="nsim">
+        <option>2000</option><option selected>6000</option><option>15000</option></select></label>
+      <button class="go" id="run">Re-run model</button><span class="small" id="simStat"></span>
+    </div>
+    <div class="wrap"><table id="oddsTbl"></table></div>
+  </div>
+</section>
+
+<section id="sched">
+  <div class="card">
+    <h2>Schedule</h2>
+    <div id="nextUp"></div>
+    <div id="schedWrap"></div>
+  </div>
+  <div class="card">
+    <h2>Courses</h2>
+    <div class="wrap"><table id="crsInfo"></table></div>
+    <p class="note">La Cala Asia and Santa Maria are the hard ones. Cabopino is the softest and its numbers are
+    exact — they came off your own scorecard there last September. Marbella's rating and slope are an estimate;
+    no published figures could be found, so correct them in Admin if the club confirms.</p>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="card">
+    <h2>How the pools work</h2>
+    <ul>
+      <li>Every market is a <b>tote pool</b>. Stakes in, pool split between backers of the winning outcome in
+        proportion to what they staked. Nothing is deducted.</li>
+      <li>The organiser takes no commission and holds no position against the field. A sweepstake, not a book.</li>
+      <li>Stakes are in <b>whole pounds</b>, minimum £1. Back as many outcomes as you like.</li>
+      <li>All stakes collected <b>before the first tee shot</b>. Nobody plays on credit.</li>
+      <li><b>Ante-post.</b> Anything struck before handicaps are declared on the first night counts for a
+        larger share of the pool when it pays out — you are betting blind, so you get paid for it. Ante-post
+        closes the moment the handicaps are agreed; after that the same pool stays open at ordinary terms.</li>
+      <li>Prices are informational. Your return depends on the pool, not the model.</li>
+    </ul>
+    <h3>Scoring</h3>
+    <ul>
+      <li>25 points available: five foursomes, five fourball, five scramble, ten singles. A win is one point,
+        a half is a half. <b>13 to win, 12.5 to retain.</b></li>
+      <li><b>MVP</b> is most points contributed across the four sessions. Maximum four.</li>
+      <li>Ties on points are settled by head-to-head singles result, then by a coin toss in the bar.</li>
+    </ul>
+    <h3>Settlement</h3>
+    <ul>
+      <li><b>Dead heat.</b> Pool splits equally between tied outcomes, then between backers within each.</li>
+      <li><b>Non-runner.</b> Anyone who does not tee it up at all is refunded in full on every market naming
+        them. Stakes on other outcomes stand.</li>
+      <li><b>Withdrawal mid-trip.</b> Points already banked stand; missed sessions score zero. Backers are not
+        refunded — you backed a man who might get injured.</li>
+      <li><b>Abandoned session.</b> That session's matches are halved and its markets settle on the half.</li>
+      <li><b>Scoring record.</b> Squabbit is the record. If Squabbit and a paper card disagree, Squabbit wins.</li>
+      <li><b>Handicaps</b> are locked at the airport and not revisited, whatever happens on Thursday.</li>
+      <li><b>Novelty markets</b> are settled by the organiser on the evidence available. Video beats testimony.</li>
+      <li><b>Disputes</b> go to the organiser. Any dispute involving the organiser goes to the two captains;
+        if they cannot agree the pool is voided and refunded.</li>
+    </ul>
+    <p class="note">Private betting between friends is lawful in the UK and winnings are untaxed. What would
+    change that is the organiser taking a cut or building a margin — that is bookmaking and needs a licence.
+    Hence no rake, ever.</p>
+  </div>
+</section>
+
+<section id="blue">
+  <div class="card" id="blueLock"><div class="locked">
+    <svg viewBox="0 0 64 64" fill="none" stroke="#c8503f" stroke-width="2.4">
+      <path d="M20 10h24v10a12 12 0 0 1-24 0z"/><path d="M20 14H12v4a8 8 0 0 0 8 8"/>
+      <path d="M44 14h8v4a8 8 0 0 1-8 8"/><path d="M32 32v10"/><path d="M24 50h16l-2-8H26z"/><path d="M20 54h24"/></svg>
+    <h2 style="color:var(--red);letter-spacing:2px;margin:12px 0 2px">RED TEAM AREA</h2>
+    <div class="small">Nothing for you here.</div>
+    <div class="count" id="cd">--</div><div class="small">until the first tee shot</div>
+    <div class="row" style="justify-content:center;margin-top:22px">
+      <input type="password" id="bluePw" placeholder="Blue Team passphrase" style="width:200px">
+      <button class="go" id="blueGo">Unlock</button></div>
+    <div class="err" id="blueErr"></div>
+  </div></div>
+  <div id="blueBody" style="display:none"></div>
+</section>
+
+<section id="admin">
+  <div class="card" id="adminLock">
+    <h2>Admin</h2>
+    <p class="note">Roster, handicaps, teams, courses, payment link and the pool ledger.</p>
+    <div class="row"><input type="password" id="admPw" placeholder="Admin passphrase" style="width:200px">
+      <button class="go" id="admGo">Unlock</button></div>
+    <div class="err" id="admErr"></div>
+    <p class="note" style="margin-top:10px">A soft gate, and that is all it needs to be — everything behind it
+    lives only in your browser, so the worst a snooper achieves is changing numbers on their own screen. The
+    Blue Room is different: that content is genuinely encrypted.</p>
+  </div>
+
+  <div id="admBody" style="display:none">
+    <div class="card">
+      <h2>Roster</h2>
+      <p class="note">Change a handicap and every price moves. <b>Form</b> is expected scoring differential,
+      pre-filled from history — nudge it if someone has clearly changed. Players marked <span class="tag nd">form assumed</span> have a handicap but no logged rounds, so their
+      scoring is the field-median assumption rather than anything measured.</p>
+      <div class="wrap"><table id="admTbl"></table></div>
+      <div class="row">
+        <input id="newName" placeholder="Add player" style="width:150px">
+        <input type="number" id="newHcp" placeholder="hcp" step="0.1" value="20">
+        <select id="newTeam"><option>Blue</option><option>Red</option></select>
+        <button class="ghost" id="addPlayer">Add</button>
+        <button class="go" id="admRun">Apply and re-run</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Payment</h2>
+      <p class="note">Starling <b>Settle Up</b> is the tool: it produces a secure link, Starling users pay in
+      the app and everyone else pays by debit card on a web page, so nobody needs to be a customer. Create it
+      once, paste it here, and it shows as a Pay button on the Pools tab. Money lands in your main account —
+      sweep it into a Chip &amp; Sip Space yourself, because Spaces cannot be paid into from outside.</p>
+      <div class="row">
+        <input id="payLink" placeholder="https://settleup.starlingbank.com/..." style="min-width:280px;flex:1">
+        <input id="payLabel" placeholder="Button label" style="width:150px">
+      </div>
+      <h3>Ledger</h3>
+      <p class="note">The link is the easy part. Chasing twenty blokes is not. Owed is entries times buy-in.</p>
+      <div class="wrap"><table id="ledgTbl"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Courses and format</h2>
+      <div class="wrap"><table id="crsTbl"></table></div>
+      <div class="row">
+        <label class="small">Minimum stake &pound;<input type="number" id="minStake" min="1" value="1"></label>
+        <label class="small">Singles allowance <select id="allow">
+          <option value="1" selected>100%</option><option value="0.95">95%</option><option value="0.9">90%</option>
+        </select></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Handicap declaration</h2>
+      <p class="note">Bets taken before the first night are <b>ante-post</b>: struck while the handicaps are
+      still guesses. Flip this on once they are declared in the bar, then correct the handicaps above and
+      re-run — every price moves and the board reprices itself.</p>
+      <div class="row">
+        <label class="small"><input type="checkbox" id="declared"> Handicaps declared — ante-post closed</label>
+        <label class="small">Ante-post share multiplier
+          <input type="number" id="apBonus" min="1" max="3" step="0.05" value="1.25"></label>
+      </div>
+      <p class="note">A tote has no concept of taking a price: everyone in a pool gets the same terms whenever
+      they bet, so without this an ante-post bet is simply a worse bet — same return, less information. The
+      multiplier fixes that by giving early money a larger share of the same pool. At 1.25 a pound staked
+      blind counts as £1.25 when the pool is divided. It moves money between backers rather than to the
+      organiser, so there is still no rake. Set it to 1 to switch the whole idea off.</p>
+    </div>
+
+    <div class="card">
+      <h2>Novelty markets</h2>
+      <p class="note">The model cannot price these. Add outcomes, take stakes, settle by eye.</p>
+      <div id="novWrap"></div>
+      <div class="row">
+        <input id="novQ" placeholder="Market, e.g. First in the water" style="min-width:230px;flex:1">
+        <input id="novOpts" placeholder="Outcomes, comma separated" style="min-width:230px;flex:1">
+        <select id="novRound"><option value="">Any round</option><option value="1">R1</option>
+          <option value="2">R2</option><option value="3">R3</option><option value="4">R4</option></select>
+        <button class="ghost" id="addNov">Add market</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Save your state</h2>
+      <p class="note">No server behind this, on purpose — one file, hostable anywhere, nothing to fall over in
+      a Spanish villa. Copy this out to keep your pools and handicaps; paste it back to restore.</p>
+      <textarea id="stateBox" spellcheck="false"></textarea>
+      <div class="row"><button class="ghost" id="stExport">Copy current state</button>
+        <button class="ghost" id="stImport">Load pasted state</button>
+        <button class="ghost" id="stReset">Factory reset</button></div>
+      <div class="ok" id="stMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2>Re-seal the Blue Room</h2>
+      <p class="note">Change the passphrase or rewrite the captain's notes and lock them back up. Re-encrypts
+      with AES-GCM in your browser and hands you a line to paste into the HTML, replacing the existing
+      <code>BLUE</code> constant. The passphrase is never written into the file.</p>
+      <div class="row"><input type="password" id="sealPw" placeholder="New passphrase" style="width:190px">
+        <button class="ghost" id="sealGo">Re-seal</button></div>
+      <textarea id="sealOut" spellcheck="false" placeholder="Sealed output appears here"></textarea>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+const MODEL=[{"name":"Alex Mulvin","hcp":16.6,"form":19.02,"sd":3.97,"probs":[0.0,0.0173,0.271,0.4908,0.1692,0.0518],"n":45,"lowSample":false,"rawGap":1.74,"unknown":false,"team":"Blue"},{"name":"Luke Usher","hcp":14.0,"form":17.32,"sd":3.77,"probs":[0.0,0.0106,0.3099,0.5123,0.136,0.0312],"n":16,"lowSample":false,"rawGap":2.07,"unknown":false,"team":"Blue"},{"name":"Josh Menzies","hcp":13.9,"form":18.44,"sd":4.41,"probs":[0.0,0.0521,0.316,0.3681,0.1961,0.0678],"n":14,"lowSample":false,"rawGap":4.16,"unknown":false,"team":"Blue"},{"name":"Tom Bucknall","hcp":25.1,"form":29.77,"sd":4.61,"probs":[0.0,0.0112,0.0955,0.3371,0.382,0.1742],"n":10,"lowSample":false,"rawGap":4.3,"unknown":false,"team":"Blue"},{"name":"Matt Holland","hcp":28.0,"form":32.69,"sd":4.58,"probs":[0.0,0.019,0.0577,0.4616,0.2499,0.2118],"n":3,"lowSample":true,"rawGap":3.52,"unknown":false,"team":"Blue"},{"name":"Mark Sturgess","hcp":20.0,"form":25.16,"sd":4.75,"probs":[0.0002,0.0232,0.2108,0.3749,0.2455,0.1454],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Blue"},{"name":"Matt Petty","hcp":18.0,"form":23.16,"sd":4.75,"probs":[0.0002,0.0232,0.2108,0.3749,0.2455,0.1454],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Blue"},{"name":"Ben West","hcp":21.9,"form":27.06,"sd":4.4,"probs":[0.0,0.0244,0.2122,0.3417,0.2322,0.1894],"n":68,"lowSample":false,"rawGap":5.19,"unknown":false,"team":"Blue"},{"name":"Rob Parfitt","hcp":25.4,"form":31.11,"sd":4.83,"probs":[0.0,0.0184,0.1022,0.3116,0.3445,0.2233],"n":12,"lowSample":false,"rawGap":6.44,"unknown":false,"team":"Blue"},{"name":"Dom Mills","hcp":20.8,"form":27.15,"sd":5.44,"probs":[0.0,0.0212,0.1417,0.3692,0.2962,0.1718],"n":13,"lowSample":false,"rawGap":7.61,"unknown":false,"team":"Blue"},{"name":"Luke Holland","hcp":15.7,"form":20.22,"sd":5.41,"probs":[0.0,0.0368,0.3343,0.3554,0.2022,0.0713],"n":32,"lowSample":false,"rawGap":4.35,"unknown":false,"team":"Red"},{"name":"Gabe Hills","hcp":18.3,"form":22.87,"sd":4.42,"probs":[0.0,0.0162,0.243,0.3863,0.2269,0.1276],"n":14,"lowSample":false,"rawGap":4.22,"unknown":false,"team":"Red"},{"name":"Eamonn Brady","hcp":16.7,"form":21.68,"sd":4.41,"probs":[0.0,0.0312,0.2538,0.384,0.2332,0.0979],"n":63,"lowSample":false,"rawGap":4.98,"unknown":false,"team":"Red"},{"name":"Theo","hcp":15.0,"form":20.16,"sd":4.76,"probs":[0.0002,0.0239,0.2151,0.3747,0.2431,0.1431],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Red"},{"name":"Josh (new)","hcp":12.0,"form":17.16,"sd":4.74,"probs":[0.0002,0.0229,0.2105,0.3786,0.2423,0.1455],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Red"},{"name":"Chris Best","hcp":24.0,"form":29.81,"sd":4.75,"probs":[0.0,0.0,0.0964,0.2885,0.3076,0.3076],"n":3,"lowSample":true,"rawGap":9.12,"unknown":false,"team":"Red"},{"name":"Dave Huddleston","hcp":18.4,"form":25.0,"sd":5.24,"probs":[0.0,0.0,0.1932,0.3864,0.2159,0.2045],"n":5,"lowSample":true,"rawGap":10.49,"unknown":false,"team":"Red"},{"name":"dong ming lau","hcp":15.9,"form":22.85,"sd":5.01,"probs":[0.0039,0.0329,0.2338,0.3677,0.221,0.1406],"n":27,"lowSample":false,"rawGap":7.82,"unknown":false,"team":"Red"},{"name":"Jay France","hcp":8.1,"form":15.15,"sd":5.58,"probs":[0.0,0.064,0.3471,0.355,0.1772,0.0566],"n":15,"lowSample":false,"rawGap":8.7,"unknown":false,"team":"Red"},{"name":"Jack Mulroy","hcp":22.0,"form":29.41,"sd":4.95,"probs":[0.0,0.0106,0.1601,0.3419,0.2863,0.2012],"n":52,"lowSample":false,"rawGap":7.97,"unknown":false,"team":"Red"}], BLUE={"s":"cvrzK/4bFgePAya/roznFQ==","i":"2tm0Nl2Pu0omqJFn","c":"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"}, ADMIN_PW="chipsip-admin";
+const TEE_OFF=new Date("2026-09-24T13:50:00+02:00");
+
+const SCHEDULE=[
+ {d:"Wed 23 Sep",t:"Arrival",pick:"23:50",travel:"25 min",tee:null,coll:null,
+  course:"Late flight group transfer",note:"Rob's 30th. The Tactical Black Hole."},
+ {d:"Thu 24 Sep",t:"Round 1",pick:"12:00",travel:"35 min",tee:"13:50",coll:"20:50",
+  course:"Marbella Golf & Country Club",note:"Alternate Shot (Foursomes)"},
+ {d:"Fri 25 Sep",t:"Round 2",pick:"09:30",travel:"30 min",tee:"11:10",coll:"18:10",
+  course:"Cabopino Golf Club",note:"Best Ball (Fourball)"},
+ {d:"Sat 26 Sep",t:"Round 3",pick:"10:00",travel:"35 min",tee:"11:40",coll:"18:40",
+  course:"La Cala Golf, Asia course",note:"2v2 Scramble"},
+ {d:"Sun 27 Sep",t:"Round 4",pick:"08:30",travel:"30 min",tee:"10:10",coll:"16:30",
+  course:"Santa Maria Golf Club",note:"Singles Match Play. Collection goes to the airport."}
+];
+const DEF_COURSES=[
+ {n:"Marbella Golf & Country Club",d:"Thu 24 Sep",par:72,slope:133,rating:71.0,fmt:"foursomes",est:true},
+ {n:"Cabopino Golf Club",d:"Fri 25 Sep",par:71,slope:127,rating:67.9,fmt:"fourball",est:false},
+ {n:"La Cala Golf, Asia",d:"Sat 26 Sep",par:72,slope:139,rating:69.1,fmt:"scramble",est:false,
+  si:[12,16,18,2,10,4,14,8,6,1,13,3,5,17,11,7,15,9]},
+ {n:"Santa Maria Golf Club",d:"Sun 27 Sep",par:72,slope:137,rating:71.7,fmt:"singles",est:false}
+];
+const FMT={foursomes:"Foursomes",fourball:"Fourball",scramble:"Scramble",singles:"Singles"};
+
+const MARKETS=[
+ {k:"mvp",n:"MVP",d:"Most points across the four sessions",type:"model",round:""},
+ {k:"team",n:"Team Result",d:"Blue, Red or a tie at 12.5 apiece",type:"model",round:"",team:true},
+ {k:"blueTop",n:"Blue Top Scorer",d:"Most points on the Blue team",type:"model",round:"",only:"Blue"},
+ {k:"redTop",n:"Red Top Scorer",d:"Most points on the Red team",type:"model",round:"",only:"Red"},
+ {k:"perfect",n:"Perfect Record",d:"Wins every match he plays",type:"model",round:""},
+ {k:"blank",n:"The Blank",d:"Finishes the trip on zero points",type:"model",round:""},
+ {k:"singles",n:"Sunday Singles",d:"Wins his singles match at Santa Maria",type:"model",round:"4"}
+];
+const DEF_NOV=[
+ {k:"nov_rob",n:"Rob's 30th",d:"He turns 30 on arrival night and tees it up at Marbella the next day",
+  round:"1",opts:["Wins his Thursday match","Halves it","Loses it","Does not make the tee"]},
+ {k:"nov_water",n:"First in the Water",d:"First ball wet, any round",round:"",opts:[]},
+ {k:"nov_balls",n:"Most Balls Lost",d:"Across the whole trip",round:"",opts:[]}
+];
+
+let S=null;
+function freshState(){return{
+ minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
+ declared:false,apBonus:1.25,
+ courses:JSON.parse(JSON.stringify(DEF_COURSES)),
+ players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
+   low:p.lowSample,unknown:!!p.unknown,rawGap:p.rawGap,team:p.team,
+   base:{hcp:p.hcp,form:p.form},in:true})),
+ novelty:JSON.parse(JSON.stringify(DEF_NOV)),
+ pools:{}, paid:{}
+};}
+function load(){try{const r=localStorage.getItem("chipsip26v2");if(r){S=JSON.parse(r);return;}}catch(e){}
+ S=freshState();}
+function save(){try{localStorage.setItem("chipsip26v2",JSON.stringify(S));}catch(e){}}
+const allMarkets=()=>MARKETS.concat((S.novelty||[]).map(m=>({...m,type:"novelty"})));
+const pool=k=>(S.pools[k]=S.pools[k]||{});
+/* a stake is {a: ante-post pounds, o: pounds staked after handicaps were declared} */
+function bet(k,o){const P=pool(k);let v=P[o];
+ if(typeof v==="number")v=P[o]={a:v,o:0};          /* migrate older saved state */
+ if(!v)v=P[o]={a:0,o:0};
+ return v;}
+const cash=v=>(v.a||0)+(v.o||0);                    /* real money in */
+const weighted=v=>(v.a||0)*(S.apBonus||1)+(v.o||0); /* payout weight */
+function poolTotals(k){const P=pool(k);let money=0,w=0;
+ Object.keys(P).forEach(o=>{const v=bet(k,o);money+=cash(v);w+=weighted(v);});
+ return{money,w};}
+
+let _g=null;
+function gauss(){if(_g!==null){const v=_g;_g=null;return v;}let u=0,v=0;
+ while(!u)u=Math.random();while(!v)v=Math.random();
+ const r=Math.sqrt(-2*Math.log(u)),t=2*Math.PI*v;_g=r*Math.sin(t);return r*Math.cos(t);}
+function courseHcp(idx,c){return idx*c.slope/113+(c.rating-c.par);}
+function strokeMap(ph,c){
+ const m=new Array(18).fill(0);const n=Math.round(ph);if(n<=0)return m;
+ const rank=c.si?c.si.map((s,i)=>[s,i]).sort((a,b)=>a[0]-b[0]).map(x=>x[1])
+   :[...Array(18).keys()].sort((a,b)=>(c.pars?c.pars[b]-c.pars[a]:0)||a-b);
+ const base=Math.floor(n/18),rem=n-base*18;m.fill(base);
+ for(let i=0;i<rem;i++)m[rank[i%18]]++;return m;}
+function drawVsPar(pr){const r=Math.random();let a=0;const v=[-2,-1,0,1,2];
+ for(let i=0;i<5;i++){a+=pr[i];if(r<a)return v[i];}
+ let t=3;if(Math.random()<0.35)t++;if(Math.random()<0.15)t++;return t;}
+function playerHoles(p,c){
+ const target=(p.form+gauss()*p.sd)*c.slope/113+c.rating-c.par;
+ const h=new Array(18);let raw=0;
+ for(let i=0;i<18;i++){h[i]=drawVsPar(p.probs);raw+=h[i];}
+ let d=Math.round(target-raw),g=0;
+ while(d>0&&g++<300){h[(Math.random()*18)|0]++;d--;}
+ while(d<0&&g++<300){const i=(Math.random()*18)|0;if(h[i]>-1){h[i]--;d++;}}
+ return h;}
+function sideNet(side,c,fmt,allow){
+ if(fmt==="singles"){const p=side[0],h=playerHoles(p,c),sm=strokeMap(courseHcp(p.hcp,c)*allow,c);
+  return h.map((v,i)=>v-sm[i]);}
+ const [a,b]=side, ha=playerHoles(a,c), hb=playerHoles(b,c);
+ const ca=courseHcp(a.hcp,c), cb=courseHcp(b.hcp,c);
+ if(fmt==="fourball"){const sa=strokeMap(ca*0.9,c),sb=strokeMap(cb*0.9,c);
+  return ha.map((v,i)=>Math.min(v-sa[i],hb[i]-sb[i]));}
+ if(fmt==="foursomes"){const sm=strokeMap((ca+cb)*0.5,c);
+  /* one ball between two: errors compound, so average the pair and add an occasional extra */
+  return ha.map((v,i)=>Math.round((v+hb[i])/2)+(Math.random()<0.18?1:0)-sm[i]);}
+ /* scramble: play the better ball each time, and being able to choose is worth a shot or so a round */
+ const lo=Math.min(ca,cb),hi=Math.max(ca,cb),sm=strokeMap(lo*0.35+hi*0.15,c);
+ return ha.map((v,i)=>Math.max(-3,Math.min(v,hb[i])-(Math.random()<0.22?1:0))-sm[i]);}
+function playMatch(A,B){let up=0;
+ for(let i=0;i<18;i++){if(A[i]<B[i])up++;else if(B[i]<A[i])up--;
+  if(Math.abs(up)>17-i)break;}
+ return up>0?1:up<0?0:0.5;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+let ODDS=null,TEAMP=null;
+function runSim(N){
+ const blue=S.players.filter(p=>p.in&&p.team==="Blue"),red=S.players.filter(p=>p.in&&p.team==="Red");
+ if(blue.length<2||red.length<2||blue.length!==red.length){ODDS=null;TEAMP=null;return;}
+ const names=[...blue,...red].map(p=>p.name);
+ const pts={},win={},per={},blank={},sing={};
+ names.forEach(n=>{pts[n]=0;win[n]=0;per[n]=0;blank[n]=0;sing[n]=0;});
+ let bw=0,rw=0,tie=0,margin=0;
+ const K=blue.length;
+ for(let s=0;s<N;s++){
+  const sc={};names.forEach(n=>sc[n]=0);
+  let bTot=0, M=0;                       /* bTot = Blue's points, M = matches played */
+  S.courses.forEach(c=>{
+   const B=shuffle([...blue]),R=shuffle([...red]);
+   if(c.fmt==="singles"){
+    for(let i=0;i<K;i++){
+     const r=playMatch(sideNet([B[i]],c,"singles",S.allowance),sideNet([R[i]],c,"singles",S.allowance));
+     sc[B[i].name]+=r; sc[R[i].name]+=1-r; bTot+=r; M++;
+     if(r===1)sing[B[i].name]++; if(r===0)sing[R[i].name]++;}
+   }else{
+    for(let i=0;i+1<K;i+=2){
+     const bs=[B[i],B[i+1]],rs=[R[i],R[i+1]];
+     const r=playMatch(sideNet(bs,c,c.fmt,S.allowance),sideNet(rs,c,c.fmt,S.allowance));
+     /* both partners bank the point, so player totals sum to more than the match count —
+        the team result must be judged on bTot vs M, never on the sum of player scores */
+     bs.forEach(p=>sc[p.name]+=r); rs.forEach(p=>sc[p.name]+=1-r); bTot+=r; M++;}
+   }});
+  if(bTot>M/2)bw++; else if(bTot<M/2)rw++; else tie++;
+  margin+=2*bTot-M;
+  let hi=-1,hn=[];names.forEach(n=>{if(sc[n]>hi){hi=sc[n];hn=[n];}else if(sc[n]===hi)hn.push(n);});
+  hn.forEach(n=>win[n]+=1/hn.length);
+  names.forEach(n=>{pts[n]+=sc[n]; if(sc[n]>=S.courses.length)per[n]++; if(sc[n]===0)blank[n]++;});
+  const bh=Math.max(...blue.map(p=>sc[p.name])),rh=Math.max(...red.map(p=>sc[p.name]));
+  const bt=blue.filter(p=>sc[p.name]===bh),rt=red.filter(p=>sc[p.name]===rh);
+  bt.forEach(p=>{win["B_"+p.name]=(win["B_"+p.name]||0)+1/bt.length;});
+  rt.forEach(p=>{win["R_"+p.name]=(win["R_"+p.name]||0)+1/rt.length;});
+ }
+ ODDS={};
+ names.forEach(n=>{ODDS[n]={mvp:win[n]/N,perfect:per[n]/N,blank:blank[n]/N,
+  singles:sing[n]/N,avgPts:pts[n]/N,
+  blueTop:(win["B_"+n]||0)/N,redTop:(win["R_"+n]||0)/N};});
+ TEAMP={Blue:bw/N,Red:rw/N,Tie:tie/N,margin:margin/N};
+}
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const FRACS=[[1,100],[1,50],[1,33],[1,25],[1,20],[1,16],[1,14],[1,12],[1,10],[1,9],[1,8],[1,7],[1,6],[2,11],
+ [1,5],[2,9],[1,4],[2,7],[3,10],[1,3],[4,11],[2,5],[4,9],[1,2],[8,15],[4,7],[8,13],[2,3],[8,11],[4,5],[5,6],
+ [10,11],[1,1],[11,10],[6,5],[5,4],[11,8],[6,4],[13,8],[7,4],[15,8],[2,1],[85,40],[9,4],[5,2],[11,4],[3,1],
+ [100,30],[7,2],[4,1],[9,2],[5,1],[11,2],[6,1],[13,2],[7,1],[15,2],[8,1],[17,2],[9,1],[10,1],[11,1],[12,1],
+ [14,1],[16,1],[18,1],[20,1],[22,1],[25,1],[28,1],[33,1],[40,1],[50,1],[66,1],[80,1],[100,1],[150,1],[200,1],
+ [250,1],[500,1],[1000,1]];
+function toFrac(o){const p=o-1;let best=FRACS[0],bd=Infinity;
+ for(const f of FRACS){const d=Math.abs(f[0]/f[1]-p);if(d<bd){bd=d;best=f;}}
+ return best[0]===best[1]?"Evens":best[0]+"/"+best[1];}
+function fmtDec(o){if(!o||o<=0||!isFinite(o))return "—";
+ if(o>999)return S.oddsFmt==="frac"?"1000/1+":"999+";
+ return S.oddsFmt==="frac"?toFrac(o):o.toFixed(2);}
+const dec=p=>(!p||p<=0)?"—":fmtDec(1/p);
+const pct=p=>(p*100).toFixed(1)+"%";
+const teamTag=t=>`<span class="tag ${t==="Blue"?"blue":"red"}">${t}</span>`;
+
+function marketOutcomes(m){
+ if(m.type==="novelty") return (m.opts&&m.opts.length?m.opts:S.players.filter(p=>p.in).map(p=>p.name))
+   .map(o=>({label:o,prob:null,player:S.players.find(p=>p.name===o)||null}));
+ if(m.k==="team") return ["Blue","Red","Tie"].map(o=>({label:o,prob:TEAMP?TEAMP[o]:null,player:null}));
+ return S.players.filter(p=>p.in&&(!m.only||p.team===m.only))
+   .map(p=>({label:p.name,player:p,prob:ODDS&&ODDS[p.name]?ODDS[p.name][m.k==="singles"?"singles":m.k]:null}));
+}
+function passFilter(o,m){
+ const t=$("#fTeam").value,hmin=parseFloat($("#fHmin").value),hmax=parseFloat($("#fHmax").value);
+ if(t&&(!o.player||o.player.team!==t)&&!m.team)return false;
+ if(!isNaN(hmin)&&(!o.player||o.player.hcp<hmin))return false;
+ if(!isNaN(hmax)&&(!o.player||o.player.hcp>hmax))return false;
+ return true;}
+function drawPools(){
+ const mk=$("#fMarket").value,rd=$("#fRound").value,ty=$("#fType").value;
+ let out="",shown=0;
+ allMarkets().forEach(m=>{
+  if(mk&&m.k!==mk)return; if(ty&&m.type!==ty)return;
+  if(rd&&(m.round||"")!==rd)return;
+  const P=pool(m.k);
+  let rows=marketOutcomes(m).filter(o=>passFilter(o,m));
+  if(!rows.length)return; shown++;
+  const {money,w}=poolTotals(m.k);
+  rows=rows.map(o=>{const v=bet(m.k,o.label);
+    const wt=weighted(v), imp=wt>0?money/wt:0;
+    return{...o,a:v.a||0,o:v.o||0,cash:cash(v),wt,imp,
+      ev:(cash(v)>0&&o.prob>0)?o.prob*imp-1:null};})
+   .sort((x,y)=>(y.prob||0)-(x.prob||0)||x.label.localeCompare(y.label));
+  let t=`<tr><th>Outcome</th><th class="num">Ante-post £</th><th class="num">Open £</th>
+   <th class="num">Implied</th><th class="num">Fair</th><th class="num">Edge</th><th style="width:64px"></th></tr>`;
+  rows.forEach(r=>{const ec=r.ev===null?"":r.ev>0.05?"pos":r.ev<-0.05?"neg":"";
+   t+=`<tr><td>${esc(r.label)}${r.player?" "+teamTag(r.player.team):""}${r.player&&r.player.unknown?' <span class="tag nd">form assumed</span>':""}</td>
+    <td class="num"><input type="number" min="0" step="1" value="${r.a}" class="stake" data-b="a"
+      data-mk="${esc(m.k)}" data-pl="${esc(r.label)}"${S.declared?' title="Ante-post is closed"':''}></td>
+    <td class="num"><input type="number" min="0" step="1" value="${r.o}" class="stake" data-b="o"
+      data-mk="${esc(m.k)}" data-pl="${esc(r.label)}"></td>
+    <td class="num">${r.imp?fmtDec(r.imp):"—"}</td>
+    <td class="num">${r.prob?dec(r.prob):'<span class="small">manual</span>'}</td>
+    <td class="num ${ec}">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</td>
+    <td><div class="bar"><i style="width:${w?(r.wt/w*100):0}%"></i></div></td></tr>`;});
+  out+=`<div class="card"><h2>${esc(m.n)} ${m.type==="novelty"?'<span class="tag">novelty</span>':""}
+    ${m.round?`<span class="tag">R${m.round}</span>`:""}</h2>
+   <p class="note">${esc(m.d||"")} &mdash; pool <b>£${money.toFixed(0)}</b>${S.apBonus>1&&rows.some(r=>r.a>0)?` &middot; ante-post stakes carry a ${S.apBonus}× share`:""}</p>
+   <div class="wrap"><table>${t}</table></div></div>`;
+ });
+ $("#poolWrap").innerHTML=out||`<div class="card"><p class="note">Nothing matches those filters.</p></div>`;
+ document.querySelectorAll(".stake").forEach(el=>el.addEventListener("change",e=>{
+  const v=bet(e.target.dataset.mk,e.target.dataset.pl);
+  v[e.target.dataset.b]=Math.max(0,Math.round(+e.target.value||0));   /* whole pounds only */
+  save();drawPools();drawLedger();}));
+ // pay button
+ $("#payWrap").innerHTML=S.payLink
+  ? `<div class="row"><a class="pay" href="${esc(S.payLink)}" target="_blank" rel="noopener">${esc(S.payLabel||"Pay your buy-in")}</a>
+     <span class="small">Stakes in whole pounds, minimum £${S.minStake}</span></div>`
+  : `<p class="note">No payment link set yet. Add a Starling Settle Up link in Admin and a Pay button appears here.</p>`;
+}
+function drawKpis(){
+ const ps=S.players.filter(p=>p.in);
+ const val=[...ps].sort((a,b)=>(a.form-a.hcp)-(b.form-b.hcp))[0];
+ const vol=[...ps].sort((a,b)=>b.sd-a.sd)[0];
+ const nd=ps.filter(p=>p.unknown).length;
+ $("#kpis").innerHTML=`
+  <div><span>Players</span><b>${ps.length}</b></div>
+  <div><span>Points at stake</span><b>25</b></div>
+  <div><span>Blue to win</span><b>${TEAMP?pct(TEAMP.Blue):"—"}</b></div>
+  <div><span>Best value</span><b style="font-size:14px">${esc(val?val.name:"—")}</b></div>
+  <div><span>Most volatile</span><b style="font-size:14px">${esc(vol?vol.name:"—")}</b></div>
+  <div><span>Form assumed</span><b class="${nd?"warn":""}">${nd}</b></div>`;
+ if(TEAMP){const b=TEAMP.Blue*100,t=TEAMP.Tie*100,r=TEAMP.Red*100;
+  $("#kpis").insertAdjacentHTML("afterend",
+   `<div class="split" title="Blue / Tie / Red"><i style="width:${b}%;background:var(--blue)"></i>
+    <i style="width:${t}%;background:#555"></i><i style="width:${r}%;background:var(--red)"></i></div>
+    <p class="note">Blue ${b.toFixed(1)}% &middot; Tie ${t.toFixed(1)}% &middot; Red ${r.toFixed(1)}%
+    &middot; average margin ${TEAMP.margin>=0?"+":""}${TEAMP.margin.toFixed(1)} to Blue</p>`);}
+}
+function gFiltered(){
+ const t=$("#gTeam").value,hmin=parseFloat($("#gHmin").value),hmax=parseFloat($("#gHmax").value),d=$("#gData").value;
+ let ps=S.players.filter(p=>p.in);
+ if(t)ps=ps.filter(p=>p.team===t);
+ if(!isNaN(hmin))ps=ps.filter(p=>p.hcp>=hmin);
+ if(!isNaN(hmax))ps=ps.filter(p=>p.hcp<=hmax);
+ if(d==="good")ps=ps.filter(p=>p.n>=10);
+ if(d==="low")ps=ps.filter(p=>p.n<10);
+ const s=$("#gSort").value;
+ ps.sort((a,b)=> s==="hcp"?a.hcp-b.hcp : s==="sd"?b.sd-a.sd : s==="name"?a.name.localeCompare(b.name)
+   : s==="mvp"?((ODDS&&ODDS[b.name]?ODDS[b.name].mvp:0)-(ODDS&&ODDS[a.name]?ODDS[a.name].mvp:0))
+   : (a.form-a.hcp)-(b.form-b.hcp));
+ return ps;}
+function drawForm(){
+ let h=`<tr><th>Player</th><th>Team</th><th class="num">Hcp</th><th class="num">Form</th><th class="num">Raw</th>
+  <th class="num">Gap</th><th class="num">Spread</th><th class="num">Rounds</th><th>Read</th></tr>`;
+ gFiltered().forEach(p=>{const g=p.form-p.hcp;
+  const read=p.unknown?"Handicap known, form assumed":g<3.5?"Best value in the field":g<4.8?"Good value"
+   :g<5.8?"About right":g<6.8?"Over-shot":"Well over-shot";
+  h+=`<tr><td>${esc(p.name)}${p.unknown?' <span class="tag nd">form assumed</span>':p.low?' <span class="tag low">thin</span>':""}</td>
+   <td>${teamTag(p.team)}</td><td class="num">${p.hcp.toFixed(1)}</td><td class="num">${p.form.toFixed(1)}</td>
+   <td class="num small">${p.rawGap==null?"—":(p.rawGap>=0?"+":"")+p.rawGap.toFixed(1)}</td>
+   <td class="num ${g<3.5?"pos":g>6.8?"neg":""}">${g>=0?"+":""}${g.toFixed(1)}</td>
+   <td class="num">${p.sd.toFixed(1)}${p.sd<4.2?' <span class="small">steady</span>':p.sd>5.2?' <span class="small">wild</span>':""}</td>
+   <td class="num ${p.n<10?"warn":""}">${p.n}</td><td class="small">${read}</td></tr>`;});
+ $("#formTbl").innerHTML=h;}
+function drawOdds(){
+ if(!ODDS){$("#oddsTbl").innerHTML=`<tr><td class="small">Teams must be equal-sized with at least two a side. Fix the roster in Admin, then re-run.</td></tr>`;return;}
+ let h=`<tr><th>Player</th><th>Team</th><th class="num">Avg pts</th><th class="num">MVP</th>
+  <th class="num">Team top</th><th class="num">Wins singles</th><th class="num">4 from 4</th><th class="num">Blank</th></tr>`;
+ gFiltered().sort((a,b)=>(ODDS[b.name]?.mvp||0)-(ODDS[a.name]?.mvp||0)).forEach(p=>{const o=ODDS[p.name];if(!o)return;
+  h+=`<tr><td>${esc(p.name)}${p.unknown?' <span class="tag nd">form assumed</span>':""}</td><td>${teamTag(p.team)}</td>
+   <td class="num">${o.avgPts.toFixed(2)}</td><td class="num pos">${dec(o.mvp)}</td>
+   <td class="num">${dec(p.team==="Blue"?o.blueTop:o.redTop)}</td>
+   <td class="num">${dec(o.singles)}</td><td class="num">${dec(o.perfect)}</td><td class="num">${dec(o.blank)}</td></tr>`;});
+ $("#oddsTbl").innerHTML=h;}
+function drawSched(){
+ let h="";SCHEDULE.forEach(s=>{h+=`<div class="day"><b>${s.d} &middot; ${s.t}</b>
+  <div class="small">${esc(s.course)}</div>
+  <div class="small"><span class="t">${s.pick}</span> pickup &middot; ${s.travel} travel
+  ${s.tee?`&middot; <span class="t">${s.tee}</span> first tee`:""}
+  ${s.coll?`&middot; <span class="t">${s.coll}</span> collection`:""}</div>
+  <div class="small" style="color:var(--acc2)">${esc(s.note)}</div></div>`;});
+ $("#schedWrap").innerHTML=h;
+ let c=`<tr><th>Round</th><th>Course</th><th>Format</th><th class="num">Par</th><th class="num">Rating</th><th class="num">Slope</th></tr>`;
+ S.courses.forEach((x,i)=>{c+=`<tr><td class="small">${esc(x.d)}</td><td>${esc(x.n)}</td>
+  <td class="small">${FMT[x.fmt]||x.fmt}</td><td class="num">${x.par}</td>
+  <td class="num">${x.rating}${x.est?' <span class="tag low">est</span>':""}</td>
+  <td class="num ${x.slope>=137?"neg":""}">${x.slope}</td></tr>`;});
+ $("#crsInfo").innerHTML=c;
+ const now=new Date();const nxt=SCHEDULE.map((s,i)=>s).find(s=>true);
+ $("#nextUp").innerHTML=(TEE_OFF-now>0)
+  ? `<p class="note">First tee shot in <b id="cd2"></b>.</p>` : "";
+}
+function drawLedger(){
+ let owed={};allMarkets().forEach(m=>{const P=pool(m.k);
+  Object.keys(P).forEach(k=>{owed[k]=(owed[k]||0)+cash(bet(m.k,k));});});
+ const names=[...new Set([...S.players.filter(p=>p.in).map(p=>p.name),...Object.keys(owed)])].sort();
+ let h=`<tr><th>Player</th><th class="num">Staked</th><th class="num">Owed</th><th class="num">Paid</th><th class="num">Balance</th></tr>`;
+ let to=0,tp=0;
+ names.forEach(n=>{const e=owed[n]||0,o=e,p=+(S.paid[n]||0);to+=o;tp+=p;
+  h+=`<tr><td>${esc(n)}</td><td class="num">£${e}</td><td class="num">£${o.toFixed(0)}</td>
+   <td class="num"><input type="number" min="0" step="1" class="paid" data-pl="${esc(n)}" value="${p}"></td>
+   <td class="num ${o-p>0?"neg":"pos"}">£${(o-p).toFixed(0)}</td></tr>`;});
+ h+=`<tr><td><b>Total</b></td><td></td><td class="num"><b>£${to.toFixed(0)}</b></td>
+  <td class="num"><b>£${tp.toFixed(0)}</b></td><td class="num ${to-tp>0?"neg":"pos"}"><b>£${(to-tp).toFixed(0)}</b></td></tr>`;
+ $("#ledgTbl").innerHTML=h;
+ document.querySelectorAll(".paid").forEach(el=>el.addEventListener("change",e=>{
+  S.paid[e.target.dataset.pl]=Math.max(0,+e.target.value||0);save();drawLedger();}));}
+function drawAdmin(){
+ let h=`<tr><th>In</th><th>Player</th><th>Team</th><th class="num">Hcp</th><th class="num">Form</th>
+  <th class="num">Spread</th><th class="num">Rounds</th><th></th></tr>`;
+ S.players.forEach((p,i)=>{h+=`<tr>
+  <td><input type="checkbox" class="ain" data-i="${i}" ${p.in?"checked":""}></td>
+  <td>${esc(p.name)}${p.unknown?' <span class="tag nd">form assumed</span>':""}</td>
+  <td><select class="ateam" data-i="${i}"><option${p.team==="Blue"?" selected":""}>Blue</option>
+    <option${p.team==="Red"?" selected":""}>Red</option></select></td>
+  <td class="num"><input type="number" step="0.1" class="ahcp" data-i="${i}" value="${p.hcp}"></td>
+  <td class="num"><input type="number" step="0.1" class="aform" data-i="${i}" value="${p.form}"></td>
+  <td class="num"><input type="number" step="0.1" class="asd" data-i="${i}" value="${p.sd}"></td>
+  <td class="num ${p.n<10?"warn":""}">${p.n}</td>
+  <td><button class="ghost adel" data-i="${i}" style="padding:4px 8px">×</button></td></tr>`;});
+ const nb=S.players.filter(p=>p.in&&p.team==="Blue").length,nr=S.players.filter(p=>p.in&&p.team==="Red").length;
+ h+=`<tr><td colspan="8" class="small ${nb!==nr?"neg":"pos"}">Blue ${nb} &middot; Red ${nr}
+  ${nb!==nr?"— teams must be equal to simulate matches":"— balanced"}</td></tr>`;
+ $("#admTbl").innerHTML=h;
+ const bind=(c,f)=>document.querySelectorAll("."+c).forEach(el=>el.addEventListener("change",e=>{
+  f(S.players[+e.target.dataset.i],e.target);save();drawAdmin();}));
+ bind("ain",(p,e)=>p.in=e.checked);bind("ahcp",(p,e)=>p.hcp=+e.value);
+ bind("aform",(p,e)=>p.form=+e.value);bind("asd",(p,e)=>p.sd=Math.max(1.5,+e.value));
+ bind("ateam",(p,e)=>p.team=e.value);
+ document.querySelectorAll(".adel").forEach(el=>el.addEventListener("click",e=>{
+  S.players.splice(+e.target.dataset.i,1);save();drawAdmin();}));
+
+ let c=`<tr><th>Round</th><th>Course</th><th>Format</th><th class="num">Par</th><th class="num">Slope</th><th class="num">Rating</th></tr>`;
+ S.courses.forEach((x,i)=>{c+=`<tr><td class="small">${esc(x.d)}</td>
+  <td><input class="cn" data-i="${i}" value="${esc(x.n)}" style="width:180px"></td>
+  <td><select class="cf" data-i="${i}">${Object.keys(FMT).map(k=>
+    `<option value="${k}"${x.fmt===k?" selected":""}>${FMT[k]}</option>`).join("")}</select></td>
+  <td class="num"><input type="number" class="cp" data-i="${i}" value="${x.par}"></td>
+  <td class="num"><input type="number" class="cs" data-i="${i}" value="${x.slope}"></td>
+  <td class="num"><input type="number" step="0.1" class="cr" data-i="${i}" value="${x.rating}"></td></tr>`;});
+ $("#crsTbl").innerHTML=c;
+ const cb=(cl,f)=>document.querySelectorAll("."+cl).forEach(el=>el.addEventListener("change",e=>{
+  f(S.courses[+e.target.dataset.i],e.target);save();}));
+ cb("cn",(x,e)=>x.n=e.value);cb("cp",(x,e)=>x.par=+e.value);cb("cs",(x,e)=>x.slope=+e.value);
+ cb("cr",(x,e)=>{x.rating=+e.value;x.est=false;});cb("cf",(x,e)=>x.fmt=e.value);
+
+ $("#novWrap").innerHTML=(S.novelty||[]).map((m,i)=>
+  `<div class="row"><b style="flex:1">${esc(m.n)}</b>
+   <span class="small">${m.opts&&m.opts.length?esc(m.opts.join(", ")):"all players"}</span>
+   <button class="ghost ndel" data-i="${i}" style="padding:4px 8px">×</button></div>`).join("")
+   ||`<p class="note">No novelty markets yet.</p>`;
+ document.querySelectorAll(".ndel").forEach(el=>el.addEventListener("click",e=>{
+  S.novelty.splice(+e.target.dataset.i,1);save();drawAdmin();fillMarketFilter();drawPools();}));
+ $("#payLink").value=S.payLink||"";$("#payLabel").value=S.payLabel||"";
+ $("#minStake").value=S.minStake;$("#allow").value=String(S.allowance);
+ $("#declared").checked=!!S.declared;$("#apBonus").value=S.apBonus;
+ drawLedger();
+}
+function fillMarketFilter(){
+ const cur=$("#fMarket").value;
+ $("#fMarket").innerHTML=`<option value="">All markets</option>`+
+  allMarkets().map(m=>`<option value="${esc(m.k)}"${m.k===cur?" selected":""}>${esc(m.n)}</option>`).join("");}
+function drawHeader(){
+ const n=S.players.filter(p=>p.in).length;
+ $("#hdr").textContent=`Costa del Sol · 24–27 Sep 2026 · ${n} players · Ryder Cup · 25 points`;}
+function drawAll(){drawHeader();drawKpis();drawForm();drawOdds();fillMarketFilter();drawPools();drawSched();}
+
+const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const b64e=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+async function keyFrom(pw,salt){const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
+ return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:250000,hash:"SHA-256"},km,
+  {name:"AES-GCM",length:256},false,["encrypt","decrypt"]);}
+async function unseal(pw,b){const k=await keyFrom(pw,b64d(b.s));
+ const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(b.i)},k,b64d(b.c));
+ return JSON.parse(new TextDecoder().decode(pt));}
+async function seal(pw,o){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+ const k=await keyFrom(pw,salt);
+ const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},k,new TextEncoder().encode(JSON.stringify(o)));
+ return{s:b64e(salt),i:b64e(iv),c:b64e(ct)};}
+
+let BLUEDATA=null;
+function drawBlue(){const d=BLUEDATA;if(!d)return;
+ const reds=S.players.filter(p=>p.in&&p.team==="Red");
+ const dos=reds.length?reds.map(p=>`<details><summary>${esc(p.name)}
+   <span class="small">&nbsp;hcp ${p.hcp.toFixed(1)} &middot; form ${p.form.toFixed(1)}
+   ${ODDS&&ODDS[p.name]?`&middot; wins his singles ${dec(ODDS[p.name].singles)}`:""}</span></summary>
+   <p class="small" style="margin:8px 0 0">${esc(d.dossiers[p.name]||"No history on file.")}</p></details>`).join("")
+  :`<p class="note">Assign teams in Admin and the dossiers appear.</p>`;
+ let wl=`<tr><th>Player</th><th>Team</th><th class="num">Hcp</th><th class="num">Raw gap</th>
+  <th class="num">Adj</th><th class="num">Rounds</th><th>Verdict</th></tr>`;
+ d.watchlist.forEach(w=>{const cls=(w.raw||0)>7.5?"neg":"";
+  wl+=`<tr><td>${esc(w.name)}</td><td>${teamTag(w.team)}</td><td class="num">${w.hcp}</td>
+   <td class="num ${cls}"><b>${w.raw==null?"—":(w.raw>=0?"+":"")+w.raw}</b></td>
+   <td class="num small">${w.gap>=0?"+":""}${w.gap}</td>
+   <td class="num ${w.n<10?"warn":""}">${w.n}</td><td class="small ${cls}">${esc(w.verdict)}</td></tr>`;});
+ $("#blueBody").innerHTML=`
+  <div class="card" style="border-color:#26507f"><h2 style="color:var(--blue2)">BLUE TEAM — EYES ONLY</h2>
+   <p class="note">${esc(d.sealed)}</p></div>
+  <div class="card"><h2>Handicap watchlist</h2><p class="note">${esc(d.watchlistNote)}</p>
+   <div class="wrap"><table>${wl}</table></div></div>
+  <div class="card"><h2>Opposition dossiers</h2>${dos}</div>
+  <div class="card"><h2>Tactics</h2><ul>${d.tactics.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
+  <div class="card"><h2>Captain's notes</h2><p class="note">Private. Edit here, then re-seal from Admin.</p>
+   <textarea id="capNotes" spellcheck="false">${esc(d.captainNotes)}</textarea></div>`;
+ $("#capNotes").addEventListener("input",e=>BLUEDATA.captainNotes=e.target.value);}
+
+function tick(){const ms=TEE_OFF-new Date();
+ const txt=ms<=0?"IT'S ON":`${Math.floor(ms/864e5)}d ${String(Math.floor(ms/36e5)%24).padStart(2,"0")}h ${String(Math.floor(ms/6e4)%60).padStart(2,"0")}m`;
+ const a=$("#cd"),b=$("#cd2");if(a)a.textContent=txt;if(b)b.textContent=txt;}
+
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
+ document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));
+ b.classList.add("on");$("#"+b.dataset.t).classList.add("on");}));
+document.querySelectorAll("#oddsFmt button").forEach(b=>b.addEventListener("click",()=>{
+ S.oddsFmt=b.dataset.f;save();paintFmt();drawOdds();drawPools();}));
+function paintFmt(){document.querySelectorAll("#oddsFmt button").forEach(b=>b.classList.toggle("on",b.dataset.f===S.oddsFmt));}
+["fMarket","fTeam","fRound","fType","fHmin","fHmax"].forEach(id=>{
+ const el=$("#"+id);el.addEventListener("change",drawPools);el.addEventListener("input",drawPools);});
+$("#fClear").addEventListener("click",()=>{["fMarket","fTeam","fRound","fType","fHmin","fHmax"]
+ .forEach(id=>$("#"+id).value="");drawPools();});
+["gTeam","gHmin","gHmax","gData","gSort"].forEach(id=>{
+ const el=$("#"+id);el.addEventListener("change",()=>{drawForm();drawOdds();});
+ el.addEventListener("input",()=>{drawForm();drawOdds();});});
+$("#gClear").addEventListener("click",()=>{["gTeam","gHmin","gHmax","gData"].forEach(id=>$("#"+id).value="");
+ $("#gSort").value="gap";drawForm();drawOdds();});
+$("#run").addEventListener("click",()=>{const N=+$("#nsim").value;$("#simStat").textContent="running…";
+ setTimeout(()=>{const t=performance.now();runSim(N);
+  $("#simStat").textContent=`${N.toLocaleString()} trips in ${Math.round(performance.now()-t)}ms`;
+  drawAll();},20);});
+$("#admGo").addEventListener("click",()=>{if($("#admPw").value===ADMIN_PW){
+ $("#adminLock").style.display="none";$("#admBody").style.display="block";drawAdmin();}
+ else $("#admErr").textContent="Nope.";});
+$("#admRun").addEventListener("click",()=>{runSim(+$("#nsim").value||6000);drawAll();if(BLUEDATA)drawBlue();});
+$("#addPlayer").addEventListener("click",()=>{const n=$("#newName").value.trim();if(!n)return;
+ const base=S.players.filter(p=>!p.unknown);
+ const avg=[...Array(6).keys()].map(i=>base.reduce((a,p)=>a+p.probs[i],0)/Math.max(1,base.length));
+ const gaps=base.map(p=>p.form-p.hcp).sort((a,b)=>a-b),med=gaps[Math.floor(gaps.length/2)]||5;
+ const hcp=+$("#newHcp").value||20;
+ S.players.push({name:n,hcp,form:+(hcp+med).toFixed(2),sd:4.8,probs:avg,n:0,low:true,unknown:true,
+  rawGap:null,team:$("#newTeam").value,base:{hcp,form:hcp+med},in:true});
+ $("#newName").value="";save();drawAdmin();});
+$("#addNov").addEventListener("click",()=>{const q=$("#novQ").value.trim();if(!q)return;
+ S.novelty.push({k:"nov_"+Date.now(),n:q,d:"Settled by the organiser",round:$("#novRound").value,
+  opts:$("#novOpts").value.split(",").map(s=>s.trim()).filter(Boolean)});
+ $("#novQ").value="";$("#novOpts").value="";save();drawAdmin();fillMarketFilter();drawPools();});
+$("#payLink").addEventListener("change",e=>{S.payLink=e.target.value.trim();save();drawPools();});
+$("#payLabel").addEventListener("change",e=>{S.payLabel=e.target.value.trim();save();drawPools();});
+$("#minStake").addEventListener("change",e=>{S.minStake=Math.max(1,Math.round(+e.target.value||1));save();drawPools();});
+$("#declared").addEventListener("change",e=>{S.declared=e.target.checked;save();drawPools();drawAdmin();});
+$("#apBonus").addEventListener("change",e=>{S.apBonus=Math.max(1,+e.target.value||1);save();drawPools();});
+$("#allow").addEventListener("change",e=>{S.allowance=+e.target.value;save();});
+$("#blueGo").addEventListener("click",async()=>{$("#blueErr").textContent="";
+ try{BLUEDATA=await unseal($("#bluePw").value,BLUE);
+  $("#blueLock").style.display="none";$("#blueBody").style.display="block";drawBlue();}
+ catch(e){$("#blueErr").textContent="Wrong passphrase.";}});
+$("#stExport").addEventListener("click",()=>{$("#stateBox").value=JSON.stringify(S);
+ $("#stMsg").textContent="Copied out. Keep it somewhere safe.";});
+$("#stImport").addEventListener("click",()=>{try{S=JSON.parse($("#stateBox").value);save();
+ runSim(6000);drawAll();drawAdmin();$("#stMsg").textContent="Loaded.";}
+ catch(e){$("#stMsg").textContent="That isn't valid state.";}});
+$("#stReset").addEventListener("click",()=>{S=freshState();save();runSim(6000);drawAll();drawAdmin();
+ $("#stMsg").textContent="Back to defaults.";});
+$("#sealGo").addEventListener("click",async()=>{const pw=$("#sealPw").value;
+ if(!pw){$("#sealOut").value="Set a passphrase first.";return;}
+ if(!BLUEDATA){$("#sealOut").value="Unlock the Blue Room first so there is something to seal.";return;}
+ $("#sealOut").value="const BLUE = "+JSON.stringify(await seal(pw,BLUEDATA))+";";});
+
+load();if(!S.oddsFmt)S.oddsFmt="frac";if(!S.paid)S.paid={};if(!S.pools)S.pools={};
+paintFmt();runSim(6000);drawAll();tick();setInterval(tick,30000);
+</script>
+</body></html>
