@@ -22,16 +22,20 @@ GitHub Pages serves `index.html` from the repository root. See **Deploying** bel
 
 ## Passphrases
 
-- **Admin** — set in the `ADMIN_PW` constant near the top of the `<script>` block. A soft gate, and
-  that is all it needs to be: everything behind it lives in the visitor's own browser, so the worst a
-  snooper can do is change numbers on their own screen.
-- **Blue Room** — genuinely encrypted with AES-GCM, key derived from the passphrase via PBKDF2 at
-  250,000 iterations. The passphrase is **not** in this file. Only ciphertext ships, so Red Team
-  cannot read it from View Source no matter how hard they look.
+Both use the same scheme: AES-GCM, key derived from the passphrase via PBKDF2 at 250,000 iterations.
+**Neither passphrase appears anywhere in the source.** Only ciphertext ships.
 
-**To change the Blue Room passphrase, do not hand-edit anything.** Unlock the Blue Room, go to
-Admin → Re-seal, enter the new passphrase, and paste the line it gives you over the existing
-`const BLUE = {...}` declaration. Editing the ciphertext by hand will make it permanently unreadable.
+- **Blue Room** encrypts *content*. Get the passphrase wrong and there is nothing to read, because the
+  dossiers exist only as ciphertext. Red Team cannot get at them from View Source however hard they try.
+- **Admin** encrypts a *verifier* — a small blob that simply fails to decrypt on the wrong passphrase.
+  The panel it guards holds no secrets, only controls, so somebody handy with developer tools could
+  unhide it without knowing the passphrase. That costs nothing: every control edits state living in
+  that person's own browser. The real ledger and the live site are untouched.
+
+**To change either passphrase, do not hand-edit anything.** Go to Admin → Change a passphrase, pick the
+target, enter the new one, and paste the line it produces over the existing `const BLUE = {...}` or
+`const ADMIN = {...}` declaration. Then commit and push. Editing ciphertext by hand makes it permanently
+unreadable.
 
 ## The model
 
@@ -60,13 +64,25 @@ Two things matter and should not be undone if anyone edits the data:
 Four players have a handicap but no logged rounds. They are marked `form assumed` throughout and are
 running on a prior, not a read.
 
-## Ante-post
+## The three betting phases
 
-A tote has no concept of taking a price — everyone in a pool gets the same terms whenever they bet.
-Without an adjustment, betting early is simply a worse bet: same return, less information. The
-ante-post multiplier fixes that by giving stakes struck before the handicaps are declared a larger
-share of the same pool. It moves money between backers, never to the organiser, so there is still no
-rake. Set it to 1 in Admin to switch the idea off.
+A tote has no concept of taking a price — everyone in a pool gets identical terms whenever they bet.
+Without an adjustment, betting early would simply be a worse bet: same return, less information. Hence
+three phases, all feeding the same pool on each market.
+
+1. **Ante-post** — now until the handicaps are declared on the first night. Prices rest on last
+   season's numbers and assumptions, so you are betting partly blind. Stakes struck here count 1.25×
+   when the pool divides.
+2. **Open** — from declaration until the first tee shot, Thursday 13:50. Handicaps are known and the
+   model has been re-run, so the prices are real. Ordinary share: you are paying for certainty.
+3. **Closed** — from the first ball. Automatic, based on the tee-off time, so nobody has to remember.
+
+The phase changes your share of the pool, not what you are betting on, and none of it reaches the
+organiser. Set the multiplier to 1 in Admin to switch the whole idea off.
+
+Admin controls the transition: tick **Handicaps declared** once they are agreed in the bar, correct the
+handicaps, then Apply and re-run. Every price moves. There is also a manual close and an override for
+fixing a stake keyed into the wrong column.
 
 ## Saving state
 
