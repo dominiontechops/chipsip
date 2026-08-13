@@ -104,6 +104,35 @@ the message was being set correctly and nobody could ever see it, so every re-ru
 done nothing. It now also names how many handicaps differ from Squabbit, and the trip-count selector
 is mirrored onto the Admin row so the organiser can see how deep it is about to run.
 
+## The trophy is not the score
+
+Red won in 2024 and retained in 2025 on a 12.5 apiece tie, so they arrive holding it. That is not
+decoration — it makes the two targets different: **Blue need 13 to take it, Red need only 12.5 to
+keep it**. The scoreboard shows both targets separately and the headline tile names whoever is
+actually favourite to end the week holding it, counting the tie to the holders. It used to be
+hard-coded to "Blue to win", which read as "Blue to win 28.2%".
+
+The Team Result market still settles on **the score**, not the trophy: 12.5 apiece pays Tie, not
+Red. Both facts are spelled out in the Rules and in the market's own description, because that is
+exactly the argument that would otherwise happen on Sunday night.
+
+`DB.settings.holder` drives all of it and defaults to Red.
+
+## Who can do what
+
+| | Bet | Enter the score | Admin |
+|---|---|---|---|
+| Any signed-in member of the group | yes | no | no |
+| Captains and vice-captains | yes | **yes** | no |
+| The organiser | yes | yes | yes |
+
+Score entry is `can_score()` — owner, or a roster role of C or VC. Wiping the whole card stays with
+the organiser alone. Every check is in the database, so unhiding a panel with developer tools gets
+you a panel that refuses to save.
+
+The card is validated as it is typed, not only on save: a man in two matches in one session, or
+partnered with himself, is marked in red immediately and the save is refused.
+
 ## Money
 
 Settlement is one function in the database, `bet_detail_all()`, and everything else reads it:
