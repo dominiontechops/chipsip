@@ -52,6 +52,17 @@ spaces arrives looking like a ransom note. Anyone who has ticked *already paid* 
 from the chase list, with the two totals kept apart, so nobody is named in front of twenty people
 over money already sitting in the organiser's account.
 
+## Robustness
+
+`drawAll()` runs each panel inside its own guard. A single bad field in a published price set used
+to throw in `drawKpis` and take every panel after it down with it, including the betting board —
+the one screen that actually matters. A broken panel is now a broken panel, named in a warning, and
+everything else still draws.
+
+The simulation count in the Tote pools card is read off the published price set, never typed in.
+Copy claiming forty thousand simulations while the organiser published six would be a lie, and the
+one claim this whole board rests on is that nothing here is fiddled.
+
 ## Money
 
 Settlement is one function in the database, `bet_detail_all()`, and everything else reads it:
