@@ -13,9 +13,9 @@ GitHub Pages serves `index.html` from the repository root. See **Deploying** bel
 
 | Tab | What it does |
 |---|---|
-| **Pools** | Every market, grouped and collapsed until pressed, biggest pool first. Captains and vice-captains badged C and VC. Your own stake and what it is currently worth on every bet you hold |
 | **Form Book** | All 20 players with handicap, form, volatility and sample size, plus the simulated prices |
 | **Schedule** | Transfers, tee times and collections for all four days, and the four courses |
+| **Place a Bet** | The default tab. Every market, grouped and collapsed until pressed, biggest pool first |
 | **Score** | The scoreboard, who needs what, every match session by session. Captains enter the card here |
 | **Rules** | How the pools settle. Read this before arguing |
 | **Admin** | Roster, handicaps, courses, payment link, ledger, settlement, settle-up sheet |
@@ -30,6 +30,27 @@ WhatsApp, which is where it always belonged. No ciphertext ships and no crypto c
 
 The Admin passphrase is checked by the database (`admin_check`), not by anything in the page, and
 is changed with `set_admin_token` from the Supabase dashboard.
+
+## The header
+
+Account and Pay both live in the header, reachable from every tab. The account chip shows who you
+are and what you have staked; tapping it opens the panel with your bets and Sign out. When there is
+something to do — sign in, choose your name, a broken connection — the panel forces itself open,
+because a call to action hidden behind a tap is one nobody answers.
+
+Placing a bet raises a reminder with the running total outstanding, a Pay button, and **I have
+already paid**. That tick writes to `payment_claims`, not to `payments`: it credits nothing and
+moves no money. It exists so the organiser is not chasing a man who has already sent it, and it
+shows against his name in the ledger until the organiser confirms it against his own bank and
+presses the button that actually settles him.
+
+## The morning report
+
+Admin writes the message for the group chat: score, who still owes, and the biggest pools with their
+cutoffs, as plain text with no columns — WhatsApp uses a proportional font and anything aligned with
+spaces arrives looking like a ransom note. Anyone who has ticked *already paid* is listed separately
+from the chase list, with the two totals kept apart, so nobody is named in front of twenty people
+over money already sitting in the organiser's account.
 
 ## Money
 
