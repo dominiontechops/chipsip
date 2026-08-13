@@ -25,6 +25,10 @@ GitHub Pages serves `index.html` from the repository root. See **Deploying** bel
 Both use the same scheme: AES-GCM, key derived from the passphrase via PBKDF2 at 250,000 iterations.
 **Neither passphrase appears anywhere in the source.** Only ciphertext ships.
 
+The Blue Room passphrase is set in `seal.py`; run it to re-seal after changing the payload, then
+rebuild. The watchlist prose is generated from the same figures as the table beneath it, split by team,
+so it can never again tell the captain to argue one of his own men's handicaps down.
+
 - **Blue Room** encrypts *content*. Get the passphrase wrong and there is nothing to read, because the
   dossiers exist only as ciphertext. Red Team cannot get at them from View Source however hard they try.
 - **Admin** encrypts a *verifier* — a small blob that simply fails to decrypt on the wrong passphrase.
