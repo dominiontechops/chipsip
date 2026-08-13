@@ -95,6 +95,8 @@ padding:10px 18px;border-radius:8px}
 .mkfig::before{content:attr(data-l) " ";font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   font-size:10px;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin-right:2px}
 .mkfig.strong{color:var(--acc2)}
+.mkrow.barred{opacity:.5}
+.nope{color:var(--warn);font-size:11px;text-align:right;display:inline-block;max-width:110px;line-height:1.25}
 @media(min-width:720px){
   .mkhead{display:grid}
   .mkhead,.mkrow{grid-template-columns:minmax(0,1fr) 84px 84px 84px 74px 104px;
@@ -265,6 +267,12 @@ padding:10px 18px;border-radius:8px}
         proportion to what they staked. Nothing is deducted.</li>
       <li>The organiser takes no commission and holds no position against the field. A sweepstake, not a book.</li>
       <li>Stakes are in <b>whole pounds</b>, minimum £1. Back as many outcomes as you like.</li>
+      <li><b>You cannot back yourself</b>, in any market, for or against. You cannot back against your own
+        team either, and the team top-scorer markets are your own team only. Not because anyone is a wrong 'un,
+        but because a man with money on his own bad day is a different golfer. This is enforced by the
+        database, not the page, so it cannot be got round.</li>
+      <li><b>Anyone in the group can bet</b>, playing or not. If you are not on either team you have no
+        restrictions at all, since there is nothing for you to influence.</li>
       <li>All stakes collected <b>before the first tee shot</b>. Nobody plays on credit.</li>
       <li><b>Ante-post</b> runs from now until the handicaps are declared on the first night. You are betting
         against a model built on last season's numbers and some assumptions, so stakes struck in this window
@@ -461,7 +469,21 @@ padding:10px 18px;border-radius:8px}
 const MODEL=[{"name":"Alex Mulvin","hcp":16.6,"form":19.02,"sd":3.97,"probs":[0.0,0.0173,0.271,0.4908,0.1692,0.0518],"n":45,"lowSample":false,"rawGap":1.74,"unknown":false,"team":"Blue"},{"name":"Luke Usher","hcp":14.0,"form":17.32,"sd":3.77,"probs":[0.0,0.0106,0.3099,0.5123,0.136,0.0312],"n":16,"lowSample":false,"rawGap":2.07,"unknown":false,"team":"Blue"},{"name":"Josh Menzies","hcp":13.9,"form":18.44,"sd":4.41,"probs":[0.0,0.0521,0.316,0.3681,0.1961,0.0678],"n":14,"lowSample":false,"rawGap":4.16,"unknown":false,"team":"Blue"},{"name":"Tom Bucknall","hcp":25.1,"form":29.77,"sd":4.61,"probs":[0.0,0.0112,0.0955,0.3371,0.382,0.1742],"n":10,"lowSample":false,"rawGap":4.3,"unknown":false,"team":"Blue"},{"name":"Matt Holland","hcp":28.0,"form":32.69,"sd":4.58,"probs":[0.0,0.019,0.0577,0.4616,0.2499,0.2118],"n":3,"lowSample":true,"rawGap":3.52,"unknown":false,"team":"Blue"},{"name":"Mark Sturgess","hcp":20.0,"form":25.16,"sd":4.75,"probs":[0.0002,0.0232,0.2108,0.3749,0.2455,0.1454],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Blue"},{"name":"Matt Petty","hcp":18.0,"form":23.16,"sd":4.75,"probs":[0.0002,0.0232,0.2108,0.3749,0.2455,0.1454],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Blue"},{"name":"Ben West","hcp":21.9,"form":27.06,"sd":4.4,"probs":[0.0,0.0244,0.2122,0.3417,0.2322,0.1894],"n":68,"lowSample":false,"rawGap":5.19,"unknown":false,"team":"Blue"},{"name":"Rob Parfitt","hcp":25.4,"form":31.11,"sd":4.83,"probs":[0.0,0.0184,0.1022,0.3116,0.3445,0.2233],"n":12,"lowSample":false,"rawGap":6.44,"unknown":false,"team":"Blue"},{"name":"Dom Mills","hcp":20.8,"form":27.15,"sd":5.44,"probs":[0.0,0.0212,0.1417,0.3692,0.2962,0.1718],"n":13,"lowSample":false,"rawGap":7.61,"unknown":false,"team":"Blue"},{"name":"Luke Holland","hcp":15.7,"form":20.22,"sd":5.41,"probs":[0.0,0.0368,0.3343,0.3554,0.2022,0.0713],"n":32,"lowSample":false,"rawGap":4.35,"unknown":false,"team":"Red"},{"name":"Gabe Hills","hcp":18.3,"form":22.87,"sd":4.42,"probs":[0.0,0.0162,0.243,0.3863,0.2269,0.1276],"n":14,"lowSample":false,"rawGap":4.22,"unknown":false,"team":"Red"},{"name":"Eamonn Brady","hcp":16.7,"form":21.68,"sd":4.41,"probs":[0.0,0.0312,0.2538,0.384,0.2332,0.0979],"n":63,"lowSample":false,"rawGap":4.98,"unknown":false,"team":"Red"},{"name":"Theo Smith-Harris","hcp":15.0,"form":20.16,"sd":4.76,"probs":[0.0002,0.0239,0.2151,0.3747,0.2431,0.1431],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Red"},{"name":"Josh Evans","hcp":12.0,"form":17.16,"sd":4.74,"probs":[0.0002,0.0229,0.2105,0.3786,0.2423,0.1455],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Red"},{"name":"Chris Best","hcp":24.0,"form":29.81,"sd":4.75,"probs":[0.0,0.0,0.0964,0.2885,0.3076,0.3076],"n":3,"lowSample":true,"rawGap":9.12,"unknown":false,"team":"Red"},{"name":"Dave Huddleston","hcp":18.4,"form":25.0,"sd":5.24,"probs":[0.0,0.0,0.1932,0.3864,0.2159,0.2045],"n":5,"lowSample":true,"rawGap":10.49,"unknown":false,"team":"Red"},{"name":"dong ming lau","hcp":15.9,"form":22.85,"sd":5.01,"probs":[0.0039,0.0329,0.2338,0.3677,0.221,0.1406],"n":27,"lowSample":false,"rawGap":7.82,"unknown":false,"team":"Red"},{"name":"Jay France","hcp":8.1,"form":15.15,"sd":5.58,"probs":[0.0,0.064,0.3471,0.355,0.1772,0.0566],"n":15,"lowSample":false,"rawGap":8.7,"unknown":false,"team":"Red"},{"name":"Jack Mulroy","hcp":22.0,"form":29.41,"sd":4.95,"probs":[0.0,0.0106,0.1601,0.3419,0.2863,0.2012],"n":52,"lowSample":false,"rawGap":7.97,"unknown":false,"team":"Red"}], BLUE={"s":"ImnpJ4Iu2NFnIohRkxkF/Q==","i":"Kkzoey+CgVqmcY/i","c":"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"}, ADMIN={"s":"jaMQkDhnrV3W9qzQSnGAlQ==","i":"Hi0WypQZ/Z5FXY2x","c":"8Y7y40GqFUgf6brQMFL9VdHcMsnE2X7hqhvalE867Nwn3cRy/pquP6OV9sYqemHK0REpxs3V+J8aEfiqK3Aee8KLGxhCVD76HIgpbF5y3Vj06swOXvlK8g=="};
 const SB={url:"https://nqewsjczuqnkqehcayzq.supabase.co",
           key:"sb_publishable_jZ3Iw2rYsGgCdsBqKmJqBw_vO00J2DO"};
-const DB={bets:[],ledger:[],settings:{},online:false,err:""};
+const DB={bets:[],ledger:[],settings:{},roster:[],online:false,err:""};
+/* same normalisation the database uses, so the page agrees with it */
+const norm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+const myTeam=()=>{const r=DB.roster.find(x=>norm(x.name)===norm(S.me));return r?r.team:null;};
+/* why this person may not back this outcome, or null if they may */
+function blockReason(m,label){
+ if(!S.me) return null;
+ if(norm(label)===norm(S.me)) return "You cannot back yourself";
+ const mt=myTeam(); if(!mt) return null;
+ if(m.k==="team" && (label==="Blue"||label==="Red") && label!==mt) return "That is betting against your own team";
+ if((m.k==="blueTop"&&mt==="Blue")||(m.k==="redTop"&&mt==="Red")){
+   const r=DB.roster.find(x=>norm(x.name)===norm(label));
+   if(r&&r.team!==mt) return "Your own team only";
+ }
+ return null;}
 let ADMIN_TOKEN=null;                       /* held in memory only, never written to disk */
 async function sbFetch(path,opts={}){
   const r=await fetch(SB.url+"/rest/v1/"+path,{...opts,headers:{
@@ -473,11 +495,12 @@ async function sbFetch(path,opts={}){
 const rpc=(fn,args)=>sbFetch("rpc/"+fn,{method:"POST",body:JSON.stringify(args)});
 async function refresh(){
   try{
-    const [st,bets,led]=await Promise.all([
+    const [st,bets,led,ros]=await Promise.all([
       sbFetch("settings?select=data&id=eq.1"),
       sbFetch("bets?select=id,bettor,market,outcome,stake,phase,created_at&voided=eq.false&order=created_at"),
-      sbFetch("ledger?select=*")]);
-    DB.settings=(st&&st[0]&&st[0].data)||{}; DB.bets=bets||[]; DB.ledger=led||[];
+      sbFetch("ledger?select=*"),
+      sbFetch("roster?select=name,team,playing&order=name")]);
+    DB.settings=(st&&st[0]&&st[0].data)||{}; DB.bets=bets||[]; DB.ledger=led||[]; DB.roster=ros||[];
     DB.online=true; DB.err="";
     S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
     if(DB.settings.apBonus!=null)   S.apBonus=DB.settings.apBonus;
@@ -784,8 +807,9 @@ function drawPools(){
    <span class="num">Fair</span><span class="num">Edge</span><span></span></div>`;
   rows.forEach(r=>{const ec=r.ev===null?"":r.ev>0.05?"pos":r.ev<-0.05?"neg":"";
    const inSlip=S.slip.find(x=>x.market===m.k&&x.outcome===r.label);
+   const blocked=blockReason(m,r.label);
    const who=backers(m.k,r.label);
-   t+=`<div class="mkrow">
+   t+=`<div class="mkrow${blocked?" barred":""}">
      <div class="mkname">${esc(r.label)}${r.player?" "+teamTag(r.player.team):""}${r.player&&r.player.unknown?' <span class="tag nd">form assumed</span>':""}
        ${who.length?`<div class="small">${esc(who.join(", "))}</div>`:""}</div>
      <div class="mkfigs">
@@ -795,6 +819,7 @@ function drawPools(){
        <span class="mkfig ${ec}" data-l="Edge">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</span>
      </div>
      <div class="mkact">${mp==="closed"?'<span class="small">shut</span>'
+      :blocked?`<span class="small nope" title="${esc(blocked)}">${esc(blocked)}</span>`
       :inSlip?`<button class="ghost slipdel on" data-mk="${esc(m.k)}" data-pl="${esc(r.label)}">£${inSlip.stake} ✕</button>`
       :`<button class="ghost slipadd" data-mk="${esc(m.k)}" data-pl="${esc(r.label)}">+ Add</button>`}</div>
      <div class="mkbar"><div class="bar"><i style="width:${w?(r.wt/w*100):0}%"></i></div></div>
@@ -830,7 +855,10 @@ function drawSlip(){
  if(!S.slip.length){el.hidden=true;document.body.classList.remove("hasslip");return;}
  el.hidden=false;document.body.classList.add("hasslip");
  const total=S.slip.reduce((a,x)=>a+(+x.stake||0),0);
- const names=S.players.filter(p=>p.in).map(p=>p.name).sort();
+ const R=DB.roster.length?DB.roster:S.players.filter(p=>p.in).map(p=>({name:p.name,team:p.team,playing:true}));
+ const playing=R.filter(x=>x.playing).map(x=>x.name).sort();
+ const others =R.filter(x=>!x.playing).map(x=>x.name).sort();
+ const names=[...playing,...others];
  el.innerHTML=`<div class="card" style="margin:0;border-color:var(--acc)">
    <h2>Your slip &mdash; ${S.slip.length} selection${S.slip.length===1?"":"s"} &middot; £${total}</h2>
    <div class="sliplist">${S.slip.map((x,i)=>`<div class="sliprow">
@@ -842,7 +870,8 @@ function drawSlip(){
    <div class="row">
      <select id="slipWho" style="min-width:170px">
        <option value="">Who are you?</option>
-       ${names.map(n=>`<option${S.me===n?" selected":""}>${esc(n)}</option>`).join("")}
+       <optgroup label="Playing">${playing.map(n=>`<option${S.me===n?" selected":""}>${esc(n)}</option>`).join("")}</optgroup>
+       ${others.length?`<optgroup label="Not playing, still betting">${others.map(n=>`<option${S.me===n?" selected":""}>${esc(n)}</option>`).join("")}</optgroup>`:""}
        <option value="__other"${S.me&&!names.includes(S.me)?" selected":""}>Someone else…</option>
      </select>
      <input id="slipOther" placeholder="Your name" style="width:150px;display:${S.me&&!names.includes(S.me)?"inline-block":"none"}"
@@ -860,7 +889,10 @@ function drawSlip(){
  $("#slipWho").addEventListener("change",e=>{
    const v=e.target.value;
    $("#slipOther").style.display=v==="__other"?"inline-block":"none";
-   S.me=v==="__other"?($("#slipOther").value||""):v; save();});
+   S.me=v==="__other"?($("#slipOther").value||""):v; save();
+   /* drop anything the rule now forbids, and redraw so barred rows grey out */
+   S.slip=S.slip.filter(x=>!blockReason(allMarkets().find(m=>m.k===x.market)||{k:x.market},x.outcome));
+   drawPools();});
  $("#slipOther").addEventListener("input",e=>{S.me=e.target.value.trim();save();});
  $("#slipGo").addEventListener("click",placeSlip);
  $("#slipClear").addEventListener("click",()=>{S.slip=[];save();drawPools();});
@@ -872,6 +904,9 @@ async function placeSlip(){
  if(ph==="closed"){err.textContent="The book is shut.";return;}
  const bad=S.slip.filter(x=>mPhase(allMarkets().find(m=>m.k===x.market)||{})==="closed");
  if(bad.length){err.textContent="These markets have closed: "+bad.map(b=>marketName(b.market)).join(", ");return;}
+ const barred=S.slip.map(x=>({x,why:blockReason(allMarkets().find(m=>m.k===x.market)||{k:x.market},x.outcome)}))
+   .filter(o=>o.why);
+ if(barred.length){err.textContent=barred.map(o=>`${o.x.outcome}: ${o.why.toLowerCase()}`).join(" · ");return;}
  const rows=S.slip.map(x=>({bettor:S.me.trim(),market:x.market,outcome:x.outcome,stake:x.stake,phase:ph}));
  $("#slipGo").disabled=true;
  try{
@@ -880,7 +915,9 @@ async function placeSlip(){
    $("#poolWrap").insertAdjacentHTML("afterbegin",
      `<div class="card" style="border-color:var(--acc)"><p class="ok" style="margin:0">Bets placed and recorded. They now show against your name below.</p></div>`);
  }catch(e){ $("#slipGo").disabled=false;
-   err.textContent="Could not place them: "+String(e.message||e).slice(0,140); }
+   const raw=String(e.message||e);
+   const m2=raw.match(/You cannot back yourself|You cannot back against your own team|That market is for your own team only/);
+   err.textContent=m2?m2[0]:"Could not place them: "+raw.slice(0,140); }
 }
 function drawKpis(){
  const ps=S.players.filter(p=>p.in);
