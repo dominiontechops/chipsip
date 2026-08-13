@@ -13,7 +13,7 @@ GitHub Pages serves `index.html` from the repository root. See **Deploying** bel
 
 | Tab | What it does |
 |---|---|
-| **Pools** | Every market, collapsed until pressed. Ante-post and open stakes in whole pounds, implied odds against the model's fair price, and the edge between them |
+| **Pools** | Every market, collapsed until pressed. Captains and vice-captains are badged C and VC throughout. Ante-post and open stakes in whole pounds, implied odds against the model's fair price, and the edge between them |
 | **Form Book** | All 20 players with handicap, form, volatility and sample size, plus the simulated prices |
 | **Schedule** | Transfers, tee times and collections for all four days, and the four courses |
 | **Rules** | How the pools settle. Read this before arguing |
@@ -127,8 +127,10 @@ Three exceptions to the formula:
 
 - **Fewest Putts** runs the coefficients negative. It is the one novelty a good player wins.
 - **First to Get Sunburnt** is priced off rounds played, not handicap. Hours in the sun, not shots.
-- **Heated Discussion** and **Crown of the Alcohol** use a hand-set `wts` map, because no handicap will
-  ever tell you who fell out with whom last year.
+- **Most Likely to Have a Heated Discussion** uses a hand-set `wts` map, because no handicap will ever tell
+  you who fell out with whom last year. It also carries `winners: 2.2` — a row takes two men and sometimes
+  three, the dead-heat rule splits the pool between them, so the book adds to 220% and the fair prices are
+  correspondingly shorter. That is not an overround; it is what a multi-winner tote pays.
 
 An unwon pool (nobody scores zero, nobody goes four-from-four) is **not** the organiser's. It rolls into
 the kitty for next year's trip, declared in the ledger, and any backer can ask for his stake back instead
@@ -147,3 +149,11 @@ not just in the page.
 Light and dark, toggled in the header, chosen from the system preference on a first visit and remembered
 after that. It is applied by an inline script in `<head>` so there is no flash. Every colour is a CSS
 variable on `:root`; if you add a bare hex to the stylesheet it will not follow the theme.
+
+## Numbers that must stay derived
+
+Points on offer, the player count and the sample-size wording are computed from the roster
+(`pointsOnOffer()`), not typed in. An earlier build hard-coded "25 points" in three places and went on
+promising them after a player was removed, while the simulation quietly refused to price anything.
+Market cutoffs come from `cutoffOf(ROUND_TEE[r])` everywhere, including the "When each market shuts"
+table — that table used to print the raw tee time and contradict the market cards by ten minutes.
