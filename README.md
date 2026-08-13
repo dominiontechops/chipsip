@@ -168,6 +168,11 @@ Three exceptions to the formula:
 
 - **Fewest Putts** runs the coefficients negative. It is the one novelty a good player wins.
 - **First to Get Sunburnt** is priced off rounds played, not handicap. Hours in the sun, not shots.
+- **First Buggy Incident** is priced almost entirely off a hand-set `wts` map — Josh Menzies has previous.
+  Handicap counts for very little (`cart` tuning is deliberately weak): a buggy finds a kerb because of who
+  is steering, not what he goes round in. It is a single-winner market by choice, so with twenty runners the
+  tail sits at 33/1–40/1. That is arithmetic: a shorter favourite makes everyone else longer, not shorter.
+  The only honest way to shorten the whole book is fewer runners or more winners.
 - **Most Likely to Have a Heated Discussion** uses a hand-set `wts` map, because no handicap will ever tell
   you who fell out with whom last year. It also carries `winners: 2.2` — a row takes two men and sometimes
   three, the dead-heat rule splits the pool between them, so the book adds to 220% and the fair prices are
