@@ -126,6 +126,14 @@ Three exceptions to the formula:
 - **Heated Discussion** and **Crown of the Alcohol** use a hand-set `wts` map, because no handicap will
   ever tell you who fell out with whom last year.
 
+An unwon pool (nobody scores zero, nobody goes four-from-four) is **not** the organiser's. It rolls into
+the kitty for next year's trip, declared in the ledger, and any backer can ask for his stake back instead
+at any point up to the flight home. That opt-out is what keeps it clean: nothing is deducted from anybody
+without consent, and the organiser takes nothing either way.
+
+Singles only. No doubles, trebles or accumulators — a multiple needs the prices fixed at the moment of
+striking, and fixing prices is what makes a man a bookmaker.
+
 Markets that name one man and settle on his own behaviour — the Yes/No ones — carry a `subject`. He is
 barred from betting on them either way, enforced in `check_bet_integrity()` against `market_subjects`,
 not just in the page.
