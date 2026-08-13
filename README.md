@@ -164,8 +164,23 @@ only Sunday's singles produces an individual score.
 - **Scramble** — better of the two balls with a stochastic bonus, 35/15 allowance
 - **Singles** — full difference
 
-Pairings are redrawn every simulation, so prices average over who ends up with whom rather than
-assuming a draw nobody has made yet.
+Pairings are redrawn every simulation **until a real draw exists**. Any match the captains have
+entered on the Score tab is played as entered and only the leftover players are shuffled; a match
+that already has a result is not simulated at all, because a thing that has happened has a
+probability of one. Half a pairing is ignored rather than guessed at, so filling the card in as you
+go never fabricates a draw.
+
+This matters most to **Sunday Singles**, which stays open until Sunday morning while the draw is
+usually made on Saturday night. In testing, drawing Jay France against Luke Usher moved his singles
+price from 2.47 to 3.05 and shortened Josh Evans from 2.27 to 1.81 — the same simulation, the same
+handicaps, just an opponent instead of an average. It barely touches the team result, which averages
+out anyway. Banking played results collapses the team probability correctly: 15 Blue points on the
+board gives Blue 100%.
+
+**So the workflow during the trip is: enter the draw as soon as it is announced, then re-run.** The
+published price set carries the plan (`prices.plan`) and the Form Book states how many matches were
+drawn, how many were banked and how many were still shuffled, so a punter can see what the price in
+front of him actually assumed.
 
 Player form comes from 461 individual rounds pulled from Squabbit across everyone's full history.
 Two things matter and should not be undone if anyone edits the data:
