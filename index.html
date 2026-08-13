@@ -162,7 +162,7 @@ padding:10px 18px;border-radius:8px}
 <header><div class="hrow">
   <div><h1>CHIP &amp; SIP <span>2026</span></h1>
   <div class="sub" id="hdr">loading&hellip;</div>
-  <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-13.8</div></div>
+  <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-13.11</div></div>
   <div class="seg" id="oddsFmt"><button data-f="frac">Fractions</button><button data-f="dec">Decimals</button></div>
 </div></header>
 
@@ -219,10 +219,10 @@ padding:10px 18px;border-radius:8px}
     <label>Team <select id="gTeam"><option value="">All</option><option>Blue</option><option>Red</option></select></label>
     <label>Hcp <input type="number" id="gHmin" placeholder="min" style="width:64px">
       <input type="number" id="gHmax" placeholder="max" style="width:64px"></label>
-    <label>Data <select id="gData"><option value="">All</option><option value="good">10+ rounds</option>
-      <option value="low">Thin / none</option></select></label>
-    <label>Sort <select id="gSort"><option value="gap">Handicap value</option><option value="mvp">MVP price</option>
-      <option value="hcp">Handicap</option><option value="sd">Volatility</option><option value="name">Name</option></select></label>
+    <label>Show <select id="gData"><option value="">Everyone</option><option value="good">Known quantities</option>
+      <option value="low">Wildcards</option></select></label>
+    <label>Sort <select id="gSort"><option value="gap">Best value first</option><option value="mvp">Shortest price</option>
+      <option value="hcp">Handicap</option><option value="name">Name</option></select></label>
     <button class="ghost" id="gClear">Clear</button>
   </div>
   <div class="card">
@@ -237,10 +237,14 @@ padding:10px 18px;border-radius:8px}
     <h2>Model prices</h2>
     <p class="note">Monte Carlo of the full Ryder Cup: foursomes, fourball, scramble and singles, hole by hole,
     with pairings redrawn every simulation so the prices average over who ends up with whom.</p>
-    <div class="row">
+    <div id="pubInfo" class="note"></div>
+    <div class="row" id="simCtl" style="display:none">
       <label class="small">Simulations <select id="nsim">
-        <option>2000</option><option selected>6000</option><option>15000</option></select></label>
-      <button class="go" id="run">Re-run model</button><span class="small" id="simStat"></span>
+        <option>2000</option><option selected>6000</option><option>15000</option>
+        <option>40000</option></select></label>
+      <button class="go" id="run">Re-run</button>
+      <button class="go" id="publish">Publish these prices</button>
+      <span class="small" id="simStat"></span>
     </div>
     <div class="wrap"><table id="oddsTbl"></table></div>
   </div>
@@ -311,10 +315,12 @@ padding:10px 18px;border-radius:8px}
         refunded — you backed a man who might get injured.</li>
       <li><b>Abandoned session.</b> That session's matches are halved and its markets settle on the half.</li>
       <li><b>Scoring record.</b> Squabbit is the record. If Squabbit and a paper card disagree, Squabbit wins.</li>
-      <li><b>Handicaps</b> are locked at the airport and not revisited, whatever happens on Thursday.</li>
+      <li><b>Handicaps</b> are locked at the airport and not revisited, whatever happens on Thursday. Yes,
+        even if he shoots the round of his life. Especially then.</li>
       <li><b>Novelty markets</b> are settled by the organiser on the evidence available. Video beats testimony.</li>
       <li><b>Disputes</b> go to the organiser. Any dispute involving the organiser goes to the two captains;
-        if they cannot agree the pool is voided and refunded.</li>
+        if they cannot agree the pool is voided and refunded, and everyone sulks equally.</li>
+      <li><b>"I was robbed"</b> is not a settlement mechanism. Neither is "the wind got up".</li>
     </ul>
     <p class="note">Private betting between friends is lawful in the UK and winnings are untaxed. What would
     change that is the organiser taking a cut or building a margin — that is bookmaking and needs a licence.
@@ -513,6 +519,7 @@ async function refresh(){
     if(DB.settings.apBonus!=null)   S.apBonus=DB.settings.apBonus;
     if(DB.settings.blindScale!=null)S.blindScale=DB.settings.blindScale;
     if(DB.settings.payLink!=null)   S.payLink=DB.settings.payLink;
+    PUB = DB.settings.prices || null;
     if(Array.isArray(DB.settings.hcp)) DB.settings.hcp.forEach(h=>{
       const p=S.players.find(x=>x.name===h.n); if(p){p.hcp=h.h; if(h.f!=null)p.form=h.f;}});
   }catch(e){ DB.online=false; DB.err=String(e.message||e).slice(0,160); }
@@ -553,23 +560,27 @@ const DEF_COURSES=[
 const FMT={foursomes:"Foursomes",fourball:"Fourball",scramble:"Scramble",singles:"Singles"};
 
 const MARKETS=[
- {k:"mvp",n:"MVP",d:"Most points across the four sessions",type:"model",round:""},
- {k:"team",n:"Team Result",d:"Blue, Red or a tie at 12.5 apiece",type:"model",round:"",team:true},
- {k:"blueTop",n:"Blue Top Scorer",d:"Most points on the Blue team",type:"model",round:"",only:"Blue"},
- {k:"redTop",n:"Red Top Scorer",d:"Most points on the Red team",type:"model",round:"",only:"Red"},
- {k:"perfect",n:"Perfect Record",d:"Wins every match he plays",type:"model",round:""},
- {k:"blank",n:"The Blank",d:"Finishes the trip on zero points",type:"model",round:""},
- {k:"singles",n:"Sunday Singles",d:"Wins his singles match at Santa Maria",type:"model",round:"4"}
+ {k:"mvp",n:"MVP",d:"Most points across the four sessions. Bragging rights until next September",type:"model",round:""},
+ {k:"team",n:"Team Result",d:"Blue, Red, or the unbearable anticlimax of 12.5 apiece",type:"model",round:"",team:true},
+ {k:"blueTop",n:"Blue Top Scorer",d:"Best of the Blues. Someone has to be",type:"model",round:"",only:"Blue"},
+ {k:"redTop",n:"Red Top Scorer",d:"Best of the Reds. Enjoy it while it lasts",type:"model",round:"",only:"Red"},
+ {k:"perfect",n:"Perfect Record",d:"Four from four. Insufferable for a decade",type:"model",round:""},
+ {k:"blank",n:"The Blank",d:"Four matches, nil points, one very quiet flight home",type:"model",round:""},
+ {k:"singles",n:"Sunday Singles",d:"Wins his singles at Santa Maria. Nowhere to hide, no partner to blame",type:"model",round:"4"}
 ];
 const DEF_NOV=[
- {k:"nov_rob",n:"Rob's 30th",d:"He turns 30 on arrival night and tees it up at Marbella the next day",
-  round:"1",opts:["Wins his Thursday match","Halves it","Loses it","Does not make the tee"]},
- {k:"nov_water",n:"First in the Water",d:"First ball wet, any round",round:"",opts:[]},
- {k:"nov_balls",n:"Most Balls Lost",d:"Across the whole trip",round:"",opts:[]}
+ {k:"nov_rob",n:"Rob's 30th",
+  d:"Turns 30 on arrival night, tees off at 13:50 the next day. What could possibly go wrong",
+  round:"1",opts:["Wins his Thursday match","Halves it","Loses it","Does not make the tee at all"]},
+ {k:"nov_water",n:"First in the Drink",d:"First ball wet. Provisional does not count, we all saw it",round:"",opts:[]},
+ {k:"nov_balls",n:"Most Balls Lost",d:"Across the week. Sleeve-buyers need not apply",round:"",opts:[]},
+ {k:"nov_air",n:"First Air Shot",d:"A genuine swing and miss. Practice swings excepted, obviously",round:"",opts:[]},
+ {k:"nov_cart",n:"First Buggy Incident",d:"Kerb, bunker, flowerbed or tree. Adjudicated by the organiser",round:"",opts:[]},
+ {k:"nov_shout",n:"First to Blame His Clubs",d:"Out loud, in earshot of at least two witnesses",round:"",opts:[]}
 ];
 
 let S=null;
-const DATA_V="2026-08-13.8";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-13.11";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],me:"",
@@ -662,7 +673,10 @@ function playMatch(A,B){let up=0;
  return up>0?1:up<0?0:0.5;}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-let ODDS=null,TEAMP=null;
+let ODDS=null,TEAMP=null;      /* what this browser simulated */
+let PUB=null;                  /* what the organiser published — everyone sees the same numbers */
+const priceSrc=()=>PUB?PUB.odds:ODDS;
+const teamSrc =()=>PUB?PUB.team:TEAMP;
 function runSim(N){
  const blue=S.players.filter(p=>p.in&&p.team==="Blue"),red=S.players.filter(p=>p.in&&p.team==="Red");
  if(blue.length<2||red.length<2||blue.length!==red.length){ODDS=null;TEAMP=null;return;}
@@ -760,9 +774,9 @@ const teamTag=t=>`<span class="tag ${t==="Blue"?"blue":"red"}">${t}</span>`;
 function marketOutcomes(m){
  if(m.type==="novelty") return (m.opts&&m.opts.length?m.opts:S.players.filter(p=>p.in).map(p=>p.name))
    .map(o=>({label:o,prob:null,player:S.players.find(p=>p.name===o)||null}));
- if(m.k==="team") return ["Blue","Red","Tie"].map(o=>({label:o,prob:TEAMP?TEAMP[o]:null,player:null}));
+ if(m.k==="team"){const T=teamSrc();return ["Blue","Red","Tie"].map(o=>({label:o,prob:T?T[o]:null,player:null}));}
  return S.players.filter(p=>p.in&&(!m.only||p.team===m.only))
-   .map(p=>({label:p.name,player:p,prob:ODDS&&ODDS[p.name]?ODDS[p.name][m.k==="singles"?"singles":m.k]:null}));
+   .map(p=>{const O=priceSrc();return{label:p.name,player:p,prob:O&&O[p.name]?O[p.name][m.k==="singles"?"singles":m.k]:null};});
 }
 function passFilter(o,m){
  const t=$("#fTeam").value,hmin=parseFloat($("#fHmin").value),hmax=parseFloat($("#fHmax").value);
@@ -856,7 +870,8 @@ function drawPools(){
     &middot; ${mp==="closed"?"<b>shut</b>":`closes in <b>${untilStr(deadline(m))}</b>`}</p>
    <div class="mkt">${t}</div></div>`;
  });
- $("#poolWrap").innerHTML=out||`<div class="card"><p class="note">Nothing matches those filters.</p></div>`;
+ $("#poolWrap").innerHTML=out||`<div class="card"><p class="note">Nothing matches that. You have filtered your way
+ into an empty room.</p></div>`;
  if($("#retry"))$("#retry").addEventListener("click",async()=>{await refresh();drawAll();});
  document.querySelectorAll(".slipadd").forEach(el=>el.addEventListener("click",e=>{
   const {mk,pl}=e.target.dataset;
@@ -949,16 +964,16 @@ function drawKpis(){
  $("#kpis").innerHTML=`
   <div><span>Players</span><b>${ps.length}</b></div>
   <div><span>Points at stake</span><b>25</b></div>
-  <div><span>Blue to win</span><b>${TEAMP?pct(TEAMP.Blue):"—"}</b></div>
+  <div><span>Blue to win</span><b>${teamSrc()?pct(teamSrc().Blue):"—"}</b></div>
   <div><span>Best value</span><b style="font-size:14px">${esc(val?val.name:"—")}</b></div>
   <div><span>Most volatile</span><b style="font-size:14px">${esc(vol?vol.name:"—")}</b></div>
   <div><span>Form assumed</span><b class="${nd?"warn":""}">${nd}</b></div>`;
- if(TEAMP){const b=TEAMP.Blue*100,t=TEAMP.Tie*100,r=TEAMP.Red*100;
+ const TP=teamSrc(); if(TP){const b=TP.Blue*100,t=TP.Tie*100,r=TP.Red*100;
   $("#kpis").insertAdjacentHTML("afterend",
    `<div class="split" title="Blue / Tie / Red"><i style="width:${b}%;background:var(--blue)"></i>
     <i style="width:${t}%;background:#555"></i><i style="width:${r}%;background:var(--red)"></i></div>
     <p class="note">Blue ${b.toFixed(1)}% &middot; Tie ${t.toFixed(1)}% &middot; Red ${r.toFixed(1)}%
-    &middot; average margin ${TEAMP.margin>=0?"+":""}${TEAMP.margin.toFixed(1)} to Blue</p>`);}
+    &middot; average margin ${TP.margin>=0?"+":""}${TP.margin.toFixed(1)} to Blue</p>`);}
 }
 function gFiltered(){
  const t=$("#gTeam").value,hmin=parseFloat($("#gHmin").value),hmax=parseFloat($("#gHmax").value),d=$("#gData").value;
@@ -970,27 +985,47 @@ function gFiltered(){
  if(d==="low")ps=ps.filter(p=>p.n<10);
  const s=$("#gSort").value;
  ps.sort((a,b)=> s==="hcp"?a.hcp-b.hcp : s==="sd"?b.sd-a.sd : s==="name"?a.name.localeCompare(b.name)
-   : s==="mvp"?((ODDS&&ODDS[b.name]?ODDS[b.name].mvp:0)-(ODDS&&ODDS[a.name]?ODDS[a.name].mvp:0))
+   : s==="mvp"?(((priceSrc()||{})[b.name]||{}).mvp||0)-(((priceSrc()||{})[a.name]||{}).mvp||0)
    : (a.form-a.hcp)-(b.form-b.hcp));
  return ps;}
 function drawForm(){
- let h=`<tr><th>Player</th><th>Team</th><th class="num">Hcp</th><th class="num">Form</th><th class="num">Raw</th>
-  <th class="num">Gap</th><th class="num">Spread</th><th class="num">Rounds</th><th>Read</th></tr>`;
+ const nerd=!!ADMIN_TOKEN;                       /* the detail is organiser's homework */
+ const TRIP={rating:69.9,slope:134};             /* average of the four courses we are playing */
+ const typical=p=>Math.round(p.form*TRIP.slope/113+TRIP.rating);
+ let h=`<tr><th>Player</th><th>Team</th><th class="num">Handicap</th><th class="num">Typical round</th>
+  ${nerd?`<th class="num">Form</th><th class="num">Raw</th><th class="num">Gap</th><th class="num">Spread</th><th class="num">Rounds</th>`:""}
+  <th>The word on him</th></tr>`;
  gFiltered().forEach(p=>{const g=p.form-p.hcp;
-  const read=p.unknown?"Handicap known, form assumed":g<3.5?"Best value in the field":g<4.8?"Good value"
-   :g<5.8?"About right":g<6.8?"Over-shot":"Well over-shot";
-  h+=`<tr><td>${esc(p.name)}${p.unknown?' <span class="tag nd">form assumed</span>':p.low?' <span class="tag low">thin</span>':""}</td>
-   <td>${teamTag(p.team)}</td><td class="num">${p.hcp.toFixed(1)}</td><td class="num">${p.form.toFixed(1)}</td>
-   <td class="num small">${p.rawGap==null?"—":(p.rawGap>=0?"+":"")+p.rawGap.toFixed(1)}</td>
-   <td class="num ${g<3.5?"pos":g>6.8?"neg":""}">${g>=0?"+":""}${g.toFixed(1)}</td>
-   <td class="num">${p.sd.toFixed(1)}${p.sd<4.2?' <span class="small">steady</span>':p.sd>5.2?' <span class="small">wild</span>':""}</td>
-   <td class="num ${p.n<10?"warn":""}">${p.n}</td><td class="small">${read}</td></tr>`;});
+  const read=p.unknown?"Complete unknown. Bet with your heart."
+   :g<3.5?"Robbed by his own handicap. Back him."
+   :g<4.8?"Fair value, if he turns up in one piece."
+   :g<5.8?"About right. Nothing to see here."
+   :g<6.8?"Getting more shots than the golf deserves."
+   :"Carrying that handicap like a rucksack of bricks.";
+  h+=`<tr><td>${esc(p.name)}${p.unknown?' <span class="tag nd">unknown quantity</span>':p.low?' <span class="tag low">barely logs</span>':""}</td>
+   <td>${teamTag(p.team)}</td><td class="num">${p.hcp.toFixed(1)}</td>
+   <td class="num strong">${typical(p)}</td>
+   ${nerd?`<td class="num">${p.form.toFixed(1)}</td>
+    <td class="num small">${p.rawGap==null?"—":(p.rawGap>=0?"+":"")+p.rawGap.toFixed(1)}</td>
+    <td class="num ${g<3.5?"pos":g>6.8?"neg":""}">${g>=0?"+":""}${g.toFixed(1)}</td>
+    <td class="num">${p.sd.toFixed(1)}</td><td class="num ${p.n<10?"warn":""}">${p.n}</td>`:""}
+   <td class="small">${read}</td></tr>`;});
  $("#formTbl").innerHTML=h;}
 function drawOdds(){
- if(!ODDS){$("#oddsTbl").innerHTML=`<tr><td class="small">Teams must be equal-sized with at least two a side. Fix the roster in Admin, then re-run.</td></tr>`;return;}
+ const ctl=$("#simCtl"); if(ctl) ctl.style.display = ADMIN_TOKEN ? "flex" : "none";
+ const pi=$("#pubInfo");
+ if(pi) pi.innerHTML = PUB
+   ? `The published prices, identical on every phone. Set by the organiser
+      ${PUB.at?new Date(PUB.at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"earlier"}
+      off ${(PUB.n||0).toLocaleString()} simulated trips. You cannot reroll them until you get a better one,
+      which is rather the point.`
+   : `<span class="warn">No published prices yet, so these are simulated in your own browser and will differ
+      slightly from everybody else's. The organiser needs to publish a set.</span>`;
+ if(!priceSrc()){$("#oddsTbl").innerHTML=`<tr><td class="small">Teams must be equal-sized with at least two a side. Fix the roster in Admin, then re-run.</td></tr>`;return;}
  let h=`<tr><th>Player</th><th>Team</th><th class="num">Avg pts</th><th class="num">MVP</th>
   <th class="num">Team top</th><th class="num">Wins singles</th><th class="num">4 from 4</th><th class="num">Blank</th></tr>`;
- gFiltered().sort((a,b)=>(ODDS[b.name]?.mvp||0)-(ODDS[a.name]?.mvp||0)).forEach(p=>{const o=ODDS[p.name];if(!o)return;
+ const O=priceSrc();
+ gFiltered().sort((a,b)=>(O[b.name]?.mvp||0)-(O[a.name]?.mvp||0)).forEach(p=>{const o=O[p.name];if(!o)return;
   h+=`<tr><td>${esc(p.name)}${p.unknown?' <span class="tag nd">form assumed</span>':""}</td><td>${teamTag(p.team)}</td>
    <td class="num">${o.avgPts.toFixed(2)}</td><td class="num pos">${dec(o.mvp)}</td>
    <td class="num">${dec(p.team==="Blue"?o.blueTop:o.redTop)}</td>
@@ -1027,7 +1062,7 @@ function drawLedger(){
      style="padding:3px 9px">Paid £${r.balance}</button>`:""}</td></tr>`;});
  h+=`<tr><td><b>Total</b></td><td></td><td class="num"><b>£${ts}</b></td><td class="num"><b>£${tp}</b></td>
    <td class="num ${ts-tp>0?"neg":"pos"}"><b>£${ts-tp}</b></td><td></td></tr>`;
- if(!L.length) h=`<tr><td class="small">No bets struck yet.</td></tr>`;
+ if(!L.length) h=`<tr><td class="small">Nobody owes anybody anything. Enjoy it, it will not last.</td></tr>`;
  $("#ledgTbl").innerHTML=h;
  document.querySelectorAll(".payoff").forEach(el=>el.addEventListener("click",async e=>{
   const w=e.target.dataset.w,a=+e.target.dataset.a; e.target.disabled=true;
@@ -1041,7 +1076,7 @@ function drawLedger(){
    <td>${esc(x.bettor)}</td><td class="small">${esc(marketName(x.market))}</td><td>${esc(x.outcome)}</td>
    <td class="num">£${x.stake}</td>
    <td><button class="ghost voidb" data-id="${x.id}" style="padding:3px 9px">Void</button></td></tr>`;});
- if(!DB.bets.length) b=`<tr><td class="small">Nothing struck yet.</td></tr>`;
+ if(!DB.bets.length) b=`<tr><td class="small">Not a penny wagered. A group of unusually sensible men.</td></tr>`;
  $("#betsTbl").innerHTML=b;
  document.querySelectorAll(".voidb").forEach(el=>el.addEventListener("click",async e=>{
   e.target.disabled=true;
@@ -1108,6 +1143,20 @@ function fillMarketFilter(){
  const cur=$("#fMarket").value;
  $("#fMarket").innerHTML=`<option value="">All markets</option>`+
   allMarkets().map(m=>`<option value="${esc(m.k)}"${m.k===cur?" selected":""}>${esc(m.n)}</option>`).join("");}
+const QUIPS=[
+ "Twenty men, twenty-five points, and one shared inability to putt.",
+ "Handicaps: works of fiction, agreed by committee, in a Spoons.",
+ "Remember, it is only gambling if you lose. Otherwise it is analysis.",
+ "The model has simulated this trip forty thousand times. Nobody enjoyed it.",
+ "Four courses, four formats, and one lad who will bring the wrong shoes.",
+ "Statistically, someone reading this is going to blank. Statistically, it is not you.",
+ "Costa del Sol: where the sun is guaranteed and the fairways are not.",
+ "A bad day on the course still beats a good day at work. Your money disagrees.",
+ "No rake, no margin, no house. Just twenty blokes and their optimism.",
+ "The Blue Room is encrypted. The Red Room is a countdown and a photograph of a trophy.",
+ "Every price here is honest. Every handicap here is negotiable.",
+ "Pairs formats: the art of losing a hole two people at a time."
+];
 function drawHeader(){
  const n=S.players.filter(p=>p.in).length;
  $("#hdr").textContent=`Costa del Sol · 24–27 Sep 2026 · ${n} players · Ryder Cup · 25 points`;}
@@ -1131,7 +1180,7 @@ function drawBlue(){const d=BLUEDATA;if(!d)return;
  const reds=S.players.filter(p=>p.in&&p.team==="Red");
  const dos=reds.length?reds.map(p=>`<details><summary>${esc(p.name)}
    <span class="small">&nbsp;hcp ${p.hcp.toFixed(1)} &middot; form ${p.form.toFixed(1)}
-   ${ODDS&&ODDS[p.name]?`&middot; wins his singles ${dec(ODDS[p.name].singles)}`:""}</span></summary>
+   ${priceSrc()&&priceSrc()[p.name]?`&middot; wins his singles ${dec(priceSrc()[p.name].singles)}`:""}</span></summary>
    <p class="small" style="margin:8px 0 0">${esc(d.dossiers[p.name]||"No history on file.")}</p></details>`).join("")
   :`<p class="note">Assign teams in Admin and the dossiers appear.</p>`;
  let wl=`<tr><th>Player</th><th>Team</th><th class="num">Hcp</th><th class="num">Raw gap</th>
@@ -1172,9 +1221,11 @@ $("#fClear").addEventListener("click",()=>{["fMarket","fTeam","fRound","fType","
  el.addEventListener("input",()=>{drawForm();drawOdds();});});
 $("#gClear").addEventListener("click",()=>{["gTeam","gHmin","gHmax","gData"].forEach(id=>$("#"+id).value="");
  $("#gSort").value="gap";drawForm();drawOdds();});
-$("#run").addEventListener("click",()=>{const N=+$("#nsim").value;$("#simStat").textContent="running…";
- setTimeout(()=>{const t=performance.now();runSim(N);
-  $("#simStat").textContent=`${N.toLocaleString()} trips in ${Math.round(performance.now()-t)}ms`;
+$("#run").addEventListener("click",()=>{
+ if(!ADMIN_TOKEN){$("#simStat").textContent="Organiser only.";return;}
+ const N=+$("#nsim").value; $("#simStat").textContent="running…";
+ setTimeout(()=>{const t0=performance.now(); runSim(N); PUB=null;
+  $("#simStat").textContent=`${N.toLocaleString()} trips in ${Math.round(performance.now()-t0)}ms — not published yet.`;
   drawAll();},20);});
 $("#admGo").addEventListener("click",async()=>{
  const tok=$("#admPw").value.trim(); const err=$("#admErr");
@@ -1192,11 +1243,21 @@ $("#admGo").addEventListener("click",async()=>{
  $("#adminLock").style.display="none"; $("#admBody").style.display="block";
  await refresh(); drawAdmin(); drawAll();
 });
+$("#publish").addEventListener("click",async()=>{
+ if(!ADMIN_TOKEN){$("#simStat").textContent="Unlock Admin first.";return;}
+ if(!ODDS){$("#simStat").textContent="Run it first.";return;}
+ $("#simStat").textContent="publishing…";
+ try{ await pushSettings({prices:{odds:ODDS,team:TEAMP,at:Date.now(),n:+$("#nsim").value||6000}});
+   PUB=DB.settings.prices; drawAll();
+   $("#simStat").textContent="Published. Everyone sees these now."; }
+ catch(e){ $("#simStat").textContent="Could not publish: "+e.message; }});
 $("#admRun").addEventListener("click",async()=>{
  runSim(+$("#nsim").value||6000);drawAll();if(BLUEDATA)drawBlue();
  if(ADMIN_TOKEN){ try{
-   await pushSettings({hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form})),blindScale:S.blindScale});
-   $("#stMsg").textContent="Handicaps published — everyone now sees these prices.";
+   await pushSettings({hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form})),blindScale:S.blindScale,
+     prices:{odds:ODDS,team:TEAMP,at:Date.now(),n:+$("#nsim").value||6000}});
+   PUB=DB.settings.prices; drawAll();
+   $("#stMsg").textContent="Handicaps and prices published — everyone sees these now.";
  }catch(x){ $("#stMsg").textContent="Re-ran locally, but could not publish: "+x.message; } }});
 $("#addPlayer").addEventListener("click",()=>{const n=$("#newName").value.trim();if(!n)return;
  const base=S.players.filter(p=>!p.unknown);
@@ -1246,8 +1307,11 @@ $("#sealGo").addEventListener("click",async()=>{const pw=$("#sealPw").value,what
  $("#sealOut").value="const BLUE = "+JSON.stringify(await seal(pw,BLUEDATA))+";";});
 
 load();if(!S.oddsFmt)S.oddsFmt="frac";if(!S.slip)S.slip=[];if(S.me==null)S.me="";
-paintFmt();runSim(6000);drawAll();tick();setInterval(tick,30000);
-refresh().then(()=>{runSim(6000);drawAll();});
+paintFmt();drawAll();tick();setInterval(tick,30000);
+/* The odds live in the database. A punter's phone reads them; it never computes them,
+   so every screen shows the same price and nobody can reroll their way to a better one.
+   Only the organiser simulates, and only to publish. */
+refresh().then(()=>{ if(!PUB && ADMIN_TOKEN) runSim(6000); drawAll(); });
 setInterval(async()=>{if($("#pools").classList.contains("on")){await refresh();drawPools();}},45000);
 setInterval(()=>{if($("#pools").classList.contains("on"))drawPools();},60000);
 </script>
