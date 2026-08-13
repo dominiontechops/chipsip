@@ -185,6 +185,51 @@ padding:10px 18px;border-radius:8px}
   #slip .card{border-radius:12px 12px 0 0}
   body.hasslip{padding-bottom:290px}     /* so the sheet never hides the last market */
 }
+
+/* ---- Score tab ------------------------------------------------------------------------- */
+.scoreboard{display:flex;align-items:stretch;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.sbside{flex:1 1 0;padding:14px;text-align:center}
+.sbside.b{background:var(--bluebg)}.sbside.r{background:var(--redbg)}
+.sbside b{display:block;font-size:34px;line-height:1.05;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sbside span{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim)}
+.sbside.b b{color:var(--blue2)}.sbside.r b{color:var(--red2)}
+.sbmid{flex:0 0 84px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+background:var(--panel2);font-size:11px;color:var(--dim);text-align:center;padding:6px}
+.mtch{display:grid;grid-template-columns:1fr 62px 1fr;gap:6px;align-items:center;
+padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px}
+.mtch:last-child{border-bottom:0}
+.mtch .mr{text-align:right}
+.mtch .res{text-align:center;font-family:var(--mono);font-size:12px;padding:2px 0;border-radius:6px;background:var(--panel2)}
+.mtch .res.b{color:var(--blue2)}.mtch .res.r{color:var(--red2)}
+.mtch.done .mr,.mtch.done .ml{opacity:1}
+.mtch.todo{opacity:.55}
+.medit{display:grid;grid-template-columns:1fr 1fr 118px;gap:6px;align-items:center;margin-bottom:6px}
+.medit select{width:100%;min-width:0}
+@media(max-width:719px){ .medit{grid-template-columns:1fr 1fr;} .medit .msel{grid-column:1/-1} }
+
+/* ---- Grouped pools --------------------------------------------------------------------- */
+.grouphd{display:flex;align-items:baseline;gap:8px;margin:18px 0 8px;padding-top:4px}
+.grouphd h3{margin:0;font-size:12px;color:var(--acc2);text-transform:uppercase;letter-spacing:.7px}
+.grouphd .small{color:var(--dim)}
+.grouphd:first-child{margin-top:0}
+
+/* ---- Slip as a persistent bar ---------------------------------------------------------- */
+#slipbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);
+border-top:1px solid var(--acc);box-shadow:0 -6px 18px rgba(0,0,0,.28);
+padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px}
+#slipbar .sbtxt{flex:1 1 auto;min-width:0;cursor:pointer}
+#slipbar .sbtxt b{display:block;font-size:14px}
+#slipbar .sbtxt span{font-size:11.5px;color:var(--dim)}
+#slipbar button{white-space:nowrap}
+body.hasbar{padding-bottom:78px}
+#slipsheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:76vh;overflow-y:auto;
+background:var(--panel);border-top:1px solid var(--acc);border-radius:14px 14px 0 0;
+padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+#slipveil{position:fixed;inset:0;z-index:39;background:rgba(0,0,0,.45)}
+.mypay{font-size:11.5px;color:var(--dim);margin-top:2px}
+.mypay b{color:var(--acc2)}
+.mypay.won b{color:var(--acc2)}.mypay.lost b{color:var(--red2)}
+
 @media(min-width:720px){ #slip{position:sticky;bottom:10px;z-index:15} }
 </style>
 <script>
@@ -205,7 +250,7 @@ padding:10px 18px;border-radius:8px}
     <img id="logo" alt="Chip &amp; Sip Championship" src="data:image/png;base64,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">
     <div><h1>CHIP &amp; SIP <span>2026</span></h1>
       <div class="sub" id="hdr">loading&hellip;</div>
-      <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-13.25</div></div>
+      <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-14.02</div></div>
   </div>
   <div class="hctl">
     <div class="seg" id="oddsFmt"><button data-f="frac">Fractions</button><button data-f="dec">Decimals</button></div>
@@ -214,17 +259,30 @@ padding:10px 18px;border-radius:8px}
 </div></header>
 
 <nav>
-  <button data-t="pools" class="on">Pools</button>
+  <button data-t="score" class="on">Score</button>
+  <button data-t="pools">Pools</button>
   <button data-t="form">Form Book</button>
   <button data-t="sched">Schedule</button>
   <button data-t="rules">Rules</button>
-  <button data-t="blue">Blue Room</button>
   <button data-t="admin">Admin</button>
 </nav>
 
 <main>
 
-<section id="pools" class="on">
+<section id="score" class="on">
+  <div id="standWrap"></div>
+  <div id="sessWrap"></div>
+  <div class="card" id="scoreAdm" style="display:none">
+    <h2>Enter the score</h2>
+    <p class="note">Captains only. Set each match as it finishes; the totals and every settled market
+    follow from what is in here. A match left blank has simply not been played yet.</p>
+    <div id="scoreEdit"></div>
+    <div class="row"><button class="go" id="mSave">Save the card</button>
+      <span class="small" id="mMsg"></span></div>
+  </div>
+</section>
+
+<section id="pools">
   <div class="card">
     <h2>Tote pools</h2>
     <p class="note">Everyone buys in, the pool splits between backers of the winner, the house takes
@@ -418,20 +476,6 @@ padding:10px 18px;border-radius:8px}
   </div>
 </section>
 
-<section id="blue">
-  <div class="card" id="blueLock"><div class="locked">
-    <img id="lockLogo" alt="" style="width:120px;height:120px;opacity:.5;filter:sepia(1) saturate(6) hue-rotate(-35deg)">
-    <h2 style="color:var(--red);letter-spacing:2px;margin:12px 0 2px">RED TEAM AREA</h2>
-    <div class="small">Nothing for you here.</div>
-    <div class="count" id="cd">--</div><div class="small">until the first tee shot</div>
-    <div class="row" style="justify-content:center;margin-top:22px">
-      <input type="password" id="bluePw" placeholder="Blue Team passphrase" style="width:200px">
-      <button class="go" id="blueGo">Unlock</button></div>
-    <div class="err" id="blueErr"></div>
-  </div></div>
-  <div id="blueBody" style="display:none"></div>
-</section>
-
 <section id="admin">
   <div class="card" id="adminLock">
     <h2>Admin</h2>
@@ -474,6 +518,19 @@ padding:10px 18px;border-radius:8px}
         <input id="payLink" placeholder="https://settleup.starlingbank.com/..." style="min-width:280px;flex:1">
         <input id="payLabel" placeholder="Button label" style="width:150px">
       </div>
+      <h3>Settle the markets</h3>
+      <p class="note">Call each market as it is decided. Pick the winning outcome &mdash; or more than one for a
+      dead heat &mdash; or mark it void if nobody won it at all. Everything after that is arithmetic: the pool
+      divides itself, ante-post stakes carry their multiplier, and each man sees his own return and nobody
+      else's. Nothing is deducted anywhere.</p>
+      <div id="setlWrap"></div>
+
+      <h3>Settle up</h3>
+      <p class="note">What each man staked, what he has paid in, what he has collected, and the difference.
+      Positive means he is up and the pot owes him; negative means he owes the pot.</p>
+      <div class="wrap"><table id="setlSheet"></table></div>
+      <div id="unclaimWrap"></div>
+
       <h3>Ledger</h3>
       <p class="note">Every bet anyone has struck, on any phone. This view is yours alone &mdash; punters can
       only see their own bets and the size of each pot. Tap the button to record someone as settled up.</p>
@@ -566,18 +623,6 @@ padding:10px 18px;border-radius:8px}
       <div class="ok" id="stMsg"></div>
     </div>
 
-    <div class="card">
-      <h2>Change a passphrase</h2>
-      <p class="note">This is the <b>Blue Room</b> passphrase only. Re-encrypts in your browser and hands you a
-      line to paste into <code>index.html</code>, replacing the existing <code>BLUE</code> constant, then commit
-      and push. The admin passphrase is a different thing entirely and lives in the database — change it with
-      <code>set_admin_token</code> from the Supabase dashboard.</p>
-      <div class="row">
-        <select id="sealWhat"><option value="BLUE">Blue Room</option></select>
-        <input type="password" id="sealPw" placeholder="New passphrase" style="width:190px">
-        <button class="ghost" id="sealGo">Re-seal</button></div>
-      <textarea id="sealOut" spellcheck="false" placeholder="Sealed output appears here"></textarea>
-    </div>
   </div>
 </section>
 </main>
@@ -1037,7 +1082,7 @@ const MODEL=[
 "role": "C"
 },
 {
-"name": "Northern Dave",
+"name": "Dave Huddleston",
 "hcp": 19.4,
 "form": 26.63,
 "sd": 5.24,
@@ -1060,10 +1105,11 @@ const MODEL=[
 "dropped": 0,
 "w": 0.294
 }
-], BLUE={"s": "/FF3z7geiLcMyoy/st0xWg==", "i": "o3lDWNzzOiyRioz7", "c": "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"}, ADMIN={"s": "jaMQkDhnrV3W9qzQSnGAlQ==", "i": "Hi0WypQZ/Z5FXY2x", "c": "8Y7y40GqFUgf6brQMFL9VdHcMsnE2X7hqhvalE867Nwn3cRy/pquP6OV9sYqemHK0REpxs3V+J8aEfiqK3Aee8KLGxhCVD76HIgpbF5y3Vj06swOXvlK8g=="};
+];
 const SB={url:"https://nqewsjczuqnkqehcayzq.supabase.co",
           key:"sb_publishable_jZ3Iw2rYsGgCdsBqKmJqBw_vO00J2DO"};
-const DB={bets:[],mine:[],totals:[],ledger:[],accounts:[],settings:{},roster:[],claimed:[],online:false,err:""};
+const DB={bets:[],mine:[],totals:[],ledger:[],accounts:[],settings:{},roster:[],claimed:[],
+ results:[],matches:[],stand:null,detail:[],settle:[],unclaimed:[],online:false,err:""};
 /* same normalisation the database uses, so the page agrees with it */
 const norm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
 const myTeam=()=>{const r=DB.roster.find(x=>norm(x.name)===norm(AUTH.name||""));return r?r.team:null;};
@@ -1163,21 +1209,34 @@ async function sbFetch(path,opts={}){
 const rpc=(fn,args)=>sbFetch("rpc/"+fn,{method:"POST",body:JSON.stringify(args)});
 async function refresh(){
   try{
-    const [st,tot,mine,ros,clm]=await Promise.all([
+    const [st,tot,mine,ros,clm,res,mat,stand,detail]=await Promise.all([
       sbFetch("settings?select=data&id=eq.1"),
       sbFetch("pool_totals?select=*"),                       /* aggregates, no names */
       AUTH.tok?sbFetch("bets?select=id,bettor,market,outcome,stake,phase,created_at&voided=eq.false&order=created_at")
               :Promise.resolve([]),                          /* RLS returns only your own */
       sbFetch("roster?select=name,team,playing,role&order=name"),
-      sbFetch("claimed_names?select=name")]);
+      sbFetch("claimed_names?select=name"),
+      sbFetch("results?select=market,outcomes,void,note,settled_at"),   /* what won: public */
+      sbFetch("matches?select=session,slot,blue,red,result&order=session,slot"),
+      sbFetch("standings?select=*"),
+      /* The money line. my_bets() is SECURITY DEFINER and filters on the caller's own claimed
+         name, so this returns your bets and nobody else's — the return figures are computed
+         server side and never leave it for anyone but their owner. */
+      AUTH.tok?rpc("my_bets",{}).catch(()=>[]):Promise.resolve([])]);
     DB.settings=(st&&st[0]&&st[0].data)||{}; DB.totals=tot||[]; DB.mine=mine||[];
     DB.roster=ros||[]; DB.claimed=(clm||[]).map(x=>x.name);
+    DB.results=res||[]; DB.matches=mat||[]; DB.stand=(stand&&stand[0])||null;
+    DB.detail=detail||[];
     if(ADMIN_TOKEN){
       try{ const [al,ab,ac]=await Promise.all([
              rpc("admin_ledger",{p_token:ADMIN_TOKEN}), rpc("admin_bets",{p_token:ADMIN_TOKEN}),
              rpc("admin_accounts",{p_token:ADMIN_TOKEN})]);
            DB.ledger=al||[]; DB.bets=(ab||[]).filter(b=>!b.voided); DB.accounts=ac||[];
-      }catch(e){ DB.ledger=[]; DB.bets=[]; DB.accounts=[]; }
+           const [se,un]=await Promise.all([
+             rpc("admin_settlement",{p_token:ADMIN_TOKEN}).catch(()=>[]),
+             sbFetch("rpc/unclaimed_pools",{method:"POST",body:"{}"}).catch(()=>[])]);
+           DB.settle=se||[]; DB.unclaimed=un||[];
+      }catch(e){ DB.ledger=[]; DB.bets=[]; DB.accounts=[]; DB.settle=[]; DB.unclaimed=[]; }
     } else { DB.ledger=[]; DB.bets=DB.mine; }
     DB.online=true; DB.err="";
     S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
@@ -1300,10 +1359,10 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-13.25";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.02";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
- declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],openMk:[],me:"",authMode:"",pendingName:"",
+ declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
  players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
    low:p.lowSample,unknown:!!p.unknown,rawGap:p.rawGap,team:p.team,role:p.role||null,
@@ -1346,6 +1405,31 @@ const backers=(k,o)=>{
    .map(b=>b.bettor+" £"+b.stake+(b.phase==="antepost"?"*":""));
  const mine=DB.mine.filter(b=>b.market===k&&b.outcome===o).reduce((a,b)=>a+b.stake,0);
  return mine?["You have £"+mine+" on this"]:[];};
+/* The sign goes in front of the pound, not between it and the number. "£-40" is not money. */
+const money0=v=>(v<0?"-£":"£")+(Math.round(Math.abs(v)*100)/100).toFixed(2).replace(/\.00$/,"");
+const resultOf=k=>(DB.results||[]).find(r=>r.market===k)||null;
+/* What this bet is worth. The figures come from my_bets(), which is computed in the database
+   and filtered to the caller — so it is the SAME formula that will settle it, and nobody can
+   see anybody else's. While a market is open the number is a projection and says so, because
+   the pool moves every time somebody else has a bet. */
+function myLine(k,o){
+ const rows=(DB.detail||[]).filter(b=>b.market===k&&b.outcome===o);
+ if(!rows.length) return "";
+ const stake=rows.reduce((a,b)=>a+b.stake,0);
+ const settled=rows.some(b=>b.settled);
+ if(settled){
+   const st=rows[0].status, ret=rows.reduce((a,b)=>a+(+b.ret||0),0);
+   if(st==="won")    return `<div class="mypay won">£${stake} on &mdash; <b>won ${money0(ret)}</b></div>`;
+   if(st==="refund") return `<div class="mypay">£${stake} on &mdash; <b>refunded in full</b>, nobody won it</div>`;
+   return `<div class="mypay lost">£${stake} on &mdash; <b>lost</b></div>`;
+ }
+ const r=rows[0], pool=+r.pool||0, ow=+r.outcome_weight||0;
+ const myW=rows.reduce((a,b)=>a+(+b.my_weight||0),0);
+ if(!(ow>0)||!(pool>0)) return `<div class="mypay">£${stake} on</div>`;
+ const proj=pool*myW/ow;
+ return `<div class="mypay">£${stake} on &mdash; worth about <b>${money0(proj)}</b> if it lands
+   <span title="Your share moves every time somebody else backs this outcome">(as the pool stands)</span></div>`;
+}
 
 let _g=null;
 function gauss(){if(_g!==null){const v=_g;_g=null;return v;}let u=0,v=0;
@@ -1654,7 +1738,25 @@ function drawPools(){
    }</table></div></div>`;
  const mk=$("#fMarket").value,rd=$("#fRound").value,ty=$("#fType").value,st=$("#fStatus").value;
  let out="",shown=0;
- allMarkets().forEach(m=>{
+ /* Twenty cards in declaration order is a scroll, and on a phone in a bar nobody touches a
+    filter. Group them the way people actually think about them — the trip, then day by day,
+    then the daft ones — and put the biggest pool at the top of each group, because that is
+    where the action is and where the next fiver wants to go. */
+ const GROUPS=[
+  {id:"trip", n:"The whole trip",  hint:"Settle on Sunday night", pick:m=>m.type!=="novelty"&&!m.round},
+  {id:"r1",   n:"Round 1 — Foursomes", hint:"Thu 24 Sep", pick:m=>m.type!=="novelty"&&m.round==="1"},
+  {id:"r2",   n:"Round 2 — Fourball",  hint:"Fri 25 Sep", pick:m=>m.type!=="novelty"&&m.round==="2"},
+  {id:"r3",   n:"Round 3 — Scramble",  hint:"Sat 26 Sep", pick:m=>m.type!=="novelty"&&m.round==="3"},
+  {id:"r4",   n:"Round 4 — Singles",   hint:"Sun 27 Sep", pick:m=>m.type!=="novelty"&&m.round==="4"},
+  {id:"nov",  n:"Novelty",  hint:"Settled by the organiser, on the evidence", pick:m=>m.type==="novelty"}];
+ const ordered=[]; const seenK=new Set();
+ GROUPS.forEach(g=>{
+   const ms=allMarkets().filter(m=>g.pick(m)&&!seenK.has(m.k))
+     .sort((a,b)=>poolTotals(b.k).money-poolTotals(a.k).money||a.n.localeCompare(b.n));
+   ms.forEach(m=>{seenK.add(m.k);ordered.push({g,m});});});
+ allMarkets().forEach(m=>{if(!seenK.has(m.k))ordered.push({g:GROUPS[0],m});});
+ let lastG=null;
+ ordered.forEach(({g,m})=>{
   if(mk&&m.k!==mk)return; if(ty&&m.type!==ty)return;
   if(rd&&(m.round||"")!==rd)return;
   if(st&&mPhase(m)!==st)return;
@@ -1675,7 +1777,7 @@ function drawPools(){
    const who=backers(m.k,r.label);
    t+=`<div class="mkrow${blocked?" barred":""}">
      <div class="mkname">${esc(r.label)}${r.player?" "+teamTag(r.player.team)+roleTag(r.label):""}${r.player&&r.player.unknown?' <span class="tag nd">form assumed</span>':""}
-       ${who.length?`<div class="small">${esc(who.join(", "))}</div>`:""}</div>
+       ${who.length?`<div class="small">${esc(who.join(", "))}</div>`:""}${myLine(m.k,r.label)}</div>
      <div class="mkfigs">
        <span class="mkfig" data-l="Backed">${r.cash?"£"+r.cash:"—"}</span>
        <span class="mkfig" data-l="Implied">${r.imp?fmtDec(r.imp):"—"}</span>
@@ -1695,6 +1797,7 @@ function drawPools(){
   /* Collapsed by default. Which ones are open is remembered, because drawPools() re-runs every
      time a selection is added and it would be maddening to have the card shut under your thumb. */
   const isOpen=(S.openMk||[]).indexOf(m.k)>=0;
+  if(g!==lastG){ out+=`<!--GH:${g.id}-->`; lastG=g; }
   out+=`<details class="card mkcard" data-k="${esc(m.k)}"${isOpen?" open":""}${mp==="closed"?' style="opacity:.62"':""}>
    <summary class="mksum">
     <div class="mksumin"><h2>${esc(m.n)} ${chip}
@@ -1706,10 +1809,23 @@ function drawPools(){
     <span class="chev" aria-hidden="true">&#9662;</span></summary>
    <p class="note">${esc(m.d||"")}${S.apBonus>1&&rows.some(r=>r.a>0)?` &middot; ante-post stakes carry a ${S.apBonus}× share`:""}
     &middot; betting shuts ${CUTOFF_MIN} minutes before the tee shot, ${bothTime(deadline(m))}</p>
+   ${(()=>{const R=resultOf(m.k); if(!R) return "";
+     return `<p class="note" style="color:var(--acc2)"><b>Settled.</b> ${R.void
+       ? "Nobody won it, so every stake is refunded in full."
+       : "Winner: <b>"+esc((R.outcomes||[]).join(" and "))+"</b>."}${R.note?" "+esc(R.note):""}</p>`;})()}
    ${m.type==="novelty"&&m.pk?`<p class="note">Prices here are shaped by handicap and form, not simulated —
     nobody logs this sort of thing. Treat them as a starting point and back your own eyes.</p>`:""}
    <div class="mkt">${t}</div></details>`;
  });
+ function groupHead(g){
+   const ms=ordered.filter(o=>o.g.id===g.id).map(o=>o.m);
+   const tot=ms.reduce((a,m)=>a+poolTotals(m.k).money,0);
+   return `<div class="grouphd"><h3>${esc(g.n)}</h3>
+     <span class="small">${esc(g.hint)}${tot?` &middot; £${tot.toFixed(0)} in play`:""}</span></div>`;
+ }
+ /* Headings are stamped as markers first and filled in afterwards, so a group whose markets
+    were all filtered out never leaves an empty heading behind. */
+ GROUPS.forEach(g=>{out=out.replace(`<!--GH:${g.id}-->`, groupHead(g));});
  $("#poolWrap").innerHTML=out||`<div class="card"><p class="note">Nothing matches that. You have filtered your way
  into an empty room.</p></div>`;
  if($("#retry"))$("#retry").addEventListener("click",async()=>{await refresh();drawAll();});
@@ -1739,40 +1855,78 @@ function drawPools(){
   : `<p class="note">No payment link yet — the organiser will add one. Settle up with him directly in the meantime.</p>`;
 }
 function marketName(k){const m=allMarkets().find(x=>x.k===k);return m?m.n:k;}
+/* The slip is a persistent bar, not a sheet that appears and disappears. A man adding his
+   fourth selection should be able to see what he is about to spend without scrolling, and the
+   bar is what makes that true. Tapping it opens the full slip over a veil; the veil and the
+   Escape key both close it. The old bottom sheet is kept as the desktop layout. */
+function slipTotal(){return S.slip.reduce((a,x)=>a+(+x.stake||0),0);}
 function drawSlip(){
  const el=$("#slip"); if(!el) return;
  const live=new Set(); allMarkets().forEach(m=>marketOutcomes(m).forEach(o=>live.add(m.k+"|"+o.label)));
  const before=S.slip.length;
  S.slip=S.slip.filter(x=>live.has(x.market+"|"+x.outcome));
  if(S.slip.length!==before) save();
- if(!S.slip.length){el.hidden=true;document.body.classList.remove("hasslip");return;}
- el.hidden=false;document.body.classList.add("hasslip");
- const total=S.slip.reduce((a,x)=>a+(+x.stake||0),0);
- el.innerHTML=`<div class="card" style="margin:0;border-color:var(--acc)">
-   <h2>Your slip &mdash; ${S.slip.length} selection${S.slip.length===1?"":"s"} &middot; £${total}</h2>
+ const bar=$("#slipbar"), sheet=$("#slipsheet"), veil=$("#slipveil");
+ if(!S.slip.length){
+   el.hidden=true; document.body.classList.remove("hasslip","hasbar");
+   if(bar)bar.remove(); if(sheet)sheet.remove(); if(veil)veil.remove();
+   S.slipOpen=false; return;
+ }
+ el.hidden=true; document.body.classList.remove("hasslip");
+ document.body.classList.add("hasbar");
+ const total=slipTotal(), n=S.slip.length;
+ const barHtml=`<div id="slipbar">
+   <div class="sbtxt" id="sbOpen"><b>${n} selection${n===1?"":"s"} &middot; £${total}</b>
+     <span>${AUTH.name?"Tap to review or change your stakes":"Sign in to place these"}</span></div>
+   ${AUTH.name?`<button class="go" id="sbGo">Place £${total}</button>`
+              :`<button class="ghost" id="sbSign">Sign in</button>`}</div>`;
+ if(bar) bar.outerHTML=barHtml; else document.body.insertAdjacentHTML("beforeend",barHtml);
+ const openIt=()=>{S.slipOpen=true;save();drawSlip();};
+ $("#sbOpen").addEventListener("click",openIt);
+ if($("#sbGo")) $("#sbGo").addEventListener("click",e=>{
+   /* Straight from the bar when there is nothing to review, otherwise open it first so nobody
+      fires off a slip he has not looked at since Tuesday. */
+   if(n<=2) placeSlip(); else openIt();});
+ if($("#sbSign")) $("#sbSign").addEventListener("click",()=>{
+   S.slipOpen=false;save();drawSlip();
+   document.querySelector('nav button[data-t="pools"]').click();
+   const a=$("#authWrap")||$("#auth"); if(a) a.scrollIntoView({behavior:"smooth",block:"center"});});
+
+ const old=$("#slipsheet"), ov=$("#slipveil");
+ if(!S.slipOpen){ if(old)old.remove(); if(ov)ov.remove(); return; }
+ const sheetHtml=`<div id="slipveil"></div><div id="slipsheet">
+   <div class="row" style="margin:0 0 8px;justify-content:space-between">
+     <h2 style="margin:0;font-size:15px">Your slip &mdash; ${n} selection${n===1?"":"s"} &middot; £${total}</h2>
+     <button class="ghost" id="sbClose">Close</button></div>
    <div class="sliplist">${S.slip.map((x,i)=>`<div class="sliprow">
      <div class="slipsel">${esc(marketName(x.market))}<div class="small">${esc(x.outcome)}</div></div>
-     <div class="slipamtwrap">£<input type="number" min="1" step="1" inputmode="numeric"
+     <div class="slipamtwrap">£<input type="number" min="${S.minStake||1}" step="1" inputmode="numeric"
         value="${x.stake}" class="slipamt" data-i="${i}"></div>
-     <button class="ghost sliprm" data-i="${i}">✕</button></div>`).join("")}
+     <button class="ghost sliprm" data-i="${i}">&#10005;</button></div>`).join("")}
    </div>
    <div class="row">
      ${AUTH.name
        ? `<span class="small">Betting as <b>${esc(AUTH.name)}</b></span>
           <button class="go" id="slipGo">Place £${total}</button>`
        : `<span class="small warn">Sign in at the top of the page to place these.</span>`}
-     <button class="ghost" id="slipClear">Clear</button>
+     <button class="ghost" id="slipClear">Clear the lot</button>
    </div>
    <div class="err" id="slipErr"></div><div class="ok" id="slipOk"></div>
-   <p class="note slipnote">Bets are recorded against your account the moment you place them. Everyone sees the
-   same book; the organiser sees what you owe.</p></div>`;
+   <p class="note slipnote">Whole pounds, minimum £${S.minStake||1}. Bets are recorded against your account the
+   moment you place them. Everyone sees the size of each pot; only you see what is yours.</p></div>`;
+ if(old){old.outerHTML=sheetHtml; if(ov)ov.remove();}
+ else document.body.insertAdjacentHTML("beforeend",sheetHtml);
+ const close=()=>{S.slipOpen=false;save();drawSlip();};
+ $("#sbClose").addEventListener("click",close);
+ $("#slipveil").addEventListener("click",close);
  document.querySelectorAll(".slipamt").forEach(x=>x.addEventListener("change",e=>{
-   S.slip[+e.target.dataset.i].stake=Math.max(1,Math.round(+e.target.value||1));save();drawSlip();}));
+   S.slip[+e.target.dataset.i].stake=Math.max(S.minStake||1,Math.round(+e.target.value||1));save();drawSlip();}));
  document.querySelectorAll(".sliprm").forEach(x=>x.addEventListener("click",e=>{
    S.slip.splice(+e.target.dataset.i,1);save();drawPools();}));
  if($("#slipGo")) $("#slipGo").addEventListener("click",placeSlip);
- $("#slipClear").addEventListener("click",()=>{S.slip=[];save();drawPools();});
+ $("#slipClear").addEventListener("click",()=>{S.slip=[];S.slipOpen=false;save();drawPools();});
 }
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S&&S.slipOpen){S.slipOpen=false;save();drawSlip();}});
 async function placeSlip(){
  const err=$("#slipErr"),ok=$("#slipOk"); err.textContent="";ok.textContent="";
  if(!AUTH.tok||!AUTH.name){err.textContent="Sign in first — bets have to belong to somebody.";return;}
@@ -1792,7 +1946,7 @@ async function placeSlip(){
  $("#slipGo").disabled=true;
  try{
    await sbFetch("bets",{method:"POST",body:JSON.stringify(rows),prefer:"return=minimal"});
-   S.slip=[];save(); await refresh(); drawAll();
+   S.slip=[];S.slipOpen=false;save(); await refresh(); drawAll();
    $("#poolWrap").insertAdjacentHTML("afterbegin",
      `<div class="card" style="border-color:var(--acc)"><p class="ok" style="margin:0">Bets placed and recorded. They now show against your name below.</p></div>`);
  }catch(e){ $("#slipGo").disabled=false;
@@ -1894,6 +2048,115 @@ function drawAuth(){
    }catch(e){ $("#authGo").disabled=false;
      er.textContent=String(e.message||e).replace(/.*"msg":"|".*/g,"").slice(0,180); }});
 }
+
+/* ================= SCORE ==================================================================
+   The matches live in the database and the points are derived from them, never stored. A
+   stored total is a total that can disagree with the card it came from, and the one thing
+   that must never be in doubt on Sunday afternoon is the score. */
+const SESSIONS=[
+ {s:1,n:"Foursomes",d:"Thu 24 Sep",c:"Marbella Golf & Country Club",pairs:true,slots:5},
+ {s:2,n:"Fourball", d:"Fri 25 Sep",c:"Cabopino Golf Club",pairs:true,slots:5},
+ {s:3,n:"Scramble", d:"Sat 26 Sep",c:"La Cala Golf, Asia",pairs:true,slots:5},
+ {s:4,n:"Singles",  d:"Sun 27 Sep",c:"Santa Maria Golf Club",pairs:false,slots:10}];
+const TARGET=()=>{const t=pointsOnOffer();return{win:Math.floor(t/2)+1,retain:t/2};};
+function scoreOf(){
+ if(DB.stand) return {blue:+DB.stand.blue,red:+DB.stand.red,played:DB.stand.played,scheduled:DB.stand.scheduled};
+ let b=0,r=0,pl=0;const ms=DB.matches||[];
+ ms.forEach(m=>{if(m.result==="blue"){b++;pl++;}else if(m.result==="red"){r++;pl++;}
+  else if(m.result==="half"){b+=.5;r+=.5;pl++;}});
+ return {blue:b,red:r,played:pl,scheduled:ms.length||pointsOnOffer()};
+}
+const sideName=a=>(a&&a.length)?a.join(" & "):"—";
+function drawScore(){
+ const S1=scoreOf(),T=TARGET(),left=S1.scheduled-S1.played;
+ /* Who is actually still alive. Says more than the raw score once it is late on Sunday. */
+ let state;
+ if(!S1.played) state="Not a ball struck yet.";
+ else if(S1.blue>=T.win) state=`<b class="pos">Blue have won it.</b>`;
+ else if(S1.red>=T.win)  state=`<b class="neg">Red have won it.</b>`;
+ else if(S1.blue>=T.retain&&left===0) state="<b>Tied. The trophy stays where it is.</b>";
+ else state=`${T.win-S1.blue===T.win-S1.red?"Level. ":""}Blue need <b>${(T.win-S1.blue).toFixed(1).replace(/\.0$/,"")}</b>,
+   Red need <b>${(T.win-S1.red).toFixed(1).replace(/\.0$/,"")}</b>. ${left} match${left===1?"":"es"} left.`;
+ $("#standWrap").innerHTML=`<div class="card">
+   <h2>The score</h2>
+   <div class="scoreboard">
+     <div class="sbside b"><span>Blue</span><b>${S1.blue.toFixed(1).replace(/\.0$/,"")}</b></div>
+     <div class="sbmid">${S1.played} of ${S1.scheduled}<br>played<br><span style="opacity:.7">${T.win} to win</span></div>
+     <div class="sbside r"><span>Red</span><b>${S1.red.toFixed(1).replace(/\.0$/,"")}</b></div>
+   </div>
+   <p class="note">${state}</p></div>`;
+ let h="";
+ SESSIONS.forEach(sc=>{
+  const ms=(DB.matches||[]).filter(m=>m.session===sc.s).sort((a,b)=>a.slot-b.slot);
+  const done=ms.filter(m=>m.result).length;
+  let b=0,r=0; ms.forEach(m=>{if(m.result==="blue")b++;else if(m.result==="red")r++;
+   else if(m.result==="half"){b+=.5;r+=.5;}});
+  h+=`<details class="card mkcard"${done&&done<ms.length?" open":""}>
+   <summary class="mksum"><div class="mksumin">
+     <h2>${sc.n} <span class="tag">${esc(sc.d)}</span>${done===ms.length&&ms.length?' <span class="tag" style="border-color:var(--okbd);color:var(--acc2)">complete</span>':""}</h2>
+     <p class="note">${esc(sc.c)} &middot; ${done} of ${ms.length||sc.slots} played${done?` &middot; <b style="color:var(--blue2)">${b}</b>&ndash;<b style="color:var(--red2)">${r}</b>`:""}</p>
+   </div><span class="chev">&#9662;</span></summary>
+   ${ms.length?ms.map(m=>{
+     const cls=m.result?"done":"todo";
+     const res=m.result==="blue"?`<span class="res b">BLUE</span>`
+       :m.result==="red"?`<span class="res r">RED</span>`
+       :m.result==="half"?`<span class="res">HALVED</span>`:`<span class="res">&mdash;</span>`;
+     return `<div class="mtch ${cls}"><div class="mr">${esc(sideName(m.blue))}</div>${res}
+       <div class="ml">${esc(sideName(m.red))}</div></div>`;}).join("")
+    :`<p class="note">No card entered for this session yet.</p>`}
+  </details>`;});
+ $("#sessWrap").innerHTML=h;
+ const adm=$("#scoreAdm"); if(adm){ adm.style.display=ADMIN_TOKEN?"block":"none";
+  if(ADMIN_TOKEN) drawScoreEdit(); }
+}
+function drawScoreEdit(){
+ const names=(DB.roster.length?DB.roster:S.players.map(p=>({name:p.name,team:p.team})));
+ const blue=names.filter(x=>x.team==="Blue").map(x=>x.name);
+ const red =names.filter(x=>x.team==="Red").map(x=>x.name);
+ const opt=(list,sel)=>`<option value=""></option>`+list.map(n=>`<option${n===sel?" selected":""}>${esc(n)}</option>`).join("");
+ let h="";
+ SESSIONS.forEach(sc=>{
+  h+=`<h3>${sc.n} &middot; ${sc.d}</h3>`;
+  for(let k=1;k<=sc.slots;k++){
+   const m=(DB.matches||[]).find(x=>x.session===sc.s&&x.slot===k)||{blue:[],red:[],result:null};
+   const B=m.blue||[],R=m.red||[];
+   h+=`<div class="medit" data-s="${sc.s}" data-k="${k}">
+     <div><select class="mb1">${opt(blue,B[0])}</select>${sc.pairs?`<select class="mb2" style="margin-top:4px">${opt(blue,B[1])}</select>`:""}</div>
+     <div><select class="mr1">${opt(red,R[0])}</select>${sc.pairs?`<select class="mr2" style="margin-top:4px">${opt(red,R[1])}</select>`:""}</div>
+     <div class="msel"><select class="mres">
+       <option value=""${!m.result?" selected":""}>Not played</option>
+       <option value="blue"${m.result==="blue"?" selected":""}>Blue win</option>
+       <option value="half"${m.result==="half"?" selected":""}>Halved</option>
+       <option value="red"${m.result==="red"?" selected":""}>Red win</option></select></div>
+   </div>`;}
+ });
+ $("#scoreEdit").innerHTML=h;
+}
+async function saveCard(){
+ const msg=$("#mMsg"); msg.textContent="Saving…";
+ const rows=[...document.querySelectorAll(".medit")].map(el=>{
+   const g=c=>{const x=el.querySelector(c);return x&&x.value?x.value:null;};
+   return {s:+el.dataset.s,k:+el.dataset.k,
+     blue:[g(".mb1"),g(".mb2")].filter(Boolean),
+     red:[g(".mr1"),g(".mr2")].filter(Boolean),
+     res:g(".mres")};});
+ /* One man cannot be in two matches in the same session. Catching it here beats discovering
+    it on Sunday when the points do not add up. */
+ for(const sc of SESSIONS){
+   const seen=new Set();
+   for(const r of rows.filter(x=>x.s===sc.s)){
+     for(const n of r.blue.concat(r.red)){
+       if(seen.has(n)){ msg.innerHTML=`<span class="neg">${esc(n)} is in two matches in the ${sc.n}.</span>`; return; }
+       seen.add(n);}}}
+ try{
+   for(const r of rows)
+     await rpc("save_match",{p_session:r.s,p_slot:r.k,p_blue:r.blue,p_red:r.red,
+       p_result:r.res,p_token:ADMIN_TOKEN});
+   await refresh(); drawAll();
+   $("#mMsg").innerHTML='<span class="pos">Card saved. The score and every settled market follow from it.</span>';
+ }catch(e){ msg.innerHTML=`<span class="neg">${esc(String(e.message||e).slice(0,140))}</span>`; }
+}
+
 function drawKpis(){
  const ps=S.players.filter(p=>p.in);
  const val=[...ps].sort((a,b)=>(a.form-a.hcp)-(b.form-b.hcp))[0];
@@ -2016,6 +2279,82 @@ function drawAccounts(){
     $("#acctMsg").textContent=r; await refresh(); drawAccounts(); drawLedger(); drawAll(); }
   catch(err){ btn.disabled=false; $("#acctMsg").textContent="Could not delete: "+err.message; }}));
 }
+
+/* ================= SETTLEMENT ============================================================
+   The organiser names the winner; he never types an amount. Every figure below is computed
+   in the database by the same function that shows a punter what his bet is worth, so the
+   settle-up sheet and the "worth about" line can never disagree. */
+function drawSettle(){
+ const w=$("#setlWrap"); if(!w) return;
+ if(!ADMIN_TOKEN){w.innerHTML="";$("#setlSheet").innerHTML="";$("#unclaimWrap").innerHTML="";return;}
+ let h="";
+ allMarkets().forEach(m=>{
+  const R=resultOf(m.k), outs=marketOutcomes(m).map(o=>o.label);
+  const {money}=poolTotals(m.k);
+  const sel=R?(R.outcomes||[]):[];
+  h+=`<div class="card" style="margin-bottom:10px;padding:11px" data-sk="${esc(m.k)}">
+    <div class="row" style="margin:0 0 6px;justify-content:space-between">
+      <b style="font-size:13.5px">${esc(m.n)}</b>
+      <span class="small">pool £${money.toFixed(0)}${R?(R.void?' &middot; <span class="warn">void</span>'
+        :' &middot; <span class="pos">settled</span>'):""}</span></div>
+    <p class="note" style="margin:0 0 5px">Pick the winner. Hold ${navigator.platform.indexOf("Mac")>=0?"Cmd":"Ctrl"}
+      to pick two for a dead heat &mdash; the pool then splits between them.</p>
+    <div class="row" style="margin:0;align-items:flex-start">
+      <select class="setlOut" multiple size="${Math.min(6,Math.max(2,outs.length))}"
+        style="min-width:190px;flex:1 1 190px;height:auto;max-height:150px;overflow:auto">
+        ${outs.map(o=>`<option${sel.indexOf(o)>=0?" selected":""}>${esc(o)}</option>`).join("")}
+      </select>
+      <label class="small"><input type="checkbox" class="setlVoid"${R&&R.void?" checked":""}> Nobody won it</label>
+      <button class="go setlGo" style="padding:5px 11px">${R?"Update":"Settle"}</button>
+      ${R?`<button class="ghost setlUndo" style="padding:5px 11px">Unsettle</button>`:""}
+    </div>
+    <div class="small setlMsg"></div></div>`;});
+ w.innerHTML=h;
+ w.querySelectorAll("[data-sk]").forEach(card=>{
+  const k=card.dataset.sk, msg=card.querySelector(".setlMsg");
+  card.querySelector(".setlGo").addEventListener("click",async e=>{
+   const outs=[...card.querySelector(".setlOut").selectedOptions].map(o=>o.value);
+   const vd=card.querySelector(".setlVoid").checked;
+   if(!vd&&!outs.length){msg.innerHTML='<span class="neg">Pick a winner, or tick nobody won it.</span>';return;}
+   e.target.disabled=true; msg.textContent="Settling…";
+   try{ await rpc("settle_market",{p_market:k,p_outcomes:vd?[]:outs,p_void:vd,p_note:null,p_token:ADMIN_TOKEN});
+     await refresh(); drawAll(); }
+   catch(err){ e.target.disabled=false; msg.innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,120))}</span>`; }});
+  const u=card.querySelector(".setlUndo");
+  if(u) u.addEventListener("click",async e=>{
+   e.target.disabled=true;
+   try{ await rpc("unsettle_market",{p_market:k,p_token:ADMIN_TOKEN}); await refresh(); drawAll(); }
+   catch(err){ e.target.disabled=false; msg.innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,120))}</span>`; }});
+ });
+ const S2=DB.settle||[];
+ let t=`<tr><th>Who</th><th class="num">Staked</th><th class="num">Paid in</th><th class="num">Collected</th>
+   <th class="num">Net</th><th class="num">Settle up</th></tr>`;
+ let ts=0,tc=0;
+ S2.forEach(r=>{const net=+r.net, coll=+r.collected; ts+=r.staked; tc+=coll;
+  h="";
+  t+=`<tr><td>${esc(r.bettor)}</td><td class="num">£${r.staked}</td><td class="num">£${r.paid}</td>
+   <td class="num">${money0(coll)}</td>
+   <td class="num ${net>0?"pos":net<0?"neg":""}"><b>${net>0?"+":""}${money0(net)}</b></td>
+   <td class="num small">${net>0?`pay him ${money0(net)}`:net<0?`he owes ${money0(-net)}`:"square"}</td></tr>`;});
+ if(!S2.length) t=`<tr><td class="small">Nothing settled yet, so there is nothing to divide.</td></tr>`;
+ else t+=`<tr><td><b>Total</b></td><td class="num"><b>£${ts}</b></td><td></td>
+   <td class="num"><b>${money0(tc)}</b></td><td class="num"><b>${money0(tc-ts)}</b></td><td></td></tr>`;
+ $("#setlSheet").innerHTML=t;
+ /* Money that won and had nobody on it. It has to be shown, not absorbed: it is the whole
+    basis of the claim that the organiser takes nothing. */
+ const U=(DB.unclaimed||[]).filter(x=>+x.unclaimed>0);
+ $("#unclaimWrap").innerHTML=U.length
+  ? `<div class="card" style="border-color:var(--warn);margin-top:10px"><h2 class="warn">Unclaimed &mdash; the 2027 pot</h2>
+     <p class="note">These outcomes won and nobody had a penny on them, so there is nobody to pay. Under the
+     rules this rolls into next year's kitty, and any backer can ask for his share back up to the flight home.
+     Read it out before anyone leaves.</p>
+     <div class="wrap"><table><tr><th>Market</th><th class="num">Unclaimed</th></tr>
+     ${U.map(x=>`<tr><td>${esc(marketName(x.market))}</td><td class="num"><b>${money0(+x.unclaimed)}</b></td></tr>`).join("")}
+     <tr><td><b>Total</b></td><td class="num"><b>${money0(U.reduce((a,x)=>a+ +x.unclaimed,0))}</b></td></tr>
+     </table></div></div>`
+  : "";
+}
+
 function drawLedger(){
  const L=[...DB.ledger].sort((a,b)=>b.balance-a.balance);
  let h=`<tr><th>Who</th><th class="num">Bets</th><th class="num">Staked</th><th class="num">Paid</th>
@@ -2104,7 +2443,7 @@ function drawAdmin(){
  $("#declared").checked=!!S.declared;$("#apBonus").value=S.apBonus;
  $("#closed").checked=!!S.closed;$("#override").checked=!!S.override;
  $("#blindScale").value=S.blindScale==null?1:S.blindScale;
- drawLedger(); drawAccounts();
+ drawLedger(); drawAccounts(); drawSettle();
 }
 function fillMarketFilter(){
  const cur=$("#fMarket").value;
@@ -2122,51 +2461,20 @@ function pointsOnOffer(){
 function drawHeader(){
  const n=S.players.filter(p=>p.in).length;
  $("#hdr").textContent=`Costa del Sol · 24–27 Sep 2026 · ${n} players · Ryder Cup · ${pointsOnOffer()} points`;}
-function drawAll(){drawHeader();drawAuth();drawKpis();drawForm();drawOdds();fillMarketFilter();drawPools();drawSched();}
+function drawAll(){drawHeader();drawAuth();drawScore();drawKpis();drawForm();drawOdds();fillMarketFilter();drawPools();drawSched();}
 
-const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const b64e=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
-async function keyFrom(pw,salt){const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
- return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:250000,hash:"SHA-256"},km,
-  {name:"AES-GCM",length:256},false,["encrypt","decrypt"]);}
-async function unseal(pw,b){const k=await keyFrom(pw,b64d(b.s));
- const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(b.i)},k,b64d(b.c));
- return JSON.parse(new TextDecoder().decode(pt));}
-async function seal(pw,o){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
- const k=await keyFrom(pw,salt);
- const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},k,new TextEncoder().encode(JSON.stringify(o)));
- return{s:b64e(salt),i:b64e(iv),c:b64e(ct)};}
-
-let BLUEDATA=null;
-function drawBlue(){const d=BLUEDATA;if(!d)return;
- const reds=S.players.filter(p=>p.in&&p.team==="Red");
- const dos=reds.length?reds.map(p=>`<details><summary>${esc(p.name)}
-   <span class="small">&nbsp;hcp ${p.hcp.toFixed(1)} &middot; form ${p.form.toFixed(1)}
-   ${priceSrc()&&priceSrc()[p.name]?`&middot; wins his singles ${dec(priceSrc()[p.name].singles)}`:""}</span></summary>
-   <p class="small" style="margin:8px 0 0">${esc(d.dossiers[p.name]||"No history on file.")}</p></details>`).join("")
-  :`<p class="note">Assign teams in Admin and the dossiers appear.</p>`;
- let wl=`<tr><th>Player</th><th>Team</th><th class="num">Hcp</th><th class="num">Raw gap</th>
-  <th class="num">Adj</th><th class="num">Rounds</th><th>Verdict</th></tr>`;
- d.watchlist.forEach(w=>{const cls=(w.raw||0)>7.5?"neg":"";
-  wl+=`<tr><td>${esc(w.name)}</td><td>${teamTag(w.team)}${roleTag(w.name)}</td><td class="num">${w.hcp}</td>
-   <td class="num ${cls}"><b>${w.raw==null?"—":(w.raw>=0?"+":"")+w.raw}</b></td>
-   <td class="num small">${w.gap>=0?"+":""}${w.gap}</td>
-   <td class="num ${w.n<10?"warn":""}">${w.n}</td><td class="small ${cls}">${esc(w.verdict)}</td></tr>`;});
- $("#blueBody").innerHTML=`
-  <div class="card" style="border-color:var(--bluebd)"><h2 style="color:var(--blue2)">BLUE TEAM — EYES ONLY</h2>
-   <p class="note">${esc(d.sealed)}</p></div>
-  <div class="card"><h2>Handicap watchlist</h2><p class="note">${esc(d.watchlistNote)}</p>
-   <div class="wrap"><table>${wl}</table></div></div>
-  <div class="card"><h2>Opposition dossiers</h2>${dos}</div>
-  <div class="card"><h2>Tactics</h2><ul>${d.tactics.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-  <div class="card"><h2>Captain's notes</h2><p class="note">Private. Edit here, then re-seal from Admin.</p>
-   <textarea id="capNotes" spellcheck="false">${esc(d.captainNotes)}</textarea></div>`;
- $("#capNotes").addEventListener("input",e=>BLUEDATA.captainNotes=e.target.value);}
-
+/* The AES-GCM / PBKDF2 helpers went with it. Nothing on this board is encrypted any more,
+   because nothing on this board is hidden any more. */
+/* The Blue Room lived here: a passphrase-locked dossier on the Red players, visible to Blue
+   only. It has been removed outright. A board that asks everyone to trust a tote with no house
+   cannot also carry a locked door with RED TEAM AREA on it — the second thing undoes the first,
+   whatever is actually behind the door. Captain's material goes round on WhatsApp now, which is
+   where it always belonged. */
 function tick(){const ms=TEE_OFF-new Date();
  const txt=ms<=0?"IT'S ON":`${Math.floor(ms/864e5)}d ${String(Math.floor(ms/36e5)%24).padStart(2,"0")}h ${String(Math.floor(ms/6e4)%60).padStart(2,"0")}m`;
- const a=$("#cd"),b=$("#cd2");if(a)a.textContent=txt;if(b)b.textContent=txt;}
+ const b=$("#cd2");if(b)b.textContent=txt;}
 
+$("#mSave").addEventListener("click",saveCard);
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{
  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
  document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));
@@ -2223,7 +2531,7 @@ $("#publish").addEventListener("click",async()=>{
  catch(e){ $("#simStat").textContent="Could not publish: "+e.message; }});
 $("#acctRefresh").addEventListener("click",async()=>{await refresh();drawAccounts();});
 $("#admRun").addEventListener("click",async()=>{
- runSim(+$("#nsim").value||6000);drawAll();if(BLUEDATA)drawBlue();
+ runSim(+$("#nsim").value||6000);drawAll();
  if(ADMIN_TOKEN){ try{
    await pushSettings({hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form})),blindScale:S.blindScale,
      prices:{odds:ODDS,team:TEAMP,at:Date.now(),n:+$("#nsim").value||6000}});
@@ -2258,10 +2566,6 @@ $("#override").addEventListener("change",e=>{S.override=e.target.checked;save();
 $("#blindScale").addEventListener("change",e=>{S.blindScale=Math.max(0,+e.target.value||0);save();
  runSim(+$("#nsim").value||6000);drawAll();});
 $("#allow").addEventListener("change",e=>{S.allowance=+e.target.value;save();});
-$("#blueGo").addEventListener("click",async()=>{$("#blueErr").textContent="";
- try{BLUEDATA=await unseal($("#bluePw").value,BLUE);
-  $("#blueLock").style.display="none";$("#blueBody").style.display="block";drawBlue();}
- catch(e){$("#blueErr").textContent="Wrong passphrase.";}});
 $("#stExport").addEventListener("click",()=>{$("#stateBox").value=JSON.stringify(S);
  $("#stMsg").textContent="Copied out. Keep it somewhere safe.";});
 $("#stImport").addEventListener("click",()=>{try{S=JSON.parse($("#stateBox").value);save();
@@ -2269,20 +2573,12 @@ $("#stImport").addEventListener("click",()=>{try{S=JSON.parse($("#stateBox").val
  catch(e){$("#stMsg").textContent="That is not valid state.";}});
 $("#stReset").addEventListener("click",()=>{S=freshState();save();runSim(6000);drawAll();drawAdmin();
  $("#stMsg").textContent="Back to defaults.";});
-$("#sealGo").addEventListener("click",async()=>{const pw=$("#sealPw").value,what=$("#sealWhat").value;
- if(!pw){$("#sealOut").value="Set a passphrase first.";return;}
- if(what==="ADMIN"){
-  $("#sealOut").value="const ADMIN = "+JSON.stringify(await seal(pw,{v:1,role:"admin"}))+";";
-  return;}
- if(!BLUEDATA){$("#sealOut").value="Unlock the Blue Room first, so there is something to seal.";return;}
- $("#sealOut").value="const BLUE = "+JSON.stringify(await seal(pw,BLUEDATA))+";";});
-
 (function(){const src=document.getElementById("logo").src;
  const l=document.createElement("link"); l.rel="icon"; l.type="image/png"; l.href=src;
  document.head.appendChild(l);
  const al=document.createElement("link"); al.rel="apple-touch-icon"; al.href=src;
  document.head.appendChild(al);
- const ll=document.getElementById("lockLogo"); if(ll) ll.src=src;})();
+})();
 load();if(!S.oddsFmt)S.oddsFmt="frac";if(!S.slip)S.slip=[];if(S.me==null)S.me="";
 paintFmt();paintTheme();drawAll();tick();setInterval(tick,30000);
 /* The odds live in the database. A punter's phone reads them; it never computes them,
