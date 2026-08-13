@@ -47,6 +47,11 @@ shut to him both ways, because a Yes/No he decides himself dodges the back-yours
 across four days with ten a side — nobody throws that for a tenner, and the rule cost more in
 suspicion than it ever saved.
 
+**One settlement exception worth knowing:** the non-runner rule refunds anyone who does not tee it
+up, on every market naming him — but *Rob's 30th* has "does not make the tee at all" as one of its
+four outcomes. If Rob fails to appear that market settles rather than voids. A market cannot refund
+on the exact thing it was written to pay out on.
+
 **Never enforced, and left that way:** backing several outcomes in one market. It is a pool, not a
 bookmaker, so covering two of three team results is an ordinary hedge. The slip warns when a
 selection set is both sides of a two-way (cannot lose, cannot really win) or the entire field (a
@@ -85,6 +90,19 @@ everything else still draws.
 The simulation count in the Tote pools card is read off the published price set, never typed in.
 Copy claiming forty thousand simulations while the organiser published six would be a lie, and the
 one claim this whole board rests on is that nothing here is fiddled.
+
+## Handicaps and re-running
+
+Every player carries `base` — the handicap and form figures from the shipped Squabbit model. Change
+either in Admin and a **↺** button appears beside it with the original number on it; there is a
+*Reset all handicaps* button for the whole roster. A reset is local until *Apply and re-run* pushes
+it, exactly like every other edit on that table.
+
+*Apply and re-run* reports what it did, under the button that caused it. It used to write its
+confirmation to `#stMsg`, which lives in the *Save your state* card two cards further down the page:
+the message was being set correctly and nobody could ever see it, so every re-run looked like it had
+done nothing. It now also names how many handicaps differ from Squabbit, and the trip-count selector
+is mirrored onto the Admin row so the organiser can see how deep it is about to run.
 
 ## Money
 
