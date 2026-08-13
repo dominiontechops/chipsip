@@ -13,7 +13,7 @@ GitHub Pages serves `index.html` from the repository root. See **Deploying** bel
 
 | Tab | What it does |
 |---|---|
-| **Pools** | Every market, ante-post and open stakes in whole pounds, implied odds against the model's fair price, and the edge between them |
+| **Pools** | Every market, collapsed until pressed. Ante-post and open stakes in whole pounds, implied odds against the model's fair price, and the edge between them |
 | **Form Book** | All 20 players with handicap, form, volatility and sample size, plus the simulated prices |
 | **Schedule** | Transfers, tee times and collections for all four days, and the four courses |
 | **Rules** | How the pools settle. Read this before arguing |
@@ -75,7 +75,12 @@ three phases, all feeding the same pool on each market.
    when the pool divides.
 2. **Open** — from declaration until the first tee shot, Thursday 13:50. Handicaps are known and the
    model has been re-run, so the prices are real. Ordinary share: you are paying for certainty.
-3. **Closed** — from the first ball. Automatic, based on the tee-off time, so nobody has to remember.
+3. **Closed** — ten minutes before the relevant ball is struck, not on it. Automatic, off the tee times,
+   so nobody has to remember and the organiser cannot conveniently forget.
+
+Tee times are stored with an explicit `+02:00`, which is Spain in late September. They are therefore
+absolute instants: a phone left on UK time computes the same closing moment as one on Spanish time. Each
+market shows its cutoff in both. Do not rewrite these as bare local date strings.
 
 The phase changes your share of the pool, not what you are betting on, and none of it reaches the
 organiser. Set the multiplier to 1 in Admin to switch the whole idea off.
@@ -105,3 +110,28 @@ The site is public, which costs nothing here: the only genuinely secret content 
 
 Edit `index.html`, commit, push. Pages redeploys in about a minute. Every change is a commit you can
 roll back from a phone if something breaks in a Spanish villa.
+
+## Novelty pricing
+
+The golf markets come from the simulation. The novelty markets cannot — nobody has ever logged an air
+shot — so they are *shaped* rather than simulated: weight per player is `exp(a·h + b·v)`, where `h` is
+handicap in field-spreads above the median and `v` is volatility against a typical five-shot spread.
+Weights normalise to exactly 100%, same as everywhere else. It is deterministic, so every phone shows the
+same price and nobody can refresh into a better one.
+
+Three exceptions to the formula:
+
+- **Fewest Putts** runs the coefficients negative. It is the one novelty a good player wins.
+- **First to Get Sunburnt** is priced off rounds played, not handicap. Hours in the sun, not shots.
+- **Heated Discussion** and **Crown of the Alcohol** use a hand-set `wts` map, because no handicap will
+  ever tell you who fell out with whom last year.
+
+Markets that name one man and settle on his own behaviour — the Yes/No ones — carry a `subject`. He is
+barred from betting on them either way, enforced in `check_bet_integrity()` against `market_subjects`,
+not just in the page.
+
+## Theme
+
+Light and dark, toggled in the header, chosen from the system preference on a first visit and remembered
+after that. It is applied by an inline script in `<head>` so there is no flash. Every colour is a CSS
+variable on `:root`; if you add a bare hex to the stylesheet it will not follow the theme.

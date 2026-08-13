@@ -8,10 +8,20 @@
 <style>
 :root{--bg:#0e1512;--panel:#152019;--panel2:#1b2a21;--line:#26382c;--ink:#e8f0e9;--dim:#8fa596;
 --acc:#3f9e63;--acc2:#6fd39a;--blue:#3d7fd6;--blue2:#8bb8f0;--red:#c8503f;--red2:#e79486;--warn:#e0a83c;
---mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+--mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+/* Everything below used to be a hard-coded hex scattered through the sheet. They are variables now
+   so the light theme can move them; add no new bare hexes or half the page will stay dark. */
+--line2:#1e2b23;--hdr1:#18261d;--hdr2:#0e1512;--on:#06120b;--okbd:#2f6b45;
+--bluebd:#26507f;--bluebg:#13243a;--redbd:#6d2f26;--redbg:#2e1512;--warnbd:#5a4a1f}
+/* Light theme. Same hues, flipped luminance, so the greens still read as Chip & Sip and not as a
+   spreadsheet. Contrast is checked against the ink colour, not against white. */
+html[data-theme="light"]{--bg:#f4f7f3;--panel:#ffffff;--panel2:#eef3ec;--line:#d3e0d5;--ink:#132018;
+--dim:#5d7466;--acc:#2f7d4b;--acc2:#1f6c3c;--blue:#2b62a8;--blue2:#204d85;--red:#b23e2c;--red2:#8f3324;
+--warn:#8a6212;--line2:#e2ebe2;--hdr1:#e7f0e7;--hdr2:#f4f7f3;--on:#ffffff;--okbd:#8fc4a4;
+--bluebd:#a9c4e6;--bluebg:#e6eefa;--redbd:#e6b3a8;--redbg:#fae9e5;--warnbd:#dcc68a}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-header{padding:16px;border-bottom:1px solid var(--line);background:linear-gradient(160deg,#18261d,#0e1512)}
+header{padding:16px;border-bottom:1px solid var(--line);background:linear-gradient(160deg,var(--hdr1),var(--hdr2))}
 .hrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
 .brand img{width:58px;height:58px;flex:0 0 auto}
@@ -20,7 +30,23 @@ h1{margin:0;font-size:20px;letter-spacing:.4px}h1 span{color:var(--acc2)}
 .sub{color:var(--dim);font-size:12.5px;margin-top:3px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:var(--panel)}
 .seg button{background:none;border:0;color:var(--dim);padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer}
-.seg button.on{background:var(--acc);color:#06120b}
+.seg button.on{background:var(--acc);color:var(--on)}
+.hctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* The crest is white on transparent, so on a pale header it would simply disappear. Give it back
+   its own dark ground rather than inverting it — an inverted crest is a different logo. */
+html[data-theme="light"] .brand img{background:#132018;border-radius:10px;padding:3px}
+/* Market cards are collapsed until pressed. The whole summary row is the hit area — thumbs are
+   not precise, and a market that only opens if you hit the little arrow is a market nobody backs. */
+.mkcard>summary{list-style:none;cursor:pointer;display:flex;align-items:flex-start;gap:10px;
+margin:-14px;padding:14px;border-radius:12px;-webkit-tap-highlight-color:transparent}
+.mkcard>summary::-webkit-details-marker{display:none}
+.mkcard>summary:hover{background:var(--panel2)}
+.mkcard[open]>summary{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.mksumin{flex:1 1 auto;min-width:0}
+.mksumin h2{margin:0 0 3px;font-size:15px}
+.mksumin .note{margin:0}
+.chev{flex:0 0 auto;color:var(--dim);font-size:15px;line-height:1.4;transition:transform .15s}
+.mkcard[open] .chev{transform:rotate(180deg)}
 nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20}
 nav button{flex:0 0 auto;background:none;border:0;color:var(--dim);padding:13px 15px;font-size:13.5px;
 font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
@@ -34,7 +60,7 @@ section{display:none}section.on{display:block}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
 padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:7px 8px;border-bottom:1px solid #1e2b23;white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--line2);white-space:nowrap}
 tr:last-child td{border-bottom:0}
 .num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
 .wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -14px;padding:0 14px}
@@ -42,15 +68,15 @@ tr:last-child td{border-bottom:0}
 @media(max-width:719px){ .wrap{margin:0 -12px;padding:0 12px} }
 .pos{color:var(--acc2)}.neg{color:var(--red)}.warn{color:var(--warn)}
 .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
-.tag.low{border-color:#5a4a1f;color:var(--warn)}
-.tag.nd{border-color:#6d2f26;color:var(--red2)}
-.tag.blue{border-color:#26507f;color:var(--blue2);background:#13243a}
-.tag.red{border-color:#6d2f26;color:var(--red2);background:#2e1512}
+.tag.low{border-color:var(--warnbd);color:var(--warn)}
+.tag.nd{border-color:var(--redbd);color:var(--red2)}
+.tag.blue{border-color:var(--bluebd);color:var(--blue2);background:var(--bluebg)}
+.tag.red{border-color:var(--redbd);color:var(--red2);background:var(--redbg)}
 input,select,textarea,button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);
 border-radius:8px;padding:7px 9px}
 input[type=number]{width:74px;text-align:right;font-family:var(--mono)}
 textarea{width:100%;min-height:110px;font-family:var(--mono);font-size:12.5px}
-button.go{background:var(--acc);border-color:var(--acc);color:#06120b;font-weight:700;cursor:pointer}
+button.go{background:var(--acc);border-color:var(--acc);color:var(--on);font-weight:700;cursor:pointer}
 button.ghost{cursor:pointer}button.ghost:hover{border-color:var(--acc)}
 .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:10px 0}
 .filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center;background:var(--panel2);
@@ -63,7 +89,7 @@ border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:14px}
 .kpi span{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px}
 .locked{text-align:center;padding:40px 16px}.locked svg{width:88px;height:88px}
 .count{font-family:var(--mono);font-size:28px;margin:10px 0 4px}
-.bar{height:5px;background:#1e2b23;border-radius:99px;overflow:hidden}
+.bar{height:5px;background:var(--line2);border-radius:99px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--acc)}
 .split{height:9px;border-radius:99px;overflow:hidden;display:flex;margin:8px 0}
 .split i{display:block;height:100%}
@@ -81,11 +107,11 @@ ul{margin:8px 0;padding-left:20px}li{margin:4px 0;font-size:13.5px}
 .phases b{display:block;font-size:12.5px}
 .phases span{display:block;font-size:11.5px;color:var(--dim);margin-top:2px}
 input:disabled{opacity:.35;cursor:not-allowed}
-.pay{display:inline-block;background:var(--acc);color:#06120b;font-weight:700;text-decoration:none;
+.pay{display:inline-block;background:var(--acc);color:var(--on);font-weight:700;text-decoration:none;
 padding:10px 18px;border-radius:8px}
 /* ---------- market rows: stacked on a phone, tabular on a laptop ---------- */
 .mkhead{display:none}
-.mkrow{display:grid;gap:4px 10px;padding:11px 0;border-bottom:1px solid #1e2b23;
+.mkrow{display:grid;gap:4px 10px;padding:11px 0;border-bottom:1px solid var(--line2);
   grid-template-columns:minmax(0,1fr) auto;
   grid-template-areas:"name act" "figs figs" "bar bar";align-items:start}
 .mkrow:last-child{border-bottom:0}
@@ -145,7 +171,7 @@ padding:10px 18px;border-radius:8px}
 /* the slip is a genuine bottom sheet on a phone, an ordinary card on a laptop */
 #slip .card{box-shadow:0 -10px 24px rgba(0,0,0,.5);margin:0}
 .sliplist{max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.sliprow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1e2b23}
+.sliprow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)}
 .sliprow:last-child{border-bottom:0}
 .slipsel{flex:1;min-width:0;font-size:13.5px}
 .slipamtwrap{display:flex;align-items:center;gap:3px;font-family:var(--mono);color:var(--dim)}
@@ -160,7 +186,18 @@ padding:10px 18px;border-radius:8px}
   body.hasslip{padding-bottom:290px}     /* so the sheet never hides the last market */
 }
 @media(min-width:720px){ #slip{position:sticky;bottom:10px;z-index:15} }
-</style></head>
+</style>
+<script>
+/* Theme is applied here, in the head, before anything paints. Doing it after the main state loads
+   would flash a dark page at anyone who chose light. Its own storage key, deliberately: it must be
+   readable before the big state blob is parsed, and it must survive a state version bump. */
+(function(){try{
+  var t=localStorage.getItem("chipsip_theme");
+  if(t!=="light"&&t!=="dark") t=window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+  document.documentElement.setAttribute("data-theme",t);
+  var m=document.querySelector('meta[name=theme-color]'); if(m) m.content=t==="light"?"#f4f7f3":"#0e1512";
+}catch(e){}})();
+</script></head>
 <body>
 
 <header><div class="hrow">
@@ -168,9 +205,12 @@ padding:10px 18px;border-radius:8px}
     <img id="logo" alt="Chip &amp; Sip Championship" src="data:image/png;base64,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">
     <div><h1>CHIP &amp; SIP <span>2026</span></h1>
       <div class="sub" id="hdr">loading&hellip;</div>
-      <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-13.19</div></div>
+      <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-13.20</div></div>
   </div>
-  <div class="seg" id="oddsFmt"><button data-f="frac">Fractions</button><button data-f="dec">Decimals</button></div>
+  <div class="hctl">
+    <div class="seg" id="oddsFmt"><button data-f="frac">Fractions</button><button data-f="dec">Decimals</button></div>
+    <div class="seg" id="theme"><button data-th="dark" title="Dark">&#9789; Dark</button><button data-th="light" title="Light">&#9788; Light</button></div>
+  </div>
 </div></header>
 
 <nav>
@@ -210,6 +250,7 @@ padding:10px 18px;border-radius:8px}
     <label>Hcp <input type="number" id="fHmin" placeholder="min" style="width:64px">
       <input type="number" id="fHmax" placeholder="max" style="width:64px"></label>
     <button class="ghost" id="fClear">Clear</button>
+    <button class="ghost" id="expAll">Expand all</button>
   </div>
   <div id="poolWrap"></div>
 </section>
@@ -298,11 +339,16 @@ padding:10px 18px;border-radius:8px}
       <li><b>Open</b> runs from declaration until the first tee shot on Thursday. Handicaps are known and the
         prices are real, so stakes take an ordinary share. Later means safer and cheaper to judge, but a
         thinner slice.</li>
-      <li><b>Closed.</b> <b>There is no in-play betting.</b> Whole-trip markets — MVP, Team Result, Top
-        Scorers, Perfect Record, The Blank — shut at the first tee shot on Thursday, because after that
-        people are backing things they have watched. A round's own markets shut when that round tees off, so
-        the Sunday singles book stays open until Sunday morning while Thursday's shut on Thursday. All of it
-        happens automatically off the tee times.</li>
+      <li><b>Closed.</b> <b>There is no in-play betting.</b> Every market shuts <b>ten minutes before the
+        relevant tee shot</b> — not on it. Standing on the tee watching the first drive being addressed is
+        not a betting opportunity. Whole-trip markets — MVP, Team Result, Top Scorers, Perfect Record, The
+        Blank — shut ten minutes before Thursday's first ball, at <b>13:40 Spanish time, 12:40 UK</b>. A
+        round's own markets shut ten minutes before that round tees off, so the Sunday singles book stays
+        open until Sunday morning while Thursday's shut on Thursday.</li>
+      <li><b>It closes itself.</b> Nobody has to remember, and the organiser cannot "forget" to shut a market
+        he fancies. The clock runs on the tee times, and those are stored as Spanish time — so it makes no
+        difference whether your phone is on UK time, Spanish time, or still on last year's holiday. The
+        countdown on each market is the truth. There is a manual close in Admin as a backstop only.</li>
       <li>Both phases feed the <b>same pool</b> on each market. The phase changes your share of it, not what
         you are betting on, and none of it goes to the organiser.</li>
       <li>Prices are informational. Your return depends on the pool, not the model.</li>
@@ -316,7 +362,32 @@ padding:10px 18px;border-radius:8px}
     </ul>
     <h3>Settlement</h3>
     <ul>
+      <li><b>The price you saw is not the price you get, and that is the point.</b> This is a tote, not a
+        bookmaker. There is no such thing as taking 12/1 and keeping it. The odds on screen are only the
+        current pool divided up as it stands; when the market shuts, the pool is divided between whoever
+        backed the winner, and everyone in that pool settles at the same rate whenever they bet. So the
+        board moving after you bet — the model being re-run on Wednesday night, forty quid landing on your
+        man on Thursday morning — changes nothing about your bet. It changes what the pool is worth, which
+        is the only number that ever mattered.</li>
+      <li><b>What ante-post actually buys you.</b> Since nobody can take a price, betting early would
+        otherwise be a strictly worse bet: identical terms, less information. So an ante-post stake counts
+        <b>1.25× when the pool divides</b>. Stake £20 ante-post and £20 open on the same winner and you
+        collect £25's worth against their £20's worth. That is the whole compensation for betting blind, and
+        it comes out of the other backers' share, not out of anybody's pocket — the pool is still divided
+        whole.</li>
+      <li><b>Worked example.</b> £100 in the MVP pool, £40 of it ante-post on the winner, £20 open on the
+        winner, £40 on the losers. Winning shares are 40 × 1.25 = 50, plus 20, so 70 in total. The pool pays
+        £100 ÷ 70 = £1.43 per share. The ante-post backers get 50 × £1.43 = £71.43; the open backer gets
+        £28.57. Nothing is left over, because nothing is taken out.</li>
       <li><b>Dead heat.</b> Pool splits equally between tied outcomes, then between backers within each.</li>
+      <li><b>Nobody wins the market.</b> It can happen: The Blank pays the man who scores nothing and
+        everybody scores something; Perfect Record pays a four-from-four and nobody manages it. When there is
+        no winning outcome, <b>the pool is refunded in full to everyone who backed it</b>, ante-post
+        multiplier and all. It does <b>not</b> go to the organiser. There is no house here — nobody is on the
+        other side of these bets, the backers are simply betting against each other, and a market with no
+        winner has nothing to divide. The organiser taking it would be a rake, and a rake is the one thing
+        that turns a private bet between friends into unlicensed bookmaking. So: money back, and The Blank
+        going unwon means everyone actually turned up and scored, which is the better outcome anyway.</li>
       <li><b>Non-runner.</b> Anyone who does not tee it up at all is refunded in full on every market naming
         them. Stakes on other outcomes stand.</li>
       <li><b>Withdrawal mid-trip.</b> Points already banked stand; missed sessions score zero. Backers are not
@@ -499,7 +570,464 @@ padding:10px 18px;border-radius:8px}
 </main>
 
 <script>
-const MODEL=[{"name":"Luke Usher","hcp":13.8,"form":17.79,"sd":3.77,"probs":[0.0,0.0106,0.3099,0.5123,0.136,0.0312],"n":16,"lowSample":false,"rawGap":2.27,"unknown":false,"team":"Blue"},{"name":"Dom Mills","hcp":26.2,"form":30.37,"sd":5.44,"probs":[0.0,0.0212,0.1417,0.3692,0.2962,0.1718],"n":13,"lowSample":false,"rawGap":2.21,"unknown":false,"team":"Blue"},{"name":"Josh Menzies","hcp":13.7,"form":18.95,"sd":4.41,"probs":[0.0,0.0521,0.316,0.3681,0.1961,0.0678],"n":14,"lowSample":false,"rawGap":4.36,"unknown":false,"team":"Blue"},{"name":"Tom Bucknall","hcp":25.3,"form":30.59,"sd":4.61,"probs":[0.0,0.0112,0.0955,0.3371,0.382,0.1742],"n":10,"lowSample":false,"rawGap":4.1,"unknown":false,"team":"Blue"},{"name":"Alex Mulvin","hcp":13.2,"form":18.58,"sd":3.97,"probs":[0.0,0.0173,0.271,0.4908,0.1692,0.0518],"n":45,"lowSample":false,"rawGap":5.14,"unknown":false,"team":"Blue"},{"name":"Mark Sturgess","hcp":20.0,"form":26.29,"sd":4.74,"probs":[0.0002,0.0232,0.2108,0.3749,0.2455,0.1454],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Blue"},{"name":"Matt Petty","hcp":18.0,"form":24.29,"sd":4.74,"probs":[0.0002,0.0232,0.2108,0.3749,0.2455,0.1454],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Blue"},{"name":"Matt Holland","hcp":22.4,"form":29.25,"sd":4.58,"probs":[0.0,0.019,0.0577,0.4616,0.2499,0.2118],"n":3,"lowSample":true,"rawGap":9.12,"unknown":false,"team":"Blue"},{"name":"Ben West","hcp":19.6,"form":26.91,"sd":4.4,"probs":[0.0,0.0244,0.2122,0.3417,0.2322,0.1894],"n":68,"lowSample":false,"rawGap":7.49,"unknown":false,"team":"Blue"},{"name":"Rob Parfitt","hcp":21.5,"form":29.81,"sd":4.83,"probs":[0.0,0.0184,0.1022,0.3116,0.3445,0.2233],"n":12,"lowSample":false,"rawGap":10.34,"unknown":false,"team":"Blue"},{"name":"Eamonn Brady","hcp":16.4,"form":21.84,"sd":4.41,"probs":[0.0,0.0312,0.2538,0.384,0.2332,0.0979],"n":63,"lowSample":false,"rawGap":5.28,"unknown":false,"team":"Red"},{"name":"Gabe Hills","hcp":17.5,"form":23.1,"sd":4.42,"probs":[0.0,0.0162,0.243,0.3863,0.2269,0.1276],"n":14,"lowSample":false,"rawGap":5.02,"unknown":false,"team":"Red"},{"name":"dong ming lau","hcp":17.8,"form":23.83,"sd":5.01,"probs":[0.0039,0.0329,0.2338,0.3677,0.221,0.1406],"n":27,"lowSample":false,"rawGap":5.92,"unknown":false,"team":"Red"},{"name":"Theo Smith-Harris","hcp":15.0,"form":21.29,"sd":4.74,"probs":[0.0002,0.0239,0.2151,0.3747,0.2431,0.1431],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Red"},{"name":"Josh Evans","hcp":12.0,"form":18.29,"sd":4.74,"probs":[0.0002,0.0229,0.2105,0.3786,0.2423,0.1455],"n":0,"lowSample":true,"rawGap":null,"unknown":true,"team":"Red"},{"name":"Luke Holland","hcp":13.4,"form":19.95,"sd":5.41,"probs":[0.0,0.0368,0.3343,0.3554,0.2022,0.0713],"n":32,"lowSample":false,"rawGap":6.65,"unknown":false,"team":"Red"},{"name":"Chris Best","hcp":24.0,"form":30.85,"sd":4.75,"probs":[0.0,0.0,0.0964,0.2885,0.3076,0.3076],"n":3,"lowSample":true,"rawGap":9.12,"unknown":false,"team":"Red"},{"name":"Jay France","hcp":9.5,"form":16.35,"sd":5.58,"probs":[0.0,0.064,0.3471,0.355,0.1772,0.0566],"n":15,"lowSample":false,"rawGap":7.3,"unknown":false,"team":"Red"},{"name":"Dave Huddleston","hcp":19.4,"form":26.63,"sd":5.24,"probs":[0.0,0.0,0.1932,0.3864,0.2159,0.2045],"n":5,"lowSample":true,"rawGap":9.49,"unknown":false,"team":"Red"},{"name":"Jack Mulroy","hcp":20.8,"form":29.43,"sd":4.95,"probs":[0.0,0.0106,0.1601,0.3419,0.2863,0.2012],"n":52,"lowSample":false,"rawGap":9.17,"unknown":false,"team":"Red"}], BLUE={"s":"JlT1W1Iq9xS2QmZfdK/LKQ==","i":"kaX9sG/hhAtuJFXP","c":"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"}, ADMIN={"s":"jaMQkDhnrV3W9qzQSnGAlQ==","i":"Hi0WypQZ/Z5FXY2x","c":"8Y7y40GqFUgf6brQMFL9VdHcMsnE2X7hqhvalE867Nwn3cRy/pquP6OV9sYqemHK0REpxs3V+J8aEfiqK3Aee8KLGxhCVD76HIgpbF5y3Vj06swOXvlK8g=="};
+const MODEL=[
+ {
+  "name": "Luke Usher",
+  "hcp": 13.8,
+  "n": 16,
+  "form": 17.79,
+  "sd": 3.77,
+  "gap": 3.99,
+  "probs": [
+   0.0,
+   0.0106,
+   0.3099,
+   0.5123,
+   0.136,
+   0.0312
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 2.27,
+  "rawForm": 16.07,
+  "w": 0.571,
+  "team": "Blue",
+  "unknown": false
+ },
+ {
+  "name": "Dom Mills",
+  "hcp": 26.2,
+  "n": 13,
+  "form": 30.37,
+  "sd": 5.44,
+  "gap": 4.17,
+  "probs": [
+   0.0,
+   0.0212,
+   0.1417,
+   0.3692,
+   0.2962,
+   0.1718
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 2.21,
+  "rawForm": 28.41,
+  "w": 0.52,
+  "team": "Blue",
+  "unknown": false
+ },
+ {
+  "name": "Josh Menzies",
+  "hcp": 13.7,
+  "n": 14,
+  "form": 18.95,
+  "sd": 4.41,
+  "gap": 5.25,
+  "probs": [
+   0.0,
+   0.0521,
+   0.316,
+   0.3681,
+   0.1961,
+   0.0678
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 4.36,
+  "rawForm": 18.06,
+  "w": 0.538,
+  "team": "Blue",
+  "unknown": false
+ },
+ {
+  "name": "Tom Bucknall",
+  "hcp": 25.3,
+  "n": 10,
+  "form": 30.59,
+  "sd": 4.61,
+  "gap": 5.29,
+  "probs": [
+   0.0,
+   0.0112,
+   0.0955,
+   0.3371,
+   0.382,
+   0.1742
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 4.1,
+  "rawForm": 29.4,
+  "w": 0.455,
+  "team": "Blue",
+  "unknown": false
+ },
+ {
+  "name": "Alex Mulvin",
+  "hcp": 13.2,
+  "n": 45,
+  "form": 18.58,
+  "sd": 3.97,
+  "gap": 5.38,
+  "probs": [
+   0.0,
+   0.0173,
+   0.271,
+   0.4908,
+   0.1692,
+   0.0518
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 5.14,
+  "rawForm": 18.34,
+  "w": 0.789,
+  "team": "Blue",
+  "unknown": false
+ },
+ {
+  "name": "Mark Sturgess",
+  "hcp": 20.0,
+  "n": 0,
+  "form": 26.29,
+  "sd": 4.74,
+  "gap": 6.29,
+  "rawGap": null,
+  "probs": [
+   0.0002,
+   0.0232,
+   0.2108,
+   0.3749,
+   0.2455,
+   0.1454
+  ],
+  "dropped": 0,
+  "lowSample": true,
+  "unknown": true,
+  "team": "Blue",
+  "w": 0
+ },
+ {
+  "name": "Matt Petty",
+  "hcp": 18.0,
+  "n": 0,
+  "form": 24.29,
+  "sd": 4.74,
+  "gap": 6.29,
+  "rawGap": null,
+  "probs": [
+   0.0002,
+   0.0232,
+   0.2108,
+   0.3749,
+   0.2455,
+   0.1454
+  ],
+  "dropped": 0,
+  "lowSample": true,
+  "unknown": true,
+  "team": "Blue",
+  "w": 0
+ },
+ {
+  "name": "Matt Holland",
+  "hcp": 22.4,
+  "n": 3,
+  "form": 29.25,
+  "sd": 4.58,
+  "gap": 6.85,
+  "probs": [
+   0.0,
+   0.019,
+   0.0577,
+   0.4616,
+   0.2499,
+   0.2118
+  ],
+  "dropped": 0,
+  "lowSample": true,
+  "rawGap": 9.12,
+  "rawForm": 31.52,
+  "w": 0.2,
+  "team": "Blue",
+  "unknown": false
+ },
+ {
+  "name": "Ben West",
+  "hcp": 19.6,
+  "n": 68,
+  "form": 26.91,
+  "sd": 4.4,
+  "gap": 7.31,
+  "probs": [
+   0.0,
+   0.0244,
+   0.2122,
+   0.3417,
+   0.2322,
+   0.1894
+  ],
+  "dropped": 3,
+  "lowSample": false,
+  "rawGap": 7.49,
+  "rawForm": 27.09,
+  "w": 0.85,
+  "team": "Blue",
+  "unknown": false
+ },
+ {
+  "name": "Rob Parfitt",
+  "hcp": 21.5,
+  "n": 12,
+  "form": 29.81,
+  "sd": 4.83,
+  "gap": 8.31,
+  "probs": [
+   0.0,
+   0.0184,
+   0.1022,
+   0.3116,
+   0.3445,
+   0.2233
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 10.34,
+  "rawForm": 31.84,
+  "w": 0.5,
+  "team": "Blue",
+  "unknown": false
+ },
+ {
+  "name": "Eamonn Brady",
+  "hcp": 16.4,
+  "n": 63,
+  "form": 21.84,
+  "sd": 4.41,
+  "gap": 5.44,
+  "probs": [
+   0.0,
+   0.0312,
+   0.2538,
+   0.384,
+   0.2332,
+   0.0979
+  ],
+  "dropped": 1,
+  "lowSample": false,
+  "rawGap": 5.28,
+  "rawForm": 21.68,
+  "w": 0.84,
+  "team": "Red",
+  "unknown": false
+ },
+ {
+  "name": "Gabe Hills",
+  "hcp": 17.5,
+  "n": 14,
+  "form": 23.1,
+  "sd": 4.42,
+  "gap": 5.6,
+  "probs": [
+   0.0,
+   0.0162,
+   0.243,
+   0.3863,
+   0.2269,
+   0.1276
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 5.02,
+  "rawForm": 22.52,
+  "w": 0.538,
+  "team": "Red",
+  "unknown": false
+ },
+ {
+  "name": "dong ming lau",
+  "hcp": 17.8,
+  "n": 27,
+  "form": 23.83,
+  "sd": 5.01,
+  "gap": 6.03,
+  "probs": [
+   0.0039,
+   0.0329,
+   0.2338,
+   0.3677,
+   0.221,
+   0.1406
+  ],
+  "dropped": 1,
+  "lowSample": false,
+  "rawGap": 5.92,
+  "rawForm": 23.72,
+  "w": 0.692,
+  "team": "Red",
+  "unknown": false
+ },
+ {
+  "name": "Theo Smith-Harris",
+  "hcp": 15.0,
+  "n": 0,
+  "form": 21.29,
+  "sd": 4.74,
+  "gap": 6.29,
+  "rawGap": null,
+  "probs": [
+   0.0002,
+   0.0239,
+   0.2151,
+   0.3747,
+   0.2431,
+   0.1431
+  ],
+  "dropped": 0,
+  "lowSample": true,
+  "unknown": true,
+  "team": "Red",
+  "w": 0
+ },
+ {
+  "name": "Josh Evans",
+  "hcp": 12.0,
+  "n": 0,
+  "form": 18.29,
+  "sd": 4.74,
+  "gap": 6.29,
+  "rawGap": null,
+  "probs": [
+   0.0002,
+   0.0229,
+   0.2105,
+   0.3786,
+   0.2423,
+   0.1455
+  ],
+  "dropped": 0,
+  "lowSample": true,
+  "unknown": true,
+  "team": "Red",
+  "w": 0
+ },
+ {
+  "name": "Luke Holland",
+  "hcp": 13.4,
+  "n": 32,
+  "form": 19.95,
+  "sd": 5.41,
+  "gap": 6.55,
+  "probs": [
+   0.0,
+   0.0368,
+   0.3343,
+   0.3554,
+   0.2022,
+   0.0713
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 6.65,
+  "rawForm": 20.05,
+  "w": 0.727,
+  "team": "Red",
+  "unknown": false
+ },
+ {
+  "name": "Chris Best",
+  "hcp": 24.0,
+  "n": 3,
+  "form": 30.85,
+  "sd": 4.75,
+  "gap": 6.85,
+  "probs": [
+   0.0,
+   0.0,
+   0.0964,
+   0.2885,
+   0.3076,
+   0.3076
+  ],
+  "dropped": 0,
+  "lowSample": true,
+  "rawGap": 9.12,
+  "rawForm": 33.12,
+  "w": 0.2,
+  "team": "Red",
+  "unknown": false
+ },
+ {
+  "name": "Jay France",
+  "hcp": 9.5,
+  "n": 15,
+  "form": 16.35,
+  "sd": 5.58,
+  "gap": 6.85,
+  "probs": [
+   0.0,
+   0.064,
+   0.3471,
+   0.355,
+   0.1772,
+   0.0566
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 7.3,
+  "rawForm": 16.8,
+  "w": 0.556,
+  "team": "Red",
+  "unknown": false
+ },
+ {
+  "name": "Dave Huddleston",
+  "hcp": 19.4,
+  "n": 5,
+  "form": 26.63,
+  "sd": 5.24,
+  "gap": 7.23,
+  "probs": [
+   0.0,
+   0.0,
+   0.1932,
+   0.3864,
+   0.2159,
+   0.2045
+  ],
+  "dropped": 0,
+  "lowSample": true,
+  "rawGap": 9.49,
+  "rawForm": 28.89,
+  "w": 0.294,
+  "team": "Red",
+  "unknown": false
+ },
+ {
+  "name": "Jack Mulroy",
+  "hcp": 20.8,
+  "n": 52,
+  "form": 29.43,
+  "sd": 4.95,
+  "gap": 8.63,
+  "probs": [
+   0.0,
+   0.0106,
+   0.1601,
+   0.3419,
+   0.2863,
+   0.2012
+  ],
+  "dropped": 1,
+  "lowSample": false,
+  "rawGap": 9.17,
+  "rawForm": 29.97,
+  "w": 0.812,
+  "team": "Red",
+  "unknown": false
+ }
+], BLUE={"s": "JlT1W1Iq9xS2QmZfdK/LKQ==", "i": "kaX9sG/hhAtuJFXP", "c": "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"}, ADMIN={"s": "jaMQkDhnrV3W9qzQSnGAlQ==", "i": "Hi0WypQZ/Z5FXY2x", "c": "8Y7y40GqFUgf6brQMFL9VdHcMsnE2X7hqhvalE867Nwn3cRy/pquP6OV9sYqemHK0REpxs3V+J8aEfiqK3Aee8KLGxhCVD76HIgpbF5y3Vj06swOXvlK8g=="};
 const SB={url:"https://nqewsjczuqnkqehcayzq.supabase.co",
           key:"sb_publishable_jZ3Iw2rYsGgCdsBqKmJqBw_vO00J2DO"};
 const DB={bets:[],mine:[],totals:[],ledger:[],accounts:[],settings:{},roster:[],claimed:[],online:false,err:""};
@@ -510,6 +1038,10 @@ const myTeam=()=>{const r=DB.roster.find(x=>norm(x.name)===norm(AUTH.name||""));
 function blockReason(m,label){
  if(!AUTH.name) return null;
  if(norm(label)===norm(AUTH.name)) return "You cannot back yourself";
+ /* A Yes/No market named after one man dodges the rule above — the outcome is "Yes", not his name,
+    and he is the only person who decides it. Those markets are barred to their subject outright.
+    The same list is enforced in the database; this is only so the button says why. */
+ if(m.subject&&norm(m.subject)===norm(AUTH.name)) return "This market is about you";
  const mt=myTeam(); if(!mt) return null;
  if(m.k==="team" && (label==="Blue"||label==="Red") && label!==mt) return "That is betting against your own team";
  if((m.k==="blueTop"&&mt==="Blue")||(m.k==="redTop"&&mt==="Red")){
@@ -609,14 +1141,29 @@ async function pushSettings(patch){
   await rpc("save_settings",{p_data:data,p_token:ADMIN_TOKEN});
   DB.settings=data;
 }
-const TEE_OFF=new Date("2026-09-24T13:50:00+02:00");
-/* Each round shuts when its own first ball is struck. Whole-trip markets shut when the trip does. */
+/* Every tee time below carries +02:00, which is Spain in late September (CEST — the clocks do not
+   go back until 25 October). These are therefore absolute instants, not wall-clock times: a phone
+   still on UK time, a laptop left on New York, one man's watch an hour out — all of them compute
+   the same closing moment. Do not "simplify" these into local date strings. */
 const ROUND_TEE={
  "1":new Date("2026-09-24T13:50:00+02:00"),
  "2":new Date("2026-09-25T11:10:00+02:00"),
  "3":new Date("2026-09-26T11:40:00+02:00"),
  "4":new Date("2026-09-27T10:10:00+02:00")};
-const deadline=m=>ROUND_TEE[m.round||"1"]||TEE_OFF;
+const TEE_OFF=ROUND_TEE["1"];
+/* Betting shuts this many minutes BEFORE the ball is struck, not on it. Somebody standing on the
+   tee watching the first drive being addressed should not be able to get a bet on. */
+const CUTOFF_MIN=10;
+const cutoffOf=d=>new Date(d.getTime()-CUTOFF_MIN*60000);
+const BOOK_CLOSE=cutoffOf(TEE_OFF);
+const LAST_CLOSE=new Date(Math.max.apply(null,Object.keys(ROUND_TEE).map(k=>cutoffOf(ROUND_TEE[k]).getTime())));
+const deadline=m=>cutoffOf(ROUND_TEE[m.round||"1"]||TEE_OFF);
+/* Spain is one hour ahead of the UK all trip. Show both, or somebody will read a UK clock and
+   swear blind the book shut early. */
+const T2=n=>String(n).padStart(2,"0");
+function esTime(d){return T2(d.getUTCHours()+2)+":"+T2(d.getUTCMinutes());}
+function ukTime(d){return T2(d.getUTCHours()+1)+":"+T2(d.getUTCMinutes());}
+const bothTime=d=>esTime(d)+" Spain / "+ukTime(d)+" UK";
 
 const SCHEDULE=[
  {d:"Wed 23 Sep",t:"Arrival",pick:"23:50",travel:"25 min",tee:null,coll:null,
@@ -651,19 +1198,63 @@ const MARKETS=[
 const DEF_NOV=[
  {k:"nov_rob",n:"Rob's 30th",
   d:"Turns 30 on arrival night, tees off at 13:50 the next day. What could possibly go wrong",
-  round:"1",opts:["Wins his Thursday match","Halves it","Loses it","Does not make the tee at all"]},
- {k:"nov_water",n:"First in the Drink",d:"First ball wet. Provisional does not count, we all saw it",round:"",opts:[]},
- {k:"nov_balls",n:"Most Balls Lost",d:"Across the week. Sleeve-buyers need not apply",round:"",opts:[]},
- {k:"nov_air",n:"First Air Shot",d:"A genuine swing and miss. Practice swings excepted, obviously",round:"",opts:[]},
- {k:"nov_cart",n:"First Buggy Incident",d:"Kerb, bunker, flowerbed or tree. Adjudicated by the organiser",round:"",opts:[]},
- {k:"nov_shout",n:"First to Blame His Clubs",d:"Out loud, in earshot of at least two witnesses",round:"",opts:[]}
+  round:"1",opts:["Wins his Thursday match","Halves it","Loses it","Does not make the tee at all"],
+  subject:"Rob Parfitt"},
+ {k:"nov_water",n:"First in the Drink",d:"First ball wet. Provisional does not count, we all saw it",round:"",opts:[],pk:"water"},
+ {k:"nov_balls",n:"Most Balls Lost",d:"Across the week. Sleeve-buyers need not apply",round:"",opts:[],pk:"balls"},
+ {k:"nov_air",n:"First Air Shot",d:"A genuine swing and miss. Practice swings excepted, obviously",round:"",opts:[],pk:"air"},
+ {k:"nov_cart",n:"First Buggy Incident",
+  d:"Kerb, bunker, flowerbed or tree. Adjudicated by the organiser. Josh has previous, and the market knows it",
+  round:"",opts:[]},
+ {k:"nov_shout",n:"First to Blame His Clubs",d:"Out loud, in earshot of at least two witnesses",round:"",opts:[],pk:"clubs"},
+ {k:"nov_row",n:"Most Likely to Have a Heated Discussion",
+  d:"Voices up, clubs down, somebody walking to the next tee on his own. Eamonn and Josh Menzies renewing "+
+    "last year's hostilities is the obvious way in; Ben and Gabe are shorter than they should be purely "+
+    "because neither can leave it alone. If two men are in it, the pool splits between them",
+  round:"",opts:[],
+  /* Not handicap-driven in the slightest. These are hand-set from previous form off the course:
+     last year's fallout, plus the two who cannot resist poking it. Adjust in Admin, not here. */
+  wts:{"Eamonn Brady":6,"Josh Menzies":6,"Ben West":3.2,"Gabe Hills":3.2}},
+ {k:"nov_burn",n:"First to Get Sunburnt",
+  d:"Visible, undeniable, and pointed at by at least two people. Priced on rounds played, on the theory "+
+    "that the more golf a man gets in the more hours he has spent standing in it. Brady is favourite on "+
+    "reputation alone. Factor 50 is not a betting strategy",
+  round:"",opts:[],pk:"sun",wts:{"Eamonn Brady":2.6}},
+ {k:"nov_crown",n:"Crown of the Alcohol",
+  d:"The heavyweight title. Four nights, one champion, no stewards' enquiry. Awarded by the organiser on "+
+    "the balance of evidence, which in practice means whoever the group nominates the morning after",
+  round:"",opts:[],
+  /* Weights pending: these come off the Blue Room drunk index, which is not in this file and must not
+     be. Until they are set every runner is level, which is honest — nobody has told the book anything. */
+  wts:null},
+ {k:"nov_putt3",n:"Most Three-Putts",
+  d:"Across the four rounds, counted honestly by your own playing partners, who will enjoy it enormously. "+
+    "Priced off handicap: the short game is where the mark actually comes from",
+  round:"",opts:[],pk:"putt3"},
+ {k:"nov_miss3",n:"First Missed Three-Footer — Singles",
+  d:"Sunday only, and it has to be inside three feet and genuinely missed. Gimmes are not missed, they are "+
+    "conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he is. Priced "+
+    "off handicap and volatility, which is the closest thing to a nerve rating we have",
+  round:"4",opts:[],pk:"miss3"},
+ {k:"nov_josh",n:"Josh Menzies to Call Someone a C**t Before the First Tee",
+  d:"Any target, any tone, affectionate counts. Window opens on landing and shuts when the first ball is "+
+    "struck on Thursday. Odds-on for a reason and the market is not apologising for it",
+  round:"1",opts:["Yes","No"],oprobs:{Yes:0.88,No:0.12},subject:"Josh Menzies"},
+ {k:"nov_rob30",n:"Rob to Say He Is Still Drunk From Last Night",
+  d:"Out loud, before he tees off on Thursday. It is his 30th the night before and the transfer leaves at "+
+    "12:00, so the only real question is whether he says it or simply demonstrates it",
+  round:"1",opts:["Yes","No"],oprobs:{Yes:0.82,No:0.18},subject:"Rob Parfitt"},
+ {k:"nov_putts",n:"Fewest Putts Overall",
+  d:"Total putts across the week, lowest wins. The one market on this page where being good at golf is "+
+    "an advantage, so the board is upside down and the low men are favourites for once",
+  round:"",opts:[],pk:"putts"}
 ];
 
 let S=null;
-const DATA_V="2026-08-13.19";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-13.20";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
- declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],me:"",authMode:"",pendingName:"",
+ declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
  players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
    low:p.lowSample,unknown:!!p.unknown,rawGap:p.rawGap,team:p.team,
@@ -816,7 +1407,10 @@ function runSim(N){
 /* Overall phase of the book. Individual markets can already be shut inside it. */
 function phase(){
  if(S.closed) return "closed";
- if(new Date()>=TEE_OFF) return "closed";
+ /* The book is not shut until the LAST market is shut. Thursday's first ball closes most of the
+    board, but Sunday's singles markets stay live until Sunday morning, and the banner has to say
+    so or nobody will try to back them. */
+ if(new Date()>=LAST_CLOSE) return "closed";
  return S.declared ? "open" : "antepost";
 }
 /* A market's own phase: it shuts at its round's tee time whatever the book is doing. */
@@ -858,9 +1452,70 @@ const dec=p=>(!p||p<=0)?"—":fmtDec(1/p);
 const pct=p=>(p*100).toFixed(1)+"%";
 const teamTag=t=>`<span class="tag ${t==="Blue"?"blue":"red"}">${t}</span>`;
 
+/* ---- Novelty pricing -------------------------------------------------------------------------
+   Nobody has ever logged an air shot, so this is not a simulation and does not pretend to be. It
+   is a shape: a 32 handicap swings and misses more often than an 8, a streaky player finds more
+   water than a steady one of the same mark, and a man with no scoring record at all gets the
+   benefit of the doubt in the wrong direction.
+
+   Weight per player = exp(a·h + b·v), where h is his handicap in field-spreads above the median
+   and v is his volatility against a typical 5-shot spread. Weights are then normalised, so every
+   book adds to exactly 100% — no margin, same as everywhere else on this page.
+
+   It is DETERMINISTIC. No random numbers, no simulation: the same handicaps and form figures that
+   the database serves produce the same prices on every phone. Nobody can refresh into a better
+   one. The tuning constants are the only opinion in here:
+
+     air    swing and miss      — mostly handicap, some wildness
+     water  first ball wet      — wildness matters more; a good player who blocks one is gone too
+     balls  most lost all week  — cumulative, so it concentrates hard on the worst two or three
+     clubs  first to blame them — the honest one. Scales with handicap, but everyone is capable
+     putt3  most three-putts — handicap again, but putting punishes the wild less than the ball-strike
+     putts  FEWEST putts all week — the one market where low handicap is an advantage, so it inverts
+
+   A market can also carry a `wts` map — a hand-set multiplier per player for the things no
+   handicap will ever tell you, like who fell out with whom in 2025. Those multiply the formula
+   weight, or stand on their own where there is no formula at all.
+*/
+const NOV_TUNE={air:[0.85,0.45,1.15],water:[0.70,0.55,1.10],balls:[1.15,0.40,1.20],clubs:[0.55,0.35,1.05],
+ putt3:[0.95,0.30,1.15],miss3:[0.80,0.40,1.15],
+ /* Negative coefficients on purpose: fewest putts is the one novelty a good player WINS, so the
+    exponent runs the other way and the men with no record are marked down, not up. */
+ putts:[-0.95,-0.25,0.80]};
+function noveltyProbs(m){
+ const t=m.pk?NOV_TUNE[m.pk]:null, wts=m.wts||null;
+ if(!t&&!wts&&m.pk!=="sun") return null;
+ const ps=S.players.filter(p=>p.in); if(ps.length<2) return null;
+ const hs=ps.map(p=>p.hcp).slice().sort((a,b)=>a-b);
+ const med=hs.length%2?hs[(hs.length-1)/2]:(hs[hs.length/2-1]+hs[hs.length/2])/2;
+ const W={};let tot=0;
+ /* Sunburn does not care what you go round in. It cares how many hours you have stood in it, so
+    this one is priced off rounds played rather than handicap. */
+ const meanN=ps.reduce((a,p)=>a+(p.n||0),0)/ps.length||1;
+ ps.forEach(p=>{
+  let w=1;
+  if(m.pk==="sun") w=0.45+(p.n||0)/meanN;
+  else if(t){const h=(p.hcp-med)/6, v=((p.sd||5)-5)/5;
+   w=Math.exp(t[0]*h+t[1]*v);
+   if(p.unknown) w*=t[2];}    /* no record — assume the worst. It is funnier and usually right */
+  if(wts&&wts[p.name]) w*=wts[p.name];
+  W[p.name]=w; tot+=w;});
+ if(!(tot>0)) return null;
+ Object.keys(W).forEach(n=>W[n]/=tot);
+ return W;
+}
 function marketOutcomes(m){
- if(m.type==="novelty") return (m.opts&&m.opts.length?m.opts:S.players.filter(p=>p.in).map(p=>p.name))
-   .map(o=>({label:o,prob:null,player:S.players.find(p=>p.name===o)||null}));
+ if(m.type==="novelty"){
+   /* oprobs is for markets whose outcomes are not people — Yes/No, or Rob's four ways. Hand-set,
+      normalised on the way out so a sloppy edit cannot ship a book that adds to 104%. */
+   let OP=null;
+   if(m.oprobs){const t=Object.values(m.oprobs).reduce((a,b)=>a+b,0);
+    if(t>0){OP={};Object.keys(m.oprobs).forEach(k=>OP[k]=m.oprobs[k]/t);}}
+   const NP=OP?null:noveltyProbs(m);
+   return (m.opts&&m.opts.length?m.opts:S.players.filter(p=>p.in).map(p=>p.name))
+     .map(o=>({label:o,prob:OP?(OP[o]!=null?OP[o]:null):(NP&&NP[o]!=null?NP[o]:null),
+       player:S.players.find(p=>p.name===o)||null}));
+ }
  if(m.k==="team"){const T=teamSrc();return ["Blue","Red","Tie"].map(o=>({label:o,prob:T?T[o]:null,player:null}));}
  return S.players.filter(p=>p.in&&(!m.only||p.team===m.only))
    .map(p=>{const O=priceSrc();return{label:p.name,player:p,prob:O&&O[p.name]?O[p.name][m.k==="singles"?"singles":m.k]:null};});
@@ -948,18 +1603,38 @@ function drawPools(){
      <div class="mkbar"><div class="bar"><i style="width:${w?(r.wt/w*100):0}%"></i></div></div>
    </div>`;});
   const chip=mp==="closed"?'<span class="tag red">closed</span>'
-    :mp==="open"?'<span class="tag" style="border-color:#2f6b45;color:var(--acc2)">open</span>'
+    :mp==="open"?'<span class="tag" style="border-color:var(--okbd);color:var(--acc2)">open</span>'
     :'<span class="tag low">ante-post</span>';
-  out+=`<div class="card"${mp==="closed"?' style="opacity:.62"':""}><h2>${esc(m.n)} ${chip}
-    ${m.type==="novelty"?'<span class="tag">novelty</span>':""}
-    ${m.round?`<span class="tag">R${m.round}</span>`:'<span class="tag">whole trip</span>'}</h2>
-   <p class="note">${esc(m.d||"")} &mdash; pool <b>£${money.toFixed(0)}</b>${S.apBonus>1&&rows.some(r=>r.a>0)?` &middot; ante-post stakes carry a ${S.apBonus}× share`:""}
-    &middot; ${mp==="closed"?"<b>shut</b>":`closes in <b>${untilStr(deadline(m))}</b>`}</p>
-   <div class="mkt">${t}</div></div>`;
+  const mine=S.slip.filter(x=>x.market===m.k).length;
+  /* Collapsed by default. Which ones are open is remembered, because drawPools() re-runs every
+     time a selection is added and it would be maddening to have the card shut under your thumb. */
+  const isOpen=(S.openMk||[]).indexOf(m.k)>=0;
+  out+=`<details class="card mkcard" data-k="${esc(m.k)}"${isOpen?" open":""}${mp==="closed"?' style="opacity:.62"':""}>
+   <summary class="mksum">
+    <div class="mksumin"><h2>${esc(m.n)} ${chip}
+      ${m.type==="novelty"?'<span class="tag">novelty</span>':""}
+      ${m.round?`<span class="tag">R${m.round}</span>`:'<span class="tag">whole trip</span>'}
+      ${mine?`<span class="tag" style="border-color:var(--acc);color:var(--acc2)">${mine} on your slip</span>`:""}</h2>
+     <p class="note">pool <b>£${money.toFixed(0)}</b> &middot; ${rows.length} runner${rows.length===1?"":"s"}
+      &middot; ${mp==="closed"?"<b>shut</b>":`closes in <b>${untilStr(deadline(m))}</b>`}</p></div>
+    <span class="chev" aria-hidden="true">&#9662;</span></summary>
+   <p class="note">${esc(m.d||"")}${S.apBonus>1&&rows.some(r=>r.a>0)?` &middot; ante-post stakes carry a ${S.apBonus}× share`:""}
+    &middot; betting shuts ${CUTOFF_MIN} minutes before the tee shot, ${bothTime(deadline(m))}</p>
+   ${m.type==="novelty"&&m.pk?`<p class="note">Prices here are shaped by handicap and form, not simulated —
+    there is no data on air shots. Treat them as a starting point and back your own eyes.</p>`:""}
+   <div class="mkt">${t}</div></details>`;
  });
  $("#poolWrap").innerHTML=out||`<div class="card"><p class="note">Nothing matches that. You have filtered your way
  into an empty room.</p></div>`;
  if($("#retry"))$("#retry").addEventListener("click",async()=>{await refresh();drawAll();});
+ document.querySelectorAll(".mkcard").forEach(el=>el.addEventListener("toggle",()=>{
+  const k=el.dataset.k, cur=new Set(S.openMk||[]);
+  el.open?cur.add(k):cur.delete(k);
+  S.openMk=[...cur]; save();}));
+ const ea=$("#expAll"); if(ea) ea.addEventListener("click",()=>{
+  const ks=[...document.querySelectorAll(".mkcard")].map(el=>el.dataset.k);
+  const allOpen=ks.length&&ks.every(k=>(S.openMk||[]).indexOf(k)>=0);
+  S.openMk=allOpen?[]:ks; save(); drawPools();});
  document.querySelectorAll(".slipadd").forEach(el=>el.addEventListener("click",e=>{
   const {mk,pl}=e.target.dataset;
   S.slip.push({market:mk,outcome:pl,stake:S.minStake||1});save();drawPools();}));
@@ -1016,10 +1691,14 @@ async function placeSlip(){
  if(ph==="closed"){err.textContent="The book is shut.";return;}
  const bad=S.slip.filter(x=>mPhase(allMarkets().find(m=>m.k===x.market)||{})==="closed");
  if(bad.length){err.textContent="These markets have closed: "+bad.map(b=>marketName(b.market)).join(", ");return;}
+ /* Each stake is tagged with ITS OWN market's phase, not the book's. Once Thursday's ball is
+    struck the whole-trip markets are gone but Sunday's are not, and a stake struck on Friday must
+    settle on the terms of the market it was struck into. */
  const barred=S.slip.map(x=>({x,why:blockReason(allMarkets().find(m=>m.k===x.market)||{k:x.market},x.outcome)}))
    .filter(o=>o.why);
  if(barred.length){err.textContent=barred.map(o=>`${o.x.outcome}: ${o.why.toLowerCase()}`).join(" · ");return;}
- const rows=S.slip.map(x=>({bettor:AUTH.name,market:x.market,outcome:x.outcome,stake:x.stake,phase:ph}));
+ const rows=S.slip.map(x=>({bettor:AUTH.name,market:x.market,outcome:x.outcome,stake:x.stake,
+   phase:mPhase(allMarkets().find(m=>m.k===x.market)||{})}));
  $("#slipGo").disabled=true;
  try{
    await sbFetch("bets",{method:"POST",body:JSON.stringify(rows),prefer:"return=minimal"});
@@ -1039,7 +1718,7 @@ function drawAuth(){
      `<div class="sliprow"><div class="slipsel">${esc(marketName(b.market))}
         <div class="small">${esc(b.outcome)}${b.phase==="antepost"?' · ante-post':""}</div></div>
       <div class="slipamtwrap">£${b.stake}</div></div>`).join("");
-   el.innerHTML=`<div class="card" style="border-color:#2f6b45">
+   el.innerHTML=`<div class="card" style="border-color:var(--okbd)">
      <div class="row" style="margin:0;justify-content:space-between">
        <div><b>${esc(AUTH.name)}</b><div class="small">${staked?`£${staked} staked across ${DB.mine.length} bet${DB.mine.length===1?"":"s"}`:"Signed in. No bets yet."}</div></div>
        <button class="ghost" id="signout">Sign out</button></div>
@@ -1365,7 +2044,7 @@ function drawBlue(){const d=BLUEDATA;if(!d)return;
    <td class="num small">${w.gap>=0?"+":""}${w.gap}</td>
    <td class="num ${w.n<10?"warn":""}">${w.n}</td><td class="small ${cls}">${esc(w.verdict)}</td></tr>`;});
  $("#blueBody").innerHTML=`
-  <div class="card" style="border-color:#26507f"><h2 style="color:var(--blue2)">BLUE TEAM — EYES ONLY</h2>
+  <div class="card" style="border-color:var(--bluebd)"><h2 style="color:var(--blue2)">BLUE TEAM — EYES ONLY</h2>
    <p class="note">${esc(d.sealed)}</p></div>
   <div class="card"><h2>Handicap watchlist</h2><p class="note">${esc(d.watchlistNote)}</p>
    <div class="wrap"><table>${wl}</table></div></div>
@@ -1386,6 +2065,14 @@ document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()
 document.querySelectorAll("#oddsFmt button").forEach(b=>b.addEventListener("click",()=>{
  S.oddsFmt=b.dataset.f;save();paintFmt();drawOdds();drawPools();}));
 function paintFmt(){document.querySelectorAll("#oddsFmt button").forEach(b=>b.classList.toggle("on",b.dataset.f===S.oddsFmt));}
+function curTheme(){return document.documentElement.getAttribute("data-theme")==="light"?"light":"dark";}
+function setTheme(t){document.documentElement.setAttribute("data-theme",t);
+ try{localStorage.setItem("chipsip_theme",t);}catch(e){}
+ const m=document.querySelector('meta[name=theme-color]'); if(m) m.content=t==="light"?"#f4f7f3":"#0e1512";
+ paintTheme();}
+function paintTheme(){const t=curTheme();
+ document.querySelectorAll("#theme button").forEach(b=>b.classList.toggle("on",b.dataset.th===t));}
+document.querySelectorAll("#theme button").forEach(b=>b.addEventListener("click",()=>setTheme(b.dataset.th)));
 ["fMarket","fTeam","fRound","fType","fStatus","fHmin","fHmax"].forEach(id=>{
  const el=$("#"+id);el.addEventListener("change",drawPools);el.addEventListener("input",drawPools);});
 $("#fClear").addEventListener("click",()=>{["fMarket","fTeam","fRound","fType","fStatus","fHmin","fHmax"]
@@ -1488,7 +2175,7 @@ $("#sealGo").addEventListener("click",async()=>{const pw=$("#sealPw").value,what
  document.head.appendChild(al);
  const ll=document.getElementById("lockLogo"); if(ll) ll.src=src;})();
 load();if(!S.oddsFmt)S.oddsFmt="frac";if(!S.slip)S.slip=[];if(S.me==null)S.me="";
-paintFmt();drawAll();tick();setInterval(tick,30000);
+paintFmt();paintTheme();drawAll();tick();setInterval(tick,30000);
 /* The odds live in the database. A punter's phone reads them; it never computes them,
    so every screen shows the same price and nobody can reroll their way to a better one.
    Only the organiser simulates, and only to publish. */
