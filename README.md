@@ -31,6 +31,29 @@ WhatsApp, which is where it always belonged. No ciphertext ships and no crypto c
 The Admin passphrase is checked by the database (`admin_check`), not by anything in the page, and
 is changed with `set_admin_token` from the Supabase dashboard.
 
+The organiser never types it. `public.owners` lists him by name, `is_owner()` matches it against the
+caller's own signed-in profile, and `is_admin()` returns true for him before it ever looks at a
+token — so every admin function works unchanged and **no secret reaches his browser**. The page holds
+a sentinel string, not a passphrase; a screenshot of his screen gives nobody anything, and unhiding
+the panel with developer tools gets you a panel whose every button is refused.
+
+## Betting rules that are enforced, and one that no longer is
+
+Enforced in `check_bet_integrity()`, not in the page: you cannot back yourself; a team top-scorer
+market only lists that team's own players; and a market named after one man (`market_subjects`) is
+shut to him both ways, because a Yes/No he decides himself dodges the back-yourself rule entirely.
+
+**Removed deliberately:** backing against your own team on the overall result. Twenty-five points
+across four days with ten a side — nobody throws that for a tenner, and the rule cost more in
+suspicion than it ever saved.
+
+**Never enforced, and left that way:** backing several outcomes in one market. It is a pool, not a
+bookmaker, so covering two of three team results is an ordinary hedge. The slip warns when a
+selection set is both sides of a two-way (cannot lose, cannot really win) or the entire field (a
+refund with extra steps), and the market card says when you are the only money in a pool — where
+every projection correctly reads as the whole pool, because whichever of your selections lands you
+simply get your own stake back.
+
 ## The header
 
 Account and Pay both live in the header, reachable from every tab. The account chip shows who you
