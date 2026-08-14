@@ -251,6 +251,9 @@ letter-spacing:.5px;color:#fff;border:2px solid transparent;background-size:cove
 .poollegend b{width:8px;height:8px;border-radius:2px;display:inline-block}
 #sinceWrap:not(:empty),#onbWrap:not(:empty),#installWrap:not(:empty){padding:12px 16px 0;max-width:1100px;margin:0 auto}
 .install{border-left:3px solid var(--acc)}
+/* One line each, with the team's own colour down the side, rather than both camps run together
+   in a single paragraph with a middle dot between them. */
+.camp{border-left:3px solid;padding-left:9px;margin:6px 0}
 .install ol{margin:8px 0 0;padding-left:20px;font-size:13.5px;line-height:1.6}
 /* The rules card. It has to fit a small phone in one piece, because the accept button is the only
    way past it and a button pushed off the bottom of the screen is a locked door. So: the card is a
@@ -549,7 +552,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
   <div class="card" id="scoreAdm" style="display:none">
     <h2>Enter the score</h2>
     <p class="note">Open to <b>both captains, both sets of vices and the organiser</b> — the men who actually
-    watch the golf, rather than one person typing in twenty-five results he did not see. Set each match as it
+    watch the golf, rather than 1 person typing in 25 results he did not see. Set each match as it
     finishes; the totals and every settled market follow from what is in here. A match left blank has simply
     not been played yet. <b>Put the pairings in as soon as they are drawn, even before they are played</b> —
     the model prices off any draw it can see and only shuffles the rest, so the Sunday singles prices stop
@@ -565,12 +568,12 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
   <details class="card foldcard" id="howCard">
     <summary>
       <div class="mksumin"><h2>How the betting works</h2>
-        <p class="note">The pool, the four numbers on every line, and what you actually collect &mdash; tap to read it</p></div>
+        <p class="note">The pool, the 4 numbers on every line, and what you actually collect &mdash; tap to read it</p></div>
       <span class="chev" aria-hidden="true">&#9662;</span></summary>
     <p class="note">Everyone's money goes into one pot per market. When it is decided, that pot is split
     between whoever backed the winner, in proportion to what they put on. <b>Nobody takes a cut</b> &mdash;
     not the organiser, not the site. Every pound in comes back out to somebody.</p>
-    <p class="note"><b>The four numbers on every line.</b>
+    <p class="note"><b>The 4 numbers on every line.</b>
     <b>Money on</b> &mdash; what has already been staked on that outcome.
     <b>Pays now</b> &mdash; what the pot would pay it if it won this minute. The more money piles onto an
     outcome, the less it pays; the fewer people fancy it, the more.
@@ -630,7 +633,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <h2>Form book</h2>
     <p class="note">Built from <b>573 individual rounds</b> pulled from Squabbit across every player's whole
     history, not just the trips. Pairs-format rounds are excluded throughout, because identical scores across
-    a pairing say nothing about either man. <b>18 of the twenty</b> have a scoring record; the other
+    a pairing say nothing about either man. <b>18 of the 20</b> have a scoring record; the other
     2 have a handicap and nothing else. Refreshed from Squabbit on 13 August 2026.</p>
     <div class="kpi" id="kpis"></div>
   </div>
@@ -647,12 +650,12 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
   <div class="card">
     <h2>Players</h2>
     <p class="note"><b>His average</b> is exactly that: every 18-hole round he has ever logged on Squabbit,
-    on a par-72 basis. Not the last twenty &mdash; all of them, right back to his first. Pairs formats are
+    on a par-72 basis. Not the last 20 &mdash; all of them, right back to his first. Pairs formats are
     thrown out, because in foursomes and scrambles two men share one ball and the score says nothing about
     either of them on his own.</p>
     <p class="note"><b>"Isn't it the best 8 of the last 20?"</b> That is the <b>handicap</b>, and yes it is
     &mdash; that is how a WHS index is built. It is deliberately <em>not</em> how these two columns are built.
-    A handicap is a measure of how well you can play: it takes your eight best days out of twenty and throws
+    A handicap is a measure of how well you can play: it takes your 8 best days out of 20 and throws
     the other twelve in the bin. These columns are a measure of what you will actually shoot on Thursday,
     which has to include the twelve in the bin. Price a golf match off everybody's best eight and you have
     priced a tournament nobody is playing in.</p>
@@ -719,7 +722,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li><b>Every line on your slip is a separate bet.</b> No doubles, no trebles, no accumulators.</li>
       <li><b>Bet early and your stake counts 1.25×</b> when the pot divides &mdash; that is what you get for
         betting before the handicaps are known.</li>
-      <li>You cannot back yourself. Markets shut ten minutes before the relevant tee shot. Pay into the pot
+      <li>You cannot back yourself. Markets shut 10 minutes before the relevant tee shot. Pay into the pot
         with the button at the top.</li>
     </ul>
   </div>
@@ -739,11 +742,11 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         that team's own players, so there is no way to back the other lot into it, and the Yes/No markets
         named after one man are shut to that man both ways. All of it is enforced by the
         database rather than the page, so it cannot be got round with developer tools.</li>
-      <li><b>You CAN back the other team to win overall.</b> Twenty-five points, four days, ten a side —
+      <li><b>You CAN back the other team to win overall.</b> 25 points, 4 days, 10 a side —
         nobody is throwing that for a tenner, and forbidding it bought nothing but suspicion. Back Red, back
         Blue, back the tie. Just do not expect a warm reception when you announce it.</li>
       <li><b>You can back more than one outcome in the same market.</b> It is a pool, not a bookmaker, so
-        covering two of the three team results or two runners in a twenty-man market is an ordinary hedge and
+        covering 2 of the 3 team results or 2 runners in a 20-man market is an ordinary hedge and
         nobody is being robbed. Two things worth knowing before you do it. On a two-way market, backing both
         sides means you cannot lose and, unless the pool is badly lopsided, cannot really win either. And if
         you are the only money in a market, backing several outcomes just hands you your own stake back — the
@@ -762,7 +765,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li><b>Open</b> runs from declaration until each market's own deadline. Handicaps are known and the
         prices are real, so stakes take an ordinary share. Later means safer and cheaper to judge, but a
         thinner slice.</li>
-      <li><b>Closed.</b> <b>There is no in-play betting.</b> Every market shuts <b>ten minutes before the
+      <li><b>Closed.</b> <b>There is no in-play betting.</b> Every market shuts <b>10 minutes before the
         relevant tee shot</b> — not on it. Standing on the tee watching the first drive being addressed is
         not a betting opportunity. Whole-trip markets — MVP, Team Result, Top Scorers, Perfect Record, The
         Blank — shut ten minutes before Thursday's first ball, at <b>13:40 Spanish time, 12:40 UK</b>. A
@@ -777,15 +780,15 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li>Prices are informational. Your return depends on the pool, not the model.</li>
       <li><b>Singles only.</b> No doubles, no trebles, no accumulators. Not out of meanness — a multiple
         needs the prices fixed at the moment you strike it, and fixing prices is exactly the thing that
-        makes a man a bookmaker. Every bet on this board is one selection into one pool. Twenty singles are
+        makes a man a bookmaker. Every bet on this board is 1 selection into 1 pool. 20 singles are
         allowed and encouraged; a treble is not.</li>
     </ul>
     <h3>Scoring</h3>
     <ul>
-      <li><b>25 points</b> at ten a side: five foursomes, five fourball, five scramble, ten singles. A win is
+      <li><b>25 points</b> at 10 a side: 5 foursomes, 5 fourball, 5 scramble, 10 singles. A win is
         one point, a half is a half. Change the squad size and the board recalculates; the numbers on this
         page follow the roster, not the other way round.</li>
-      <li><b>Red are the holders, and that makes the two targets different.</b> Red won it in 2024 and
+      <li><b>Red are the holders, and that makes the 2 targets different.</b> Red won it in 2024 and
         retained it in 2025 on a 12.5 apiece tie. So this year <b>Blue need 13 to take it and Red need only
         12.5 to keep it</b>. Anyone quoting "13 to win" at both teams is giving Red half a point they do not
         need. The scoreboard shows the two targets separately for exactly this reason.</li>
@@ -793,7 +796,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         on <b>the score</b>: 12.5 apiece pays out on <b>Tie</b>, not on Red, even though Red walk home with
         it. Back Red and you are backing Red to <em>outscore</em> Blue. If you think the week ends level,
         back the Tie — it is the outcome that has actually happened once in two years.</li>
-      <li><b>MVP</b> is most points contributed across the four sessions. Maximum four.</li>
+      <li><b>MVP</b> is most points contributed across the 4 sessions. Maximum 4.</li>
       <li>Ties on points are settled by head-to-head singles result, then by a coin toss in the bar.</li>
     </ul>
     <h3>Settlement</h3>
@@ -843,7 +846,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li><b>Handicaps</b> are agreed in the bar on the first night, locked the moment they are declared, and not
         revisited whatever happens on Thursday. Yes, even if he shoots the round of his life. Especially then.</li>
       <li><b>Novelty markets</b> are settled by the organiser on the evidence available. Video beats testimony.</li>
-      <li><b>Disputes</b> go to the organiser. Any dispute involving the organiser goes to the two captains;
+      <li><b>Disputes</b> go to the organiser. Any dispute involving the organiser goes to the 2 captains;
         if they cannot agree the pool is voided and refunded, and everyone sulks equally.</li>
       <li><b>"I was robbed"</b> is not a settlement mechanism. Neither is "the wind got up".</li>
     </ul>
@@ -1014,7 +1017,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       either way for the men with a scoring record, considerably more for the two without. Favourites drift,
       longshots come in, and nothing pretends to a precision it has not got. Tick <em>Handicaps declared</em>
       and it switches off, so the board sharpens the moment you know something. Set it to 0 to disable.</p>
-      <p class="note">The book shuts itself, market by market, ten minutes before each round tees off — the last
+      <p class="note">The book shuts itself, market by market, 10 minutes before each round tees off — the last
       of them on Sunday morning, so the singles stay backable all week. You do not have to remember. Close it
       early if you want. The override is for fixing a stake you keyed into the wrong
       column — leave it off the rest of the time so you cannot do it by accident.</p>
@@ -1053,7 +1056,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <div class="admpane" data-a="tools">
         <div class="card">
       <h2>Something worth telling the group</h2>
-      <p class="note">The board watches for the four things people actually want to hear about &mdash; a
+      <p class="note">The board watches for the 4 things people actually want to hear about &mdash; a
       market about to shut, a session finished, the pot passing a round number, and a winner still waiting
       to be paid. Anything it has spotted since you last looked is below, written as a message short enough
       that people will read it on a phone. <b>Share</b> opens WhatsApp straight from here on a phone;
@@ -1088,7 +1091,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 <h2>Morning report</h2>
       <p class="note">The message for the group. Score, who still owes, and the biggest pools, in plain text
       with no columns &mdash; WhatsApp will not keep them lined up. Anyone who has ticked <em>already paid</em>
-      is listed separately rather than chased, so nobody gets named in front of twenty people for a payment
+      is listed separately rather than chased, so nobody gets named in front of 20 people for a payment
       that is already sitting in your account.</p>
       <div class="row">
         <button class="go" id="repGo">Write today's report</button>
@@ -1855,25 +1858,36 @@ const SCHEDULE=[
  {d:"Sun 27 Sep",t:"Round 4",pick:"08:30",travel:"30 min",tee:"10:10",coll:"16:30",
   course:"Santa Maria Golf Club",note:"Singles Match Play. Collection goes to the airport."}
 ];
+/* `dec` is HOW A HOLE IS WON, which is a different question from the format.
+   All four sessions are hole-by-hole match play. Rounds 1-3 decide each hole on net strokes:
+   lower net score takes it. Round 4 decides each hole on Stableford points.
+
+   Those two are the same thing right up to net double bogey, and then they part company. Points
+   are 2 minus your net score against par, floored at zero — so net double, net triple and net
+   nine are all a blank. Under strokes a net double beats a net triple and wins the hole; under
+   Stableford they are both nought and the hole is halved. That is the whole difference, and it
+   quietly protects whoever has just made a mess of one, which is why the singles prices are a
+   shade closer together than the same men would be under strokes. */
 const DEF_COURSES=[
- {n:"Marbella Golf & Country Club",d:"Thu 24 Sep",par:72,slope:133,rating:71.0,fmt:"foursomes",est:true},
- {n:"Cabopino Golf Club",d:"Fri 25 Sep",par:71,slope:127,rating:67.9,fmt:"fourball",est:false},
- {n:"La Cala Golf, Asia",d:"Sat 26 Sep",par:72,slope:139,rating:69.1,fmt:"scramble",est:false,
+ {n:"Marbella Golf & Country Club",d:"Thu 24 Sep",par:72,slope:133,rating:71.0,fmt:"foursomes",dec:"strokes",est:true},
+ {n:"Cabopino Golf Club",d:"Fri 25 Sep",par:71,slope:127,rating:67.9,fmt:"fourball",dec:"strokes",est:false},
+ {n:"La Cala Golf, Asia",d:"Sat 26 Sep",par:72,slope:139,rating:69.1,fmt:"scramble",dec:"strokes",est:false,
   si:[12,16,18,2,10,4,14,8,6,1,13,3,5,17,11,7,15,9]},
- {n:"Santa Maria Golf Club",d:"Sun 27 Sep",par:72,slope:137,rating:71.7,fmt:"singles",est:false}
+ {n:"Santa Maria Golf Club",d:"Sun 27 Sep",par:72,slope:137,rating:71.7,fmt:"singles",dec:"stableford",est:false}
 ];
 const FMT={foursomes:"Foursomes",fourball:"Fourball",scramble:"Scramble",singles:"Singles"};
+const DEC={strokes:"Net strokes",stableford:"Stableford points"};
 
 const MARKETS=[
- {k:"mvp",n:"MVP",d:"Most points across the four sessions, maximum four. Bragging rights until next September, and the "+"one market where the man who plays above himself for four days gets properly paid for it",type:"model",round:""},
+ {k:"mvp",n:"MVP",d:"Most points across the 4 sessions, maximum 4. Bragging rights until next September, and the "+"one market where the man who plays above himself for 4 days gets properly paid for it",type:"model",round:""},
  {k:"team",n:"Team Result",
   d:"Blue, Red, or the unbearable anticlimax of 12.5 apiece. Settles on THE SCORE, not on the trophy: "+
     "12.5 each pays Tie, not Red, even though Red keep the thing. Back Tie if you fancy the draw",
   type:"model",round:"",team:true},
- {k:"blueTop",n:"Blue Top Scorer",d:"Best of the Blues. Ten runners rather than twenty, so the prices are half as long as MVP for a man "+"you probably rate anyway. Someone has to be",type:"model",round:"",only:"Blue"},
- {k:"redTop",n:"Red Top Scorer",d:"Best of the Reds. Ten runners, twice the chance, and you get to enjoy it in front of them. Enjoy it "+"while it lasts",type:"model",round:"",only:"Red"},
- {k:"perfect",n:"Perfect Record",d:"Four from four, no halves, nothing dropped. It has never been done on this trip, which is exactly "+"why the prices are long enough to be worth a fiver. Insufferable for a decade if it lands",type:"model",round:""},
- {k:"blank",n:"The Blank",d:"Four matches, nil points, one very quiet flight home. Somebody usually gets close, and the man you "+"pick is rarely the one you would guess on Wednesday",type:"model",round:""},
+ {k:"blueTop",n:"Blue Top Scorer",d:"Best of the Blues. 10 runners rather than 20, so the prices are half as long as MVP for a man "+"you probably rate anyway. Someone has to be",type:"model",round:"",only:"Blue"},
+ {k:"redTop",n:"Red Top Scorer",d:"Best of the Reds. 10 runners, twice the chance, and you get to enjoy it in front of them. Enjoy it "+"while it lasts",type:"model",round:"",only:"Red"},
+ {k:"perfect",n:"Perfect Record",d:"4 from 4, no halves, nothing dropped. It has never been done on this trip, which is exactly "+"why the prices are long enough to be worth a fiver. Insufferable for a decade if it lands",type:"model",round:""},
+ {k:"blank",n:"The Blank",d:"4 matches, nil points, 1 very quiet flight home. Somebody usually gets close, and the man you "+"pick is rarely the one you would guess on Wednesday",type:"model",round:""},
  {k:"singles",n:"Sunday Singles",d:"Wins his singles at Santa Maria. Nowhere to hide and no partner to blame, and the only market still "+"open on Sunday morning &mdash; so it is the one that gets sharper the moment the draw goes up",type:"model",round:"4"}
 ];
 const DEF_NOV=[
@@ -1894,14 +1908,14 @@ const DEF_NOV=[
  {k:"nov_cart",n:"First Buggy Incident",
   d:"Kerb, bunker, flowerbed or tree. The FIRST one only, adjudicated by the organiser, so the second and "+
     "third do not count however good they are. Josh Menzies has previous and heads the market on it. Tom, "+
-    "dong, Rob and Gabe are the organiser's fancy at a price, on no evidence whatsoever. One winner out of "+
-    "twenty means the outsiders are long — that is arithmetic, not an opinion about their driving",
+    "dong, Rob and Gabe are the organiser's fancy at a price, on no evidence whatsoever. 1 winner out of "+
+    "20 means the outsiders are long — that is arithmetic, not an opinion about their driving",
   round:"",opts:[],pk:"cart",
   /* Hand-set on previous form off the tee box rather than on it. Josh's is history; the other four
      are a hunch, said out loud in the description so nobody mistakes it for data. The rest come
      from the formula, so there is a pecking order rather than a wall of identical prices. */
   wts:{"Josh Menzies":4.4,"Tom Bucknall":1.85,"Dong Ming Lau":1.85,"Rob Parfitt":1.75,"Gabe Hills":1.7}},
- {k:"nov_shout",n:"First to Blame His Clubs",d:"Out loud, in earshot of at least two witnesses",round:"",opts:[],pk:"clubs"},
+ {k:"nov_shout",n:"First to Blame His Clubs",d:"Out loud, in earshot of at least 2 witnesses",round:"",opts:[],pk:"clubs"},
  {k:"nov_row",n:"Most Likely to Have a Heated Discussion",
   d:"Voices up, clubs down, somebody walking to the next tee on his own. Eamonn and Josh Menzies renewing "+
     "last year's hostilities is the obvious way in; Ben and Gabe are shorter than they should be purely "+
@@ -1915,17 +1929,17 @@ const DEF_NOV=[
      four days and a birthday, so the tail is 9/1, not 33/1. */
   wts:{"Eamonn Brady":2.1,"Josh Menzies":2.1,"Ben West":1.45,"Gabe Hills":1.45}},
  {k:"nov_burn",n:"First to Get Sunburnt",
-  d:"Visible, undeniable, and pointed at by at least two people. Priced on rounds played, on the theory "+
+  d:"Visible, undeniable, and pointed at by at least 2 people. Priced on rounds played, on the theory "+
     "that the man who logs the most golf is the man who has spent the most hours standing in it. It is a daft "+
     "measure and it is meant to be. Brady is favourite on "+
     "reputation alone. Factor 50 is not a betting strategy",
   round:"",opts:[],pk:"sun",wts:{"Eamonn Brady":2.6}},
  {k:"nov_putt3",n:"Most Three-Putts",
-  d:"Across the four rounds, counted honestly by your own playing partners, who will enjoy it enormously. "+
+  d:"Across the 4 rounds, counted honestly by your own playing partners, who will enjoy it enormously. "+
     "Priced off handicap: the short game is where the mark actually comes from",
   round:"",opts:[],pk:"putt3"},
  {k:"nov_miss3",n:"First Missed Three-Footer — Singles",
-  d:"Sunday only, and it has to be inside three feet and genuinely missed. Gimmes are not missed, they are "+
+  d:"Sunday only, and it has to be inside 3 feet and genuinely missed. Gimmes are not missed, they are "+
     "conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he is. Priced "+
     "off handicap and volatility, which is the closest thing to a nerve rating we have",
   round:"4",opts:[],pk:"miss3"},
@@ -1944,7 +1958,7 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-14.35";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.36";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -1962,7 +1976,11 @@ function load(){
  try{const r=localStorage.getItem("chipsip26v2"); if(r) saved=JSON.parse(r);}catch(e){}
  S=freshState();
  if(!saved) return;
- if(saved.v===DATA_V){ S=saved; return; }
+ if(saved.v===DATA_V){ S=saved;
+   /* A saved roster from before the hole rule existed has no `dec` on its courses. Fill it from
+      the defaults rather than letting every round quietly fall back to strokes. */
+   (S.courses||[]).forEach((c,i)=>{ if(!c.dec) c.dec=(DEF_COURSES[i]||{}).dec||"strokes"; });
+   return; }
  /* Newer data has shipped. Keep only what belongs to this person and take everything
     else fresh, otherwise a stale roster in one browser outlives every correction. */
  if(saved.oddsFmt)     S.oddsFmt=saved.oddsFmt;
@@ -2131,8 +2149,20 @@ function sideNet(side,c,fmt,allow){
  /* scramble: play the better ball each time, and being able to choose is worth a shot or so a round */
  const lo=Math.min(ca,cb),hi=Math.max(ca,cb),sm=strokeMap(lo*0.35+hi*0.15,c);
  return ha.map((v,i)=>Math.max(-3,Math.min(v,hb[i])-(Math.random()<0.22?1:0))-sm[i]);}
-function playMatch(A,B){let up=0;
- for(let i=0;i<18;i++){if(A[i]<B[i])up++;else if(B[i]<A[i])up--;
+/* Stableford points from a net score against par: 2 for a net par, one more for each shot better,
+   one fewer for each shot worse, and never below nought. Net double bogey and net nine both score
+   the same blank, which is the entire reason Stableford differs from strokes. */
+const stbl=v=>Math.max(0,2-v);
+/* One match, hole by hole. `dec` says how a hole is won: fewest net strokes, or most Stableford
+   points. They agree on every hole where at least one side breaks net double bogey, and differ
+   only when both sides have blown up — strokes gives it to whoever blew up less, Stableford
+   halves it. */
+function playMatch(A,B,dec){let up=0;
+ const stb = dec==="stableford";
+ for(let i=0;i<18;i++){
+  let a=A[i],b=B[i];
+  if(stb){ const pa=stbl(a),pb=stbl(b); if(pa>pb)up++; else if(pb>pa)up--; }
+  else   { if(a<b)up++; else if(b<a)up--; }
   if(Math.abs(up)>17-i)break;}
  return up>0?1:up<0?0:0.5;}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -2200,18 +2230,18 @@ function runSim(N){
    };
    plan.fixed.forEach(f=>{
      const r = f.result==="blue"?1 : f.result==="red"?0 : f.result==="half"?0.5
-       : playMatch(sideNet(f.bs,c,c.fmt,S.allowance),sideNet(f.rs,c,c.fmt,S.allowance));
+       : playMatch(sideNet(f.bs,c,c.fmt,S.allowance),sideNet(f.rs,c,c.fmt,S.allowance),c.dec);
      award(f.bs,f.rs,r);
    });
    const B=shuffle([...plan.freeB]),R=shuffle([...plan.freeR]);
    const n=Math.min(B.length,R.length);
    if(single){
     for(let i=0;i<n;i++)
-     award([B[i]],[R[i]],playMatch(sideNet([B[i]],c,"singles",S.allowance),sideNet([R[i]],c,"singles",S.allowance)));
+     award([B[i]],[R[i]],playMatch(sideNet([B[i]],c,"singles",S.allowance),sideNet([R[i]],c,"singles",S.allowance),c.dec));
    }else{
     for(let i=0;i+1<n;i+=2){
      const bs=[B[i],B[i+1]],rs=[R[i],R[i+1]];
-     award(bs,rs,playMatch(sideNet(bs,c,c.fmt,S.allowance),sideNet(rs,c,c.fmt,S.allowance)));}
+     award(bs,rs,playMatch(sideNet(bs,c,c.fmt,S.allowance),sideNet(rs,c,c.fmt,S.allowance),c.dec));}
    }});
   if(bTot>M/2)bw++; else if(bTot<M/2)rw++; else tie++;
   margin+=2*bTot-M;
@@ -2467,14 +2497,15 @@ function drawPools(){
    const nB=inP.filter(p=>p.team==="Blue").length, nR=inP.filter(p=>p.team==="Red").length;
    const caps=inP.filter(p=>roleOf(p.name));
    sq.innerHTML = (nB===nR&&nB>1)
-     ? (caps.length?`<div class="card"><h2>The two camps</h2><p class="note">${
+     ? (caps.length?`<div class="card"><h2>The two camps</h2>${
          ["Blue","Red"].map(t=>{const c=caps.filter(p=>p.team===t);
            const cap=c.find(p=>roleOf(p.name)==="C"), vc=c.filter(p=>roleOf(p.name)==="VC");
-           return `<b style="color:var(--${t==="Blue"?"blue2":"red2"})">${t}</b> &mdash; ${
-             cap?esc(cap.name)+" (C)":"no captain named"}${vc.length?", "+vc.map(p=>esc(p.name)).join(" and ")+" (VC)":""}`;
-         }).join(" &middot; ")} &middot; ${nB} a side.</p></div>`:"")
+           return `<p class="note camp" style="border-left-color:var(--${t.toLowerCase()})">
+             <b style="color:var(--${t==="Blue"?"blue2":"red2"})">${t}</b> &mdash; ${
+             cap?esc(cap.name)+" (C)":"no captain named"}${vc.length?", "+vc.map(p=>esc(p.name)).join(" and ")+" (VC)":""}</p>`;
+         }).join("")}<p class="note" style="margin-top:6px">${nB} a side.</p></div>`:"")
      : `<div class="card" style="border-color:var(--warn)"><h2 class="warn">Uneven sides &mdash; ${nB} Blue, ${nR} Red</h2>
-        <p class="note">The format needs equal teams: five matches in each of the three pairs sessions and ten
+        <p class="note">The format needs equal teams: 5 matches in each of the 3 pairs sessions and 10
         singles makes the 25 points. With ${nB} against ${nR} the fixture list does not close, so the model
         will not price anything and the board is showing pools only. Even the sides up in Admin and re-run.</p></div>`;
  }
@@ -2500,7 +2531,7 @@ function drawPools(){
        on the first night. Stakes count ${S.apBonus}× when the pool divides.</span></div>
      <div class="${ph==="open"?"on":""}"><b>2. Open</b><span>from declaration until each market's own
        deadline. Ordinary share, honest prices.</span></div>
-     <div class="${ph==="closed"?"on":""}"><b>3. Closed</b><span>ten minutes before the relevant ball is
+     <div class="${ph==="closed"?"on":""}"><b>3. Closed</b><span>10 minutes before the relevant ball is
        struck. There is no in-play betting.</span></div>
    </div>
    <h3>When each market shuts</h3>
@@ -2767,7 +2798,7 @@ function drawPools(){
      exist; any match the captains have entered is played exactly as it stands.
      <b>Nobody's hand is on the scale.</b> The organiser cannot nudge a price: the model does not know who
      is popular, who is captain, who has money on what, or which team anyone is on. It is the same
-     arithmetic applied to twenty men, run ${(PUB.n||0).toLocaleString()} times, and it is published once
+     arithmetic applied to 20 men, run ${(PUB.n||0).toLocaleString()} times, and it is published once
      so every phone shows the identical number. Being the favourite here is a statement about your scoring
      record and nothing else &mdash; and it still does not decide what you get paid. The pool does that.`
   : `The organiser has not published a set of model prices yet. Pools and stakes are live and you can bet
@@ -2856,7 +2887,7 @@ function drawSlip(){
      <button class="ghost" id="slipClear">Clear the lot</button>
    </div>
    <div class="err" id="slipErr"></div><div class="ok" id="slipOk"></div>
-   <p class="note slipnote"><b>Each line is a separate bet.</b> Three selections is three singles, not a
+   <p class="note slipnote"><b>Each line is a separate bet.</b> 3 selections is 3 singles, not a
    treble &mdash; there are no accumulators on this board. Whole pounds, minimum £${S.minStake||1}. Bets are
    recorded against your account the moment you place them. Everyone sees the size of each pot; only you see
    what is yours.</p></div>`;
@@ -3139,7 +3170,7 @@ const ONB=[
      "Those four are shortcuts, not the only options. <b>Any whole number of pounds works</b> &mdash; open "
      +"the slip and type it.",
      "Your selections gather in the bar at the bottom. Press <b>Place</b> when you are happy.",
-     "<b>Every line is its own bet.</b> Three selections is three singles, not a treble.",
+     "<b>Every line is its own bet.</b> 3 selections is 3 singles, not a treble.",
      "Then pay into the pot with the button in the header. It shows what you owe."]}];
 /* Bump this if the rules materially change and everyone should have to read and accept them
    again. Anyone whose stored acceptance is for an older version gets the card back. */
@@ -3749,7 +3780,7 @@ function drawRecon(){
    <tr><td>Unclaimed &mdash; the 2027 pot</td><td class="num">${money0(unclaimed)}</td>
      <td class="small">Won by outcomes nobody backed. Stays put and rolls into next year.</td></tr>
    <tr><td><b>Left when everyone has paid up</b></td><td class="num"><b>${money0(atEnd)}</b></td>
-     <td class="small">Stakes less winnings. Should equal the two lines above it.</td></tr>
+     <td class="small">Stakes less winnings. Should equal the 2 lines above it.</td></tr>
  </table></div>
  ${Math.abs(drift)>0.02
    ? `<p class="note" style="color:var(--warn)"><b>${money0(Math.abs(drift))} does not add up.</b>
@@ -4038,11 +4069,13 @@ function drawAdmin(){
   const p=S.players[+e.target.dataset.i]; if(p&&p.base){p.form=p.base.form;save();drawAdmin();
    runMsg(`${p.name}'s form back to the measured figure. Press Apply and re-run to publish it.`,"warn");}}));
 
- let c=`<tr><th>Round</th><th>Course</th><th>Format</th><th class="num">Par</th><th class="num">Slope</th><th class="num">Rating</th></tr>`;
+ let c=`<tr><th>Round</th><th>Course</th><th>Format</th><th>A hole is won on</th><th class="num">Par</th><th class="num">Slope</th><th class="num">Rating</th></tr>`;
  S.courses.forEach((x,i)=>{c+=`<tr><td class="small">${esc(x.d)}</td>
   <td><input class="cn" data-i="${i}" value="${esc(x.n)}" style="width:180px"></td>
   <td><select class="cf" data-i="${i}">${Object.keys(FMT).map(k=>
     `<option value="${k}"${x.fmt===k?" selected":""}>${FMT[k]}</option>`).join("")}</select></td>
+  <td><select class="cd" data-i="${i}">${Object.keys(DEC).map(k=>
+    `<option value="${k}"${(x.dec||"strokes")===k?" selected":""}>${DEC[k]}</option>`).join("")}</select></td>
   <td class="num"><input type="number" class="cp" data-i="${i}" value="${x.par}"></td>
   <td class="num"><input type="number" class="cs" data-i="${i}" value="${x.slope}"></td>
   <td class="num"><input type="number" step="0.1" class="cr" data-i="${i}" value="${x.rating}"></td></tr>`;});
@@ -4051,6 +4084,7 @@ function drawAdmin(){
   f(S.courses[+e.target.dataset.i],e.target);save();}));
  cb("cn",(x,e)=>x.n=e.value);cb("cp",(x,e)=>x.par=+e.value);cb("cs",(x,e)=>x.slope=+e.value);
  cb("cr",(x,e)=>{x.rating=+e.value;x.est=false;});cb("cf",(x,e)=>x.fmt=e.value);
+ cb("cd",(x,e)=>x.dec=e.value);
 
  $("#novWrap").innerHTML=(S.novelty||[]).map((m,i)=>
   `<div class="row"><b style="flex:1">${esc(m.n)}</b>
@@ -4128,7 +4162,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-14.35</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-14.36</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -4309,7 +4343,7 @@ $("#admRun").addEventListener("click",async e=>{
    PUB=DB.settings.prices; drawAll();
    const moved=S.players.filter(p=>p.base&&Math.abs(p.hcp-p.base.hcp)>0.001).length;
    /* A mark that disagrees violently with the man's own scoring is nearly always a slip of the
-      keyboard, and this publishes to twenty people. Say so rather than let it go quietly. */
+      keyboard, and this publishes to 20 people. Say so rather than let it go quietly. */
    const odd=S.players.filter(p=>p.in&&!p.unknown&&Math.abs(p.form-p.hcp)>12)
      .map(p=>`${p.name} off ${p.hcp} but scoring ${p.form.toFixed(1)}`);
    const pl=SIMPLAN.total?`  Pairings: ${SIMPLAN.fixed} of ${SIMPLAN.total} matches drawn`
