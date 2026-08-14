@@ -114,6 +114,7 @@ max-width:210px}
 cursor:pointer;font-size:12px;font-weight:700;background:var(--acc);border:1px solid var(--acc);
 color:var(--on);text-decoration:none}
 .paychip .owed{font-weight:600;opacity:.85}
+.paychip.pending{background:transparent;color:var(--acc2);border-color:var(--okbd);cursor:default}
 @media(max-width:719px){ .acctchip{padding:5px 11px;max-width:148px} .paychip{padding:5px 11px}
  .hctl{gap:6px} }
 
@@ -2044,11 +2045,11 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-14.38";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.39";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
- admPane:"settle",poView:"market",poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,
+ admPane:"settle",poView:"market",poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,paidClaim:0,
  onboarded:false,onbStep:0,rulesV:0,rulesAt:0,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
  players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
@@ -2087,6 +2088,7 @@ function load(){
  if(saved.phaseOpen) S.phaseOpen=true;
  if(saved.howOpen)   S.howOpen=true;
  if(saved.filtOpen)  S.filtOpen=true;
+ if(saved.paidClaim) S.paidClaim=+saved.paidClaim||0;
  /* the slip is deliberately dropped: it can hold selections on players who have since
     been renamed or removed, and an unplaceable bet on a ghost is worse than no bet */
  save();
@@ -2243,14 +2245,18 @@ const stbl=v=>Math.max(0,2-v);
    points. They agree on every hole where at least one side breaks net double bogey, and differ
    only when both sides have blown up — strokes gives it to whoever blew up less, Stableford
    halves it. */
-function playMatch(A,B,dec){let up=0;
+function playMatch(A,B,dec){let up=0,ended=18;
  const stb = dec==="stableford";
  for(let i=0;i<18;i++){
   let a=A[i],b=B[i];
   if(stb){ const pa=stbl(a),pb=stbl(b); if(pa>pb)up++; else if(pb>pa)up--; }
   else   { if(a<b)up++; else if(b<a)up--; }
-  if(Math.abs(up)>17-i)break;}
- return up>0?1:up<0?0:0.5;}
+  /* Dormie and gone. A lead bigger than the holes left cannot be pulled back, so the match is
+     over here and the hole it ended on is what "3 and 2" is counting. */
+  if(Math.abs(up)>17-i){ ended=i+1; break; }}
+ return {r: up>0?1:up<0?0:0.5, up:Math.abs(up), ended};}
+/* Everything downstream that only wants the result keeps working. */
+const mres=x=>typeof x==="object"?x.r:x;
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 let ODDS=null,TEAMP=null;      /* what this browser simulated */
@@ -2296,8 +2302,12 @@ function runSim(N){
           played:PLANS.reduce((a,p)=>a+p.fixed.filter(f=>f.result).length,0),
           total:S.courses.reduce((a,c)=>a+(c.fmt==="singles"?blue.length:Math.floor(blue.length/2)),0)};
  const names=[...blue,...red].map(p=>p.name);
- const pts={},win={},per={},blank={},sing={};
- names.forEach(n=>{pts[n]=0;win[n]=0;per[n]=0;blank[n]=0;sing[n]=0;});
+ const pts={},win={},per={},blank={},sing={},spoon={},prs={};
+ names.forEach(n=>{pts[n]=0;win[n]=0;per[n]=0;blank[n]=0;sing[n]=0;spoon[n]=0;});
+ /* Per session: who wins the day, whether anybody sweeps it, which match goes furthest and
+    which is the biggest hiding. Indexed 1..4 to match the way the rounds are named. */
+ const day={},swp={},motd={},mrg={};
+ [1,2,3,4].forEach(k=>{day[k]={Blue:0,Red:0,Tie:0};swp[k]={Blue:0,Red:0,No:0};motd[k]={};mrg[k]={};});
  let bw=0,rw=0,tie=0,margin=0;
  const K=blue.length;
  const blind=!S.declared&&!S.closed;
@@ -2308,16 +2318,28 @@ function runSim(N){
   let bTot=0, M=0;                       /* bTot = Blue's points, M = matches played */
   S.courses.forEach((c,ci)=>{
    const plan=PLANS[ci], single=c.fmt==="singles";
-   const award=(bs,rs,r)=>{
+   /* Per-session bookkeeping for the day markets. `slot` counts the matches in the order they
+      appear on the card, because that is what "Match 3" means to a man reading the board. */
+   let sB=0,sN=0,slot=0;
+   const legs=[];
+   const award=(bs,rs,x)=>{
+     const r=mres(x);
      /* both partners bank the point, so player totals sum to more than the match count —
         the team result must be judged on bTot vs M, never on the sum of player scores */
      bs.forEach(p=>sc[p.name]+=r); rs.forEach(p=>sc[p.name]+=1-r); bTot+=r; M++;
+     sB+=r; sN++;
+     slot++;
+     legs.push({slot, up:(typeof x==="object"?x.up:0), ended:(typeof x==="object"?x.ended:18), r});
      if(single){ if(r===1)sing[bs[0].name]++; if(r===0)sing[rs[0].name]++; }
+     /* A partnership is two men who actually played together. Both orders map to one key. */
+     if(!single&&bs.length===2){const k=pairKey(bs[0].name,bs[1].name); prs[k]=(prs[k]||0)+r;}
+     if(!single&&rs.length===2){const k=pairKey(rs[0].name,rs[1].name); prs[k]=(prs[k]||0)+(1-r);}
    };
    plan.fixed.forEach(f=>{
-     const r = f.result==="blue"?1 : f.result==="red"?0 : f.result==="half"?0.5
+     const x = f.result==="blue"?{r:1,up:0,ended:18} : f.result==="red"?{r:0,up:0,ended:18}
+       : f.result==="half"?{r:0.5,up:0,ended:18}
        : playMatch(sideNet(f.bs,c,c.fmt,S.allowance),sideNet(f.rs,c,c.fmt,S.allowance),c.dec);
-     award(f.bs,f.rs,r);
+     award(f.bs,f.rs,x);
    });
    const B=shuffle([...plan.freeB]),R=shuffle([...plan.freeR]);
    const n=Math.min(B.length,R.length);
@@ -2328,7 +2350,30 @@ function runSim(N){
     for(let i=0;i+1<n;i+=2){
      const bs=[B[i],B[i+1]],rs=[R[i],R[i+1]];
      award(bs,rs,playMatch(sideNet(bs,c,c.fmt,S.allowance),sideNet(rs,c,c.fmt,S.allowance),c.dec));}
-   }});
+   }
+   /* ---- the day markets, settled inside the session that produced them ---- */
+   const S1=ci+1;
+   if(sN){
+     if(sB>sN/2) day[S1].Blue++; else if(sB<sN/2) day[S1].Red++; else day[S1].Tie++;
+     const allB=legs.every(l=>l.r===1), allR=legs.every(l=>l.r===0);
+     if(allB) swp[S1].Blue++; else if(allR) swp[S1].Red++; else swp[S1].No++;
+     /* Furthest: the highest hole anybody reached. Ties split, because two matches genuinely
+        can both go up the last. */
+     const deep=Math.max(...legs.map(l=>l.ended));
+     const dl=legs.filter(l=>l.ended===deep);
+     dl.forEach(l=>{ motd[S1][l.slot]=(motd[S1][l.slot]||0)+1/dl.length; });
+     /* Biggest hiding. A halved match has no margin and cannot win it. */
+     const won=legs.filter(l=>l.r!==0.5);
+     if(won.length){
+       const big=Math.max(...won.map(l=>l.up));
+       const bl=won.filter(l=>l.up===big);
+       bl.forEach(l=>{ mrg[S1][l.slot]=(mrg[S1][l.slot]||0)+1/bl.length; });
+     }
+   }
+  });
+  /* Fewest points on the trip. The mirror of MVP, ties split the same way. */
+  let lo=1e9,ln=[];names.forEach(n=>{if(sc[n]<lo){lo=sc[n];ln=[n];}else if(sc[n]===lo)ln.push(n);});
+  ln.forEach(n=>spoon[n]=(spoon[n]||0)+1/ln.length);
   if(bTot>M/2)bw++; else if(bTot<M/2)rw++; else tie++;
   margin+=2*bTot-M;
   let hi=-1,hn=[];names.forEach(n=>{if(sc[n]>hi){hi=sc[n];hn=[n];}else if(sc[n]===hi)hn.push(n);});
@@ -2344,8 +2389,29 @@ function runSim(N){
  names.forEach(n=>{ODDS[n]={mvp:win[n]/N,perfect:per[n]/N,blank:blank[n]/N,
   singles:sing[n]/N,avgPts:pts[n]/N,
   blueTop:(win["B_"+n]||0)/N,redTop:(win["R_"+n]||0)/N};});
+ names.forEach(n=>{ODDS[n].spoon=(spoon[n]||0)/N;});
  TEAMP={Blue:bw/N,Red:rw/N,Tie:tie/N,margin:margin/N};
+ /* Everything that is not about one player. Published alongside the player prices. */
+ EXTRA={day:{},sweep:{},motd:{},margin:{},pairs:{}};
+ [1,2,3,4].forEach(k=>{
+   EXTRA.day[k]  ={Blue:day[k].Blue/N,Red:day[k].Red/N,Tie:day[k].Tie/N};
+   EXTRA.sweep[k]={Blue:swp[k].Blue/N,Red:swp[k].Red/N,No:swp[k].No/N};
+   EXTRA.motd[k]={};   Object.keys(motd[k]).forEach(sl=>EXTRA.motd[k][sl]=motd[k][sl]/N);
+   EXTRA.margin[k]={}; Object.keys(mrg[k]).forEach(sl=>EXTRA.margin[k][sl]=mrg[k][sl]/N);
+ });
+ const pt=Object.values(prs).reduce((a,b)=>a+b,0);
+ if(pt>0){
+   /* Which partnership takes most points. Only pairings that actually played are in here, so
+      before a draw goes up the market has no runners and says so. */
+   const best={};
+   Object.keys(prs).forEach(k=>{best[k]=prs[k];});
+   const tot=Object.values(best).reduce((a,b)=>a+b,0);
+   Object.keys(best).forEach(k=>EXTRA.pairs[k]=best[k]/Math.max(1e-9,tot));
+ }
 }
+/* Two men, one key, whichever way round the captain typed them. */
+const pairKey=(a,b)=>[a,b].sort((x,y)=>x.localeCompare(y)).join(" & ");
+let EXTRA=null;
 
 /* Three phases. Ante-post runs until the handicaps are declared in the bar on the first night;
    open runs from then until the first tee shot; after that the book is shut. */
@@ -2575,10 +2641,27 @@ const ICONS={
 };
 /* Which glyph belongs to which novelty market. The `pk` on each market is the pricing model it
    uses, which happens to be exactly the right key for this. */
-const NOV_ICON={cart:"buggy",water:"water",clubs:"club",burn:"sun",putt3:"putt",putts:"putt",
- miss3:"putt",air:"ball",balls:"ball",heat:"row",cunt:"mouth",drunk:"pint",rob30:"pint"};
-const iconFor=(g,m)=>g.id==="nov"?icon(NOV_ICON[m&&m.pk]||NOV_ICON[(m&&m.k||"").replace(/^nov_/,"")]||"pint"):icon(g.ic);
+const NOV_ICON={
+ /* by pricing model */
+ cart:"buggy",water:"water",clubs:"club",sun:"sun",burn:"sun",putt3:"putt",putts:"putt",
+ miss3:"putt",air:"ball",balls:"ball",
+ /* and by market key, for the hand-priced ones that have no pricing model at all */
+ shout:"club",row:"row",heat:"row",josh:"mouth",cunt:"mouth",rob:"pint",rob30:"pint",drunk:"pint"};
+const iconFor=(g,m)=>{
+ if(g.id!=="nov") return icon(g.ic);
+ const k=(m&&m.k||"").replace(/^nov_/,"");
+ return icon(NOV_ICON[m&&m.pk]||NOV_ICON[k]||"pint");};
 const icon=k=>`<svg class="mico" viewBox="0 0 20 20" aria-hidden="true">${ICONS[k]||ICONS.ball}</svg>`;
+/* "20 runners" is racing. Half these markets are not people at all, and calling Yes and No a
+   pair of runners is the sort of thing that makes a board feel like it was written for somebody
+   else. Say what the outcomes actually are. */
+function runnerWord(rows,n){
+ const labels=rows.map(r=>r.label);
+ const yn=labels.length<=3&&labels.every(l=>/^(yes|no|tie|blue|red|nobody|neither)$/i.test(l));
+ if(yn) return "<b>"+labels.join("</b> or <b>")+"</b>";
+ if(rows.every(r=>r.player)) return n+" player"+(n===1?"":"s");
+ return n+" outcome"+(n===1?"":"s");
+}
 function drawPools(){
  /* Reveal the panel the moment we know who he is, without waiting for a tab click. */
  if(ADMIN_TOKEN){const lk=$("#adminLock"),bd=$("#admBody");
@@ -2806,7 +2889,7 @@ function drawPools(){
       ${m.type==="novelty"?'<span class="tag">novelty</span>':""}
       ${m.round?`<span class="tag">R${m.round}</span>`:'<span class="tag">whole trip</span>'}
       ${mine?`<span class="tag" style="border-color:var(--acc);color:var(--acc2)">${mine} on your slip</span>`:""}</h2>
-     <p class="note">pool <b>£${money.toFixed(0)}</b> &middot; ${nRun} runner${nRun===1?"":"s"}
+     <p class="note">pool <b>£${money.toFixed(0)}</b> &middot; ${runnerWord(rows,nRun)}
       &middot; ${mp==="settled"?(RES.void?"<b>void &mdash; nobody won it</b>":"won by <b>"+esc(WON.join(" and "))+"</b>")
         :mp==="off"?"<b>withdrawn</b>"
         :mp==="closed"?"<b>shut</b>":`closes in <b data-cd="${deadline(m).getTime()}">${untilStr(deadline(m))}</b>`}</p></div>
@@ -3054,6 +3137,7 @@ function payReminder(justStaked){
    if(!amt){$("#payMsg").innerHTML='<span class="neg">Put in what you sent.</span>';return;}
    e.target.disabled=true;
    try{ await rpc("claim_paid",{p_amount:amt,p_note:"ticked on the board"});
+     S.paidClaim=amt; save();
      $("#payMsg").textContent=amt>=owed
        ? "Noted. The organiser will match it against his bank and mark you off."
        : `Noted — £${amt} of £${owed}. The other £${owed-amt} stays on your tab.`;
@@ -3121,7 +3205,11 @@ async function placeSlip(){
    fetched or shown — the header is not a leaderboard of who is behind on his payments. */
 function myOwed(){
  const r=(DB.myledger&&DB.myledger[0])||null;
- return r?Math.max(0,+r.balance||0):0;
+ const owed=r?Math.max(0,+r.balance||0):0;
+ /* Once the organiser has actually recorded the money, the local "I have paid" note has done its
+    job and is thrown away — otherwise a later bet would show as already-sent when it is not. */
+ if(S.paidClaim&&owed<=0){S.paidClaim=0;save();}
+ return owed;
 }
 function drawAcctChip(){
  const c=$("#acctChip"); if(!c) return;
@@ -3133,11 +3221,24 @@ function drawAcctChip(){
    c.className="acctchip";
    c.innerHTML=`<span class="dot out"></span><span class="who">Sign in to bet</span>`;
  }
+ /* The Pay button is a bill, not a decoration. It appears when you owe something, says how much,
+    and disappears the moment the organiser records the money as received. It used to sit there
+    permanently whatever your balance was, which trains people to ignore it. */
  const owed=myOwed(), pay=$("#payChip");
  if(pay){
-   if(S.payLink){ pay.hidden=false; pay.href=S.payLink;
-     pay.innerHTML=`${esc(S.payLabel||"Pay into the pot")}${owed?` <span class="owed">£${owed}</span>`:""}`;
-   } else pay.hidden=true;
+   const claim=+S.paidClaim||0, claimCovers=claim>0&&claim>=owed;
+   if(!AUTH.tok||!AUTH.name||!S.payLink||owed<=0){
+     pay.hidden=true;
+   } else if(claimCovers){
+     /* He has told the board he has sent it and the organiser has not matched it off yet.
+        Chasing him again for money already in the account is the fastest way to be ignored. */
+     pay.hidden=false; pay.removeAttribute("href");
+     pay.className="paychip pending";
+     pay.innerHTML=`&#10003; £${owed} sent &mdash; awaiting confirmation`;
+   } else {
+     pay.hidden=false; pay.href=S.payLink; pay.className="paychip";
+     pay.innerHTML=`${esc(S.payLabel||"Pay into the pot")} <span class="owed">£${owed}</span>`;
+   }
  }
 }
 function drawAuth(){
@@ -4286,7 +4387,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-14.38</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-14.39</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
