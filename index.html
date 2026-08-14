@@ -79,7 +79,14 @@ nav button{flex:0 0 auto;background:none;border:0;color:var(--dim);padding:13px 
 font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
 nav button.on{color:var(--ink);border-bottom-color:var(--acc)}
 main{padding:16px;max-width:1100px;margin:0 auto}
-section{display:none}section.on{display:block}
+main > section{display:none}main > section.on{display:block}
+/* ---- admin sub-tabs: the panel had grown to nine cards and a mile of scroll ---- */
+.subnav{display:flex;overflow-x:auto;gap:4px;border:1px solid var(--line);background:var(--panel);
+  border-radius:99px;padding:4px;margin-bottom:14px;position:static}
+.subnav button{flex:0 0 auto;background:none;border:0;color:var(--dim);padding:9px 15px;font-size:13px;
+  font-weight:700;cursor:pointer;border-radius:99px;white-space:nowrap}
+.subnav button.on{background:var(--acc);color:var(--on)}
+.admpane{display:none}.admpane.on{display:block}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
 .card h2{margin:0 0 4px;font-size:15px}
 .card h3{margin:14px 0 6px;font-size:12px;color:var(--acc2);text-transform:uppercase;letter-spacing:.6px}
@@ -200,11 +207,63 @@ min-width:42px}
   font-size:10px;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin-right:2px}
 .mkfig.strong{color:var(--acc2)}
 .mkrow.barred{opacity:.5}
+/* ---- who to pay ---------------------------------------------------------------------------- */
+.paytotals{display:flex;flex-wrap:wrap;gap:10px;margin:2px 0 12px}
+.paytot{flex:1 1 130px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--panel2)}
+.paytot span{display:block;font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--dim);font-weight:700}
+.paytot b{font-size:19px;font-family:var(--mono)}
+.paytot.big b{font-size:27px}
+.paytot.big.due{border-color:var(--red);border-left:5px solid var(--red)}
+.paytot.big.due b{color:var(--red2)}
+.paytot.big.clear{border-color:var(--acc);border-left:5px solid var(--acc)}
+.paytot.big.clear b{color:var(--acc2)}
+.paymk{border:1px solid var(--line);border-left:4px solid var(--red);border-radius:10px;
+  padding:9px 11px;margin-bottom:9px;background:var(--panel)}
+.paymk.cleared{border-left-color:var(--acc);opacity:.72}
+.paymkhd{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:14px}
+.paymkhd .paydue{margin-left:auto;color:var(--red2);font-weight:800;font-family:var(--mono)}
+.paymkhd .paydone{margin-left:auto;color:var(--acc2);font-weight:700;font-size:12px}
+.payline{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--line2)}
+.payline.paid{opacity:.6}
+.payname{flex:1 1 auto;min-width:0;font-size:14px;font-weight:600}
+.payname .small{font-weight:400}
+.payamt2{font-family:var(--mono);font-size:20px;font-weight:800;color:var(--red2);white-space:nowrap}
+.payline.paid .payamt2{font-size:15px;font-weight:600;color:var(--dim)}
+.paybtn{display:flex;align-items:center;gap:6px}
+.paybtn .paygo{padding:9px 18px;font-size:14px;font-weight:800;min-height:42px}
+.paytick{color:var(--acc2);font-weight:700;font-size:12.5px;white-space:nowrap}
+.paybtn .payundo{padding:3px 8px;font-size:11px}
+@media(max-width:719px){
+  .payamt2{font-size:17px}
+  .paybtn .paygo{padding:9px 14px}
+  .paytot.big b{font-size:23px}
+}
+/* ---- a settled market -----------------------------------------------------------------------
+   A result is the loudest thing on the card. It sits above the description, in the accent colour,
+   with the winner set large, and the beaten runners fade back so the eye goes straight to it. */
+.mkcard.issettled{border-color:var(--acc)}
+.resbanner{border:1px solid var(--acc);border-left:5px solid var(--acc);border-radius:10px;
+  background:var(--panel2);padding:11px 13px;margin:2px 0 10px}
+.resbanner.void{border-color:var(--warn);border-left-color:var(--warn)}
+.reslab{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);font-weight:700}
+.reswho{font-size:22px;line-height:1.15;font-weight:800;color:var(--acc2);margin:1px 0 4px}
+.resbanner.void .reswho{color:var(--warn)}
+.ressub{font-size:12.5px;color:var(--dim);line-height:1.45}
+.resmine{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:13.5px}
+.resmine.up{color:var(--acc2)}.resmine.down{color:var(--red2)}
+.mkrow.lost{opacity:.45}
+.mkrow.won{background:var(--panel2);border-radius:8px}
+.wintick{color:var(--acc2);font-weight:800}
+.tag.winner{border-color:var(--acc);color:var(--acc2);font-weight:800;letter-spacing:.5px}
+.tag.settled{border-color:var(--acc);color:var(--acc2);font-weight:800;letter-spacing:.6px}
 .nope{color:var(--warn);font-size:11px;text-align:right;display:inline-block;max-width:110px;line-height:1.25}
 @media(min-width:720px){
   .mkhead{display:grid}
-  .mkhead,.mkrow{grid-template-columns:minmax(0,1fr) 84px 84px 84px 74px 104px;
+  /* Seven columns, not six. The face is a grid item too, and leaving it out of the count pushed
+     every figure one column left of its heading and bumped the stake buttons onto a second row. */
+  .mkhead,.mkrow{grid-template-columns:44px minmax(0,1fr) 78px 78px 74px 68px 150px;
     grid-template-areas:none;align-items:center;gap:8px}
+  .face{grid-area:auto;grid-column:1}
   .mkhead span{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding-bottom:6px}
   .mkhead{border-bottom:1px solid var(--line)}
   .mkname,.mkact,.mkbar{grid-area:auto}
@@ -326,7 +385,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <img id="logo" alt="Chip &amp; Sip Championship" src="data:image/png;base64,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">
     <div><h1>CHIP &amp; SIP <span>2026</span></h1>
       <div class="sub" id="hdr">loading&hellip;</div>
-      <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-14.31</div></div>
+      <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-14.32</div></div>
   </div>
   <div class="hctl">
     <div class="seg" id="oddsFmt"><button data-f="frac">Fractions</button><button data-f="dec">Decimals</button></div>
@@ -656,6 +715,79 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
   </div>
 
   <div id="admBody" style="display:none">
+
+    <nav class="subnav" id="admNav">
+      <button data-a="settle" class="on">Settle &amp; pay</button>
+      <button data-a="money">Money</button>
+      <button data-a="squad">Squad</button>
+      <button data-a="setup">Setup</button>
+      <button data-a="tools">Tools</button>
+    </nav>
+
+    <div class="admpane on" data-a="settle">
+    <div class="card">
+<h2>Settle the markets</h2>
+      <p class="note">Call each market as it is decided. Pick the winning outcome &mdash; or more than one for a
+      dead heat &mdash; or mark it void if nobody won it at all. Everything after that is arithmetic: the pool
+      divides itself, ante-post stakes carry their multiplier, and each man sees his own return and nobody
+      else's. Nothing is deducted anywhere.</p>
+      <p class="note"><b>A settled market stops taking bets immediately</b>, on every phone and in the
+      database, so nobody can back a result that has already been called. <b>Unsettle</b> puts it back to
+      pending if you call one wrong. <b>Withdraw it</b> pulls a market off the board without settling it
+      &mdash; use that for one that turns out to be a bad idea, then settle it void to hand the money back.</p>
+      <div id="setlWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>Who to pay</h2>
+      <p class="note">The moment a market is settled, everyone owed money appears here. Work down the list,
+      hand the money over, and press <b>Paid</b> as you go &mdash; the row goes green and drops out of the
+      outstanding total, so you can put the phone down mid-round and pick up exactly where you left off.</p>
+      <div class="row" style="margin:0 0 8px">
+        <div class="seg" id="poView"><button data-v="market" class="on">By market</button><button data-v="person">By person</button></div>
+        <label class="small"><input type="checkbox" id="poDone"> show the ones already paid</label>
+      </div>
+      <div id="poWrap"></div>
+    </div>
+
+    <div class="card">
+<h2>Settle up</h2>
+      <p class="note">What each man staked, what he has paid in, what he has collected, and the difference.
+      Positive means he is up and the pot owes him; negative means he owes the pot.</p>
+      <div class="wrap"><table id="setlSheet"></table></div>
+      <div id="unclaimWrap"></div>
+    </div>
+    </div>
+
+    <div class="admpane" data-a="money">
+    <div class="card">
+<h2>Ledger</h2>
+      <p class="note">Every bet anyone has struck, on any phone. This view is yours alone &mdash; punters can
+      only see their own bets and the size of each pot. Tap the button to record someone as settled up.</p>
+      <div class="wrap"><table id="ledgTbl"></table></div>
+    </div>
+
+    <div class="card">
+<h2>Every bet</h2>
+      <p class="note">Void anything struck in error. Voided bets leave the pools and the ledger immediately
+      but stay in the database, so there is always a record of what happened.</p>
+      <div class="wrap"><table id="betsTbl"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Payment</h2>
+      <p class="note">Starling <b>Settle Up</b> is the tool: it produces a secure link, Starling users pay in
+      the app and everyone else pays by debit card on a web page, so nobody needs to be a customer. Create it
+      once, paste it here, and it shows as a Pay button in the header, on every tab. Money lands in your main account —
+      sweep it into a Chip &amp; Sip Space yourself, because Spaces cannot be paid into from outside.</p>
+      <div class="row">
+        <input id="payLink" placeholder="https://settleup.starlingbank.com/..." style="min-width:280px;flex:1">
+        <input id="payLabel" placeholder="Button label" style="width:150px">
+      </div>
+    </div>
+    </div>
+
+    <div class="admpane" data-a="squad">
     <div class="card">
       <h2>Roster</h2>
       <p class="note">Change a handicap and every price moves. <b>Form</b> is expected scoring differential,
@@ -677,76 +809,6 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     </div>
 
     <div class="card">
-      <h2>Payment</h2>
-      <p class="note">Starling <b>Settle Up</b> is the tool: it produces a secure link, Starling users pay in
-      the app and everyone else pays by debit card on a web page, so nobody needs to be a customer. Create it
-      once, paste it here, and it shows as a Pay button in the header, on every tab. Money lands in your main account —
-      sweep it into a Chip &amp; Sip Space yourself, because Spaces cannot be paid into from outside.</p>
-      <div class="row">
-        <input id="payLink" placeholder="https://settleup.starlingbank.com/..." style="min-width:280px;flex:1">
-        <input id="payLabel" placeholder="Button label" style="width:150px">
-      </div>
-      <h3>Morning report</h3>
-      <p class="note">The message for the group. Score, who still owes, and the biggest pools, in plain text
-      with no columns &mdash; WhatsApp will not keep them lined up. Anyone who has ticked <em>already paid</em>
-      is listed separately rather than chased, so nobody gets named in front of twenty people for a payment
-      that is already sitting in your account.</p>
-      <div class="row">
-        <button class="go" id="repGo">Write today's report</button>
-        <button class="ghost" id="repCopy">Copy it</button>
-        <label class="small"><input type="checkbox" id="repPools" checked> include the big pools</label>
-        <span class="small" id="repMsg"></span>
-      </div>
-      <textarea id="repOut" spellcheck="false" placeholder="Press the button and it appears here"></textarea>
-
-      <h3>Dress rehearsal</h3>
-      <p class="note">Run the whole Sunday-night sequence on obviously fake money before it matters. This
-      drops five bets of £5 to £25 into a market of your choosing, under names beginning <b>REHEARSAL</b> so
-      they can never be mistaken for real ones. Settle it below, check the payouts and the settle-up sheet
-      add up, then clear it. <b>Clearing removes the fake bets and any settlement they caused, and nothing
-      else</b> &mdash; a real bet or a real result in the same market survives untouched.</p>
-      <div class="row">
-        <select id="rehMk" style="min-width:190px"></select>
-        <button class="go" id="rehGo">Start a rehearsal</button>
-        <button class="ghost" id="rehEnd">Clear the rehearsal</button>
-        <span class="small" id="rehMsg"></span>
-      </div>
-
-      <h3>Settle the markets</h3>
-      <p class="note">Call each market as it is decided. Pick the winning outcome &mdash; or more than one for a
-      dead heat &mdash; or mark it void if nobody won it at all. Everything after that is arithmetic: the pool
-      divides itself, ante-post stakes carry their multiplier, and each man sees his own return and nobody
-      else's. Nothing is deducted anywhere.</p>
-      <div id="setlWrap"></div>
-
-      <h3>Settle up</h3>
-      <p class="note">What each man staked, what he has paid in, what he has collected, and the difference.
-      Positive means he is up and the pot owes him; negative means he owes the pot.</p>
-      <div class="wrap"><table id="setlSheet"></table></div>
-      <div id="unclaimWrap"></div>
-
-      <h3>Ledger</h3>
-      <p class="note">Every bet anyone has struck, on any phone. This view is yours alone &mdash; punters can
-      only see their own bets and the size of each pot. Tap the button to record someone as settled up.</p>
-      <div class="wrap"><table id="ledgTbl"></table></div>
-      <h3>Every bet</h3>
-      <p class="note">Void anything struck in error. Voided bets leave the pools and the ledger immediately
-      but stay in the database, so there is always a record of what happened.</p>
-      <div class="wrap"><table id="betsTbl"></table></div>
-    </div>
-
-    <div class="card">
-      <h2>Courses and format</h2>
-      <div class="wrap"><table id="crsTbl"></table></div>
-      <div class="row">
-        <label class="small">Minimum stake &pound;<input type="number" id="minStake" min="1" value="1"></label>
-        <label class="small">Singles allowance <select id="allow">
-          <option value="1" selected>100%</option><option value="0.95">95%</option><option value="0.9">90%</option>
-        </select></label>
-      </div>
-    </div>
-
-    <div class="card">
       <h2>Accounts</h2>
       <p class="note">Who has signed up and which name they claimed. Deleting an account frees the name so
       the sign-up can be run again &mdash; useful for testing, and for when somebody claims the wrong man.
@@ -759,7 +821,9 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <div class="wrap"><table id="acctTbl"></table></div>
       <div class="ok" id="acctMsg"></div>
     </div>
+    </div>
 
+    <div class="admpane" data-a="setup">
     <div class="card">
       <h2>Handicap declaration</h2>
       <p class="note">Bets taken before the first night are <b>ante-post</b>: struck while the handicaps are
@@ -793,6 +857,17 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     </div>
 
     <div class="card">
+      <h2>Courses and format</h2>
+      <div class="wrap"><table id="crsTbl"></table></div>
+      <div class="row">
+        <label class="small">Minimum stake &pound;<input type="number" id="minStake" min="1" value="1"></label>
+        <label class="small">Singles allowance <select id="allow">
+          <option value="1" selected>100%</option><option value="0.95">95%</option><option value="0.9">90%</option>
+        </select></label>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Novelty markets</h2>
       <p class="note">The model cannot price these. Add outcomes, take stakes, settle by eye.</p>
       <div id="novWrap"></div>
@@ -802,6 +877,38 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         <select id="novRound"><option value="">Any round</option><option value="1">R1</option>
           <option value="2">R2</option><option value="3">R3</option><option value="4">R4</option></select>
         <button class="ghost" id="addNov">Add market</button>
+      </div>
+    </div>
+    </div>
+
+    <div class="admpane" data-a="tools">
+    <div class="card">
+<h2>Morning report</h2>
+      <p class="note">The message for the group. Score, who still owes, and the biggest pools, in plain text
+      with no columns &mdash; WhatsApp will not keep them lined up. Anyone who has ticked <em>already paid</em>
+      is listed separately rather than chased, so nobody gets named in front of twenty people for a payment
+      that is already sitting in your account.</p>
+      <div class="row">
+        <button class="go" id="repGo">Write today's report</button>
+        <button class="ghost" id="repCopy">Copy it</button>
+        <label class="small"><input type="checkbox" id="repPools" checked> include the big pools</label>
+        <span class="small" id="repMsg"></span>
+      </div>
+      <textarea id="repOut" spellcheck="false" placeholder="Press the button and it appears here"></textarea>
+    </div>
+
+    <div class="card">
+<h2>Dress rehearsal</h2>
+      <p class="note">Run the whole Sunday-night sequence on obviously fake money before it matters. This
+      drops five bets of £5 to £25 into a market of your choosing, under names beginning <b>REHEARSAL</b> so
+      they can never be mistaken for real ones. Settle it below, check the payouts and the settle-up sheet
+      add up, then clear it. <b>Clearing removes the fake bets and any settlement they caused, and nothing
+      else</b> &mdash; a real bet or a real result in the same market survives untouched.</p>
+      <div class="row">
+        <select id="rehMk" style="min-width:190px"></select>
+        <button class="go" id="rehGo">Start a rehearsal</button>
+        <button class="ghost" id="rehEnd">Clear the rehearsal</button>
+        <span class="small" id="rehMsg"></span>
       </div>
     </div>
 
@@ -815,6 +922,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         <button class="ghost" id="stImport">Load pasted state</button>
         <button class="ghost" id="stReset">Factory reset</button></div>
       <div class="ok" id="stMsg"></div>
+    </div>
     </div>
 
   </div>
@@ -1456,12 +1564,13 @@ async function refresh(){
              rpc("admin_ledger",{p_token:ADMIN_TOKEN}), rpc("admin_bets",{p_token:ADMIN_TOKEN}),
              rpc("admin_accounts",{p_token:ADMIN_TOKEN})]);
            DB.ledger=al||[]; DB.bets=(ab||[]).filter(b=>!b.voided); DB.accounts=ac||[];
-           const [se,un,cl]=await Promise.all([
+           const [se,un,cl,ps]=await Promise.all([
              rpc("admin_settlement",{p_token:ADMIN_TOKEN}).catch(()=>[]),
              sbFetch("rpc/unclaimed_pools",{method:"POST",body:"{}"}).catch(()=>[]),
-             rpc("admin_claims",{p_token:ADMIN_TOKEN}).catch(()=>[])]);
-           DB.settle=se||[]; DB.unclaimed=un||[]; DB.claims=cl||[];
-      }catch(e){ DB.ledger=[]; DB.bets=[]; DB.accounts=[]; DB.settle=[]; DB.unclaimed=[]; DB.claims=[]; }
+             rpc("admin_claims",{p_token:ADMIN_TOKEN}).catch(()=>[]),
+             rpc("admin_payout_sheet",{p_token:ADMIN_TOKEN}).catch(()=>[])]);
+           DB.settle=se||[]; DB.unclaimed=un||[]; DB.claims=cl||[]; DB.payout=ps||[];
+      }catch(e){ DB.ledger=[]; DB.bets=[]; DB.accounts=[]; DB.settle=[]; DB.unclaimed=[]; DB.claims=[]; DB.payout=[]; }
     } else { DB.ledger=[]; DB.bets=DB.mine; }
     DB.online=true; DB.err="";
     S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
@@ -1631,10 +1740,11 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-14.31";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.32";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
+ admPane:"settle",poView:"market",poDone:false,
  onboarded:false,onbStep:0,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
  players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
@@ -1710,6 +1820,19 @@ const resultOf=k=>(DB.results||[]).find(r=>r.market===k)||null;
    and filtered to the caller — so it is the SAME formula that will settle it, and nobody can
    see anybody else's. While a market is open the number is a projection and says so, because
    the pool moves every time somebody else has a bet. */
+/* Your own bottom line on a settled market, in one sentence, at the top of the card. Everything
+   else on a settled card is history; this is the only bit that is about you. */
+function myResult(k){
+ const rows=(DB.detail||[]).filter(b=>b.market===k);
+ if(!rows.length) return "";
+ const stake=rows.reduce((a,b)=>a+b.stake,0);
+ const ret=rows.reduce((a,b)=>a+(+b.ret||0),0);
+ const net=ret-stake;
+ if(!rows.some(b=>b.settled)) return "";
+ return `<div class="resmine ${net>0?"up":net<0?"down":""}">You had <b>£${stake}</b> on this market and
+   ${ret>0?`collected <b>${money0(ret)}</b>`:"collected <b>nothing</b>"} &mdash;
+   <b>${net>0?"up "+money0(net):net<0?"down "+money0(-net):"square"}</b> on it.</div>`;
+}
 function myLine(k,o){
  const rows=(DB.detail||[]).filter(b=>b.market===k&&b.outcome===o);
  if(!rows.length) return "";
@@ -1902,12 +2025,26 @@ function phase(){
  if(new Date()>=LAST_CLOSE) return "closed";
  return S.declared ? "open" : "antepost";
 }
-/* A market's own phase: it shuts at its round's tee time whatever the book is doing. */
+/* Markets the organiser has pulled off the board. Lives in the published settings so every phone
+   sees the same thing the moment it refreshes, and the database enforces it as well — a stale tab
+   cannot sneak a stake into a withdrawn market. */
+const suspended=()=>(DB.settings&&Array.isArray(DB.settings.suspended))?DB.settings.suspended:[];
+const isOff=k=>suspended().indexOf(k)>=0;
+/* A market's own phase: it shuts at its round's tee time whatever the book is doing.
+   Two states outrank the clock. A SETTLED market is finished — the result is known, so taking
+   money on it is not betting, it is a mistake, and it used to be possible. A market the organiser
+   has WITHDRAWN is off the board entirely. Neither ever accepts a stake again. */
 function mPhase(m){
+ if(!m||!m.k) return "closed";
+ if(resultOf(m.k)) return "settled";
+ if(isOff(m.k)) return "off";
  if(S.closed) return "closed";
  if(new Date()>=deadline(m)) return "closed";
  return S.declared ? "open" : "antepost";
 }
+/* The only two phases that take money. Everything else is shut, however it got that way. */
+const mLive=m=>{const p=mPhase(m); return p==="open"||p==="antepost";};
+const mShut=m=>!mLive(m);
 function untilStr(d){const ms=d-new Date();
  if(ms<=0) return "closed";
  const dd=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,mi=Math.floor(ms/6e4)%60;
@@ -2138,26 +2275,47 @@ function drawPools(){
     return{...o,a:v.a||0,o:v.o||0,cash:cash(v),wt,imp,
       ev:(cash(v)>0&&o.prob>0)?o.prob*imp-1:null};})
    .sort((x,y)=>(y.prob||0)-(x.prob||0)||x.label.localeCompare(y.label));
-  let t=`<div class="mkhead"><span>Outcome</span><span class="num">Backed</span><span class="num">Implied</span>
+  /* Once a market is settled the interesting question is no longer "who is favourite" but
+     "who won it". The winners go to the top of the list, whatever the model thought of them. */
+  const RES=resultOf(m.k), WON=RES&&!RES.void?(RES.outcomes||[]):[];
+  const isWin=l=>WON.indexOf(l)>=0;
+  let hidden=0; const nRun=rows.length;
+  if(RES){
+    rows.sort((x,y)=>(isWin(y.label)?1:0)-(isWin(x.label)?1:0)||(y.cash||0)-(x.cash||0));
+    /* Twenty names under a result is nineteen names nobody will ever read again. Once a market
+       is settled, keep the winner, anything that had money on it, and anything you personally
+       backed; count the rest off in one line. */
+    const keep=rows.filter(r=>isWin(r.label)||r.cash>0
+      ||(DB.detail||[]).some(bt=>bt.market===m.k&&bt.outcome===r.label));
+    if(keep.length&&keep.length<rows.length){ hidden=rows.length-keep.length; rows=keep; }
+  }
+  let t=`<div class="mkhead"><span></span><span>Outcome</span><span class="num">Backed</span><span class="num">Implied</span>
    <span class="num">Fair</span><span class="num">Edge</span><span></span></div>`;
   rows.forEach(r=>{const ec=r.ev===null?"":r.ev>0.05?"pos":r.ev<-0.05?"neg":"";
    const inSlip=S.slip.find(x=>x.market===m.k&&x.outcome===r.label);
    const blocked=blockReason(m,r.label);
    const who=backers(m.k,r.label);
    const qs=quickStakes();
-   t+=`<div class="mkrow${blocked?" barred":""}">
+   const win=isWin(r.label);
+   t+=`<div class="mkrow${blocked?" barred":""}${RES?(win?" won":" lost"):""}">
      ${face(r.label,r.player?r.player.team:null)}
-     <div class="mkname">${esc(r.label)}${r.player?" "+teamTag(r.player.team)+roleTag(r.label):""}${r.player&&r.player.unknown?' <span class="tag nd">form assumed</span>':""}
+     <div class="mkname">${win?'<span class="wintick">&#10004;</span> ':""}${esc(r.label)}${r.player?" "+teamTag(r.player.team)+roleTag(r.label):""}${r.player&&r.player.unknown?' <span class="tag nd">form assumed</span>':""}
+       ${win?' <span class="tag winner">WINNER</span>':""}
        ${who.length?`<div class="small">${esc(who.join(", "))}</div>`:""}${myLine(m.k,r.label)}
-       ${r.prob&&mp!=="closed"?`<div class="small" style="opacity:.75">£10 would collect about
-         ${money0(10*(r.imp||1/r.prob))} if it lands</div>`:""}</div>
+       ${r.prob&&mp!=="closed"&&mp!=="settled"&&mp!=="off"?`<div class="small" style="opacity:.75">£10 would collect about
+         ${money0(10*(r.imp||1/r.prob))} if it lands</div>`:""}
+       ${RES&&win&&!RES.void?`<div class="small" style="color:var(--acc2)">${r.cash
+         ?`took <b>${money0(money/Math.max(1,WON.length))}</b> of the pool, shared across £${r.cash} of stakes`
+         :"nobody had a penny on it &mdash; the pool goes unclaimed"}</div>`:""}</div>
      <div class="mkfigs">
        <span class="mkfig" data-l="Backed">${r.cash?"£"+r.cash:"—"}</span>
-       <span class="mkfig" data-l="Implied">${r.imp?fmtDec(r.imp):"—"}</span>
+       <span class="mkfig" data-l="${RES?"Paid":"Implied"}">${r.imp?fmtDec(r.imp):"—"}</span>
        <span class="mkfig strong" data-l="Fair">${r.prob?dec(r.prob):"manual"}</span>
        <span class="mkfig ${ec}" data-l="Edge">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</span>
      </div>
-     <div class="mkact">${mp==="closed"?'<span class="small">shut</span>'
+     <div class="mkact">${mp==="settled"?`<span class="small">${win?'<b class="pos">won</b>':"beaten"}</span>`
+      :mp==="off"?'<span class="small">withdrawn</span>'
+      :mp==="closed"?'<span class="small">shut</span>'
       :blocked?`<span class="small nope" title="${esc(blocked)}">${esc(blocked)}</span>`
       :`<div class="quick">${qs.map(v=>`<button class="ghost q${inSlip&&inSlip.stake===v?" on":""}"
            data-q="${v}" data-mk="${esc(m.k)}" data-pl="${esc(r.label)}">£${v}</button>`).join("")}
@@ -2165,7 +2323,9 @@ function drawPools(){
            title="Take it off the slip">£${inSlip.stake} &#10005;</button>`:""}</div>`}</div>
      <div class="mkbar"><div class="bar"><i style="width:${w?(r.wt/w*100):0}%"></i></div></div>
    </div>`;});
-  const chip=mp==="closed"?'<span class="tag red">closed</span>'
+  const chip=mp==="settled"?'<span class="tag settled">SETTLED</span>'
+    :mp==="off"?'<span class="tag red">withdrawn</span>'
+    :mp==="closed"?'<span class="tag red">closed</span>'
     :mp==="open"?'<span class="tag" style="border-color:var(--okbd);color:var(--acc2)">open</span>'
     :'<span class="tag low">ante-post</span>';
   const mine=S.slip.filter(x=>x.market===m.k).length;
@@ -2173,17 +2333,31 @@ function drawPools(){
      time a selection is added and it would be maddening to have the card shut under your thumb. */
   const isOpen=(S.openMk||[]).indexOf(m.k)>=0;
   if(g!==lastG){ out+=`<!--GH:${g.id}-->`; lastG=g; }
-  out+=`<details class="card mkcard" data-k="${esc(m.k)}"${isOpen?" open":""}${mp==="closed"?' style="opacity:.62"':""}>
+  out+=`<details class="card mkcard${mp==="settled"?" issettled":""}" data-k="${esc(m.k)}"${isOpen?" open":""}${
+    mp==="closed"||mp==="off"?' style="opacity:.62"':""}>
    <summary class="mksum">
     <div class="mksumin"><h2>${esc(m.n)} ${chip}
       ${m.type==="novelty"?'<span class="tag">novelty</span>':""}
       ${m.round?`<span class="tag">R${m.round}</span>`:'<span class="tag">whole trip</span>'}
       ${mine?`<span class="tag" style="border-color:var(--acc);color:var(--acc2)">${mine} on your slip</span>`:""}</h2>
-     <p class="note">pool <b>£${money.toFixed(0)}</b> &middot; ${rows.length} runner${rows.length===1?"":"s"}
-      &middot; ${mp==="closed"?"<b>shut</b>":`closes in <b>${untilStr(deadline(m))}</b>`}</p></div>
+     <p class="note">pool <b>£${money.toFixed(0)}</b> &middot; ${nRun} runner${nRun===1?"":"s"}
+      &middot; ${mp==="settled"?(RES.void?"<b>void &mdash; nobody won it</b>":"won by <b>"+esc(WON.join(" and "))+"</b>")
+        :mp==="off"?"<b>withdrawn</b>"
+        :mp==="closed"?"<b>shut</b>":`closes in <b>${untilStr(deadline(m))}</b>`}</p></div>
     <span class="chev" aria-hidden="true">&#9662;</span></summary>
+   ${RES?`<div class="resbanner${RES.void?" void":""}">
+     <div class="reslab">${RES.void?"Void":"Result"}</div>
+     <div class="reswho">${RES.void?"Nobody won it":esc(WON.join(" and "))}</div>
+     <div class="ressub">${RES.void
+       ? "Every stake in this market is refunded in full."
+       : "The &pound;"+money.toFixed(0)+" pool has been divided between the backers of "
+         +esc(WON.join(" and "))+". This market is closed and takes no further bets."}${
+       RES.note?" "+esc(RES.note):""}</div>
+     ${myResult(m.k)}</div>`:""}
+   ${mp==="off"?`<p class="note" style="color:var(--warn)"><b>Withdrawn.</b> The organiser has taken this
+     market off the board and it accepts nothing further.${money?" Anything already staked on it will be refunded in full when he settles it as void.":""}</p>`:""}
    <p class="note">${esc(m.d||"")}${S.apBonus>1&&rows.some(r=>r.a>0)?` &middot; ante-post stakes carry a ${S.apBonus}× share`:""}
-    &middot; betting shuts ${CUTOFF_MIN} minutes before the tee shot, ${bothTime(deadline(m))}</p>
+    ${mp==="settled"||mp==="off"?"":`&middot; betting shuts ${CUTOFF_MIN} minutes before the tee shot, ${bothTime(deadline(m))}`}</p>
    ${(()=>{const mineHere=(DB.detail||[]).filter(b=>b.market===m.k).reduce((a,b)=>a+b.stake,0);
      if(!mineHere||mineHere<money-0.005) return "";
      return `<p class="note" style="color:var(--warn)"><b>You are the only money in this market.</b>
@@ -2193,10 +2367,6 @@ function drawPools(){
    ${(DB.bets||[]).some(b=>b.market===m.k&&/^REHEARSAL /.test(b.bettor))
      ?`<p class="note warn"><b>Rehearsal money is in this market.</b> Clear it in Admin before anyone bets
        for real.</p>`:""}
-   ${(()=>{const R=resultOf(m.k); if(!R) return "";
-     return `<p class="note" style="color:var(--acc2)"><b>Settled.</b> ${R.void
-       ? "Nobody won it, so every stake is refunded in full."
-       : "Winner: <b>"+esc((R.outcomes||[]).join(" and "))+"</b>."}${R.note?" "+esc(R.note):""}</p>`;})()}
    ${(()=>{
      /* A stacked bar of the pool. Four numbers in a column tell you nothing at a glance; a bar
         tells you instantly that most of the money is on three men. */
@@ -2213,7 +2383,8 @@ function drawPools(){
         ${rest?`<span><b style="background:var(--dim)"></b>the rest £${rest}</span>`:""}</div>`;})()}
    ${m.type==="novelty"&&m.pk?`<p class="note">Prices here are shaped by handicap and form, not simulated —
     nobody logs this sort of thing. Treat them as a starting point and back your own eyes.</p>`:""}
-   <div class="mkt">${t}</div></details>`;
+   <div class="mkt">${t}${hidden?`<p class="note" style="margin:8px 0 0">Plus ${hidden} other
+     ${hidden===1?"runner":"runners"}, all beaten with nothing staked on them.</p>`:""}</div></details>`;
  });
  function groupHead(g){
    const ms=ordered.filter(o=>o.g.id===g.id).map(o=>o.m);
@@ -2239,21 +2410,23 @@ function drawPools(){
    const ks=[...document.querySelectorAll(".mkcard")].map(el=>el.dataset.k);
    const allOpen=ks.length&&ks.every(k=>(S.openMk||[]).indexOf(k)>=0);
    S.openMk=allOpen?[]:ks; save(); drawPools();});}
- document.querySelectorAll(".slipadd").forEach(el=>el.addEventListener("click",e=>{
-  const {mk,pl}=e.target.dataset;
-  S.slip.push({market:mk,outcome:pl,stake:S.minStake||1});save();drawPools();}));
  /* One tap puts a stake on. Tapping the same amount again takes it off, so a mis-tap costs one
     tap to undo rather than a trip to the slip. */
  document.querySelectorAll(".quick button.q").forEach(el=>el.addEventListener("click",e=>{
   const b=e.target.closest("button"), mk=b.dataset.mk, pl=b.dataset.pl, v=+b.dataset.q;
   const at=S.slip.findIndex(x=>x.market===mk&&x.outcome===pl);
-  if(at>=0&&S.slip[at].stake===v) S.slip.splice(at,1);
+  if(at>=0&&S.slip[at].stake===v){ S.slip.splice(at,1); if(!S.slip.length) S.slipOpen=false; }
   else if(at>=0) S.slip[at].stake=v;
   else S.slip.push({market:mk,outcome:pl,stake:v});
+  /* The slip opens itself. Adding a selection and then having to find and tap a bar to see it
+     was two actions for one intention, and people were losing track of what was on. */
+  if(S.slip.length) S.slipOpen=true;
   save();drawPools();}));
  document.querySelectorAll(".slipdel").forEach(el=>el.addEventListener("click",e=>{
   const {mk,pl}=e.target.dataset;
-  S.slip=S.slip.filter(x=>!(x.market===mk&&x.outcome===pl));save();drawPools();}));
+  S.slip=S.slip.filter(x=>!(x.market===mk&&x.outcome===pl));
+  if(!S.slip.length) S.slipOpen=false;
+  save();drawPools();}));
  drawSlip();
  // pay button
  /* How the prices were made. The number is read off the published set, never typed in: copy
@@ -2443,8 +2616,15 @@ async function placeSlip(){
  S.me=AUTH.name;
  const ph=phase();
  if(ph==="closed"){err.textContent="The book is shut.";return;}
- const bad=S.slip.filter(x=>mPhase(allMarkets().find(m=>m.k===x.market)||{})==="closed");
- if(bad.length){err.textContent="These markets have closed: "+bad.map(b=>marketName(b.market)).join(", ");return;}
+ /* Shut is shut, however it got that way — the clock, a settlement, or the organiser pulling it.
+    This used to test only for "closed", which is why a settled market went on taking money. */
+ const bad=S.slip.filter(x=>mShut(allMarkets().find(m=>m.k===x.market)||{k:x.market}));
+ if(bad.length){
+   const lbl=b=>{const m=allMarkets().find(z=>z.k===b.market)||{k:b.market},p=mPhase(m);
+     return marketName(b.market)+(p==="settled"?" (settled)":p==="off"?" (withdrawn)":"");};
+   err.textContent="These markets are no longer taking bets: "+bad.map(lbl).join(", ")
+     +". Take them off the slip and try again.";
+   return;}
  /* Each stake is tagged with ITS OWN market's phase, not the book's. Once Thursday's ball is
     struck the whole-trip markets are gone but Sunday's are not, and a stake struck on Friday must
     settle on the terms of the market it was struck into. */
@@ -2629,7 +2809,7 @@ const ONB=[
      "So the odds are not a promise. They show how the pot would split <em>right now</em>. Back an "
      +"outcome nobody else fancies and your share is bigger; back the popular one and it is smaller."]},
  {h:"How to have a bet",
-  b:["Tap a market to open it, then tap <b>£5</b>, <b>£10</b> or <b>£20</b> next to the man you fancy. "
+  b:["Tap a market to open it, then tap <b>£5</b>, <b>£10</b> or <b>£20</b> against your selection. "
      +"Tap the same amount again to take it off.",
      "Your selections gather in the bar at the bottom. Press <b>Place</b> when you are happy.",
      "<b>Every line is its own bet.</b> Three selections is three singles, not a treble.",
@@ -2662,7 +2842,7 @@ function snapshot(){
  const mine={}; (DB.detail||[]).forEach(b=>{mine[b.market+"|"+b.outcome]=Math.round((+b.pool||0)*(+b.my_weight||0)/Math.max(1e-9,+b.outcome_weight||0)*100)/100;});
  return {at:Date.now(), blue:sc.blue, red:sc.red, played:sc.played,
    pot:(DB.totals||[]).reduce((a,r)=>a+(r.staked||0),0),
-   shut:allMarkets().filter(m=>mPhase(m)==="closed").length,
+   shut:allMarkets().filter(m=>mShut(m)).length,
    mine};
 }
 /* Read ONCE at boot, before anything can overwrite it. drawAll runs several times per load —
@@ -3033,11 +3213,12 @@ function buildReport(withPools){
    if(big.length){
      L.push("");L.push("*BIGGEST POOLS*");
      big.forEach(x=>{
-       const shut=mPhase(x.m)==="closed";
-       L.push(`${x.m.n} — £${x.p.toFixed(0)}${shut?" (shut)":` — shuts ${bothTime(deadline(x.m))}`}`);});
+       const p=mPhase(x.m);
+       const tag=p==="settled"?" (settled)":p==="off"?" (withdrawn)":p==="closed"?" (shut)":"";
+       L.push(`${x.m.n} — £${x.p.toFixed(0)}${tag||` — shuts ${bothTime(deadline(x.m))}`}`);});
    }
  }
- const openSoon=allMarkets().filter(m=>mPhase(m)!=="closed")
+ const openSoon=allMarkets().filter(m=>mLive(m))
    .sort((a,b)=>deadline(a)-deadline(b))[0];
  if(openSoon&&!withPools){
    L.push("");L.push(`Next to shut: ${openSoon.n}, ${bothTime(deadline(openSoon))}.`);
@@ -3056,11 +3237,13 @@ function drawSettle(){
   const R=resultOf(m.k), outs=marketOutcomes(m).map(o=>o.label);
   const {money}=poolTotals(m.k);
   const sel=R?(R.outcomes||[]):[];
-  h+=`<div class="card" style="margin-bottom:10px;padding:11px" data-sk="${esc(m.k)}">
+  const off=isOff(m.k);
+  h+=`<div class="card" style="margin-bottom:10px;padding:11px${R?";border-color:var(--acc)":off?";border-color:var(--warn)":""}" data-sk="${esc(m.k)}">
     <div class="row" style="margin:0 0 6px;justify-content:space-between">
       <b style="font-size:13.5px">${esc(m.n)}</b>
-      <span class="small">pool £${money.toFixed(0)}${R?(R.void?' &middot; <span class="warn">void</span>'
-        :' &middot; <span class="pos">settled</span>'):""}</span></div>
+      <span class="small">pool £${money.toFixed(0)}${R?(R.void?' &middot; <span class="warn">VOID</span>'
+        :' &middot; <span class="pos"><b>SETTLED &mdash; '+esc((R.outcomes||[]).join(" and "))+'</b></span>')
+        :off?' &middot; <span class="warn"><b>WITHDRAWN</b></span>':""}</span></div>
     <p class="note" style="margin:0 0 5px">Pick the winner. Hold ${navigator.platform.indexOf("Mac")>=0?"Cmd":"Ctrl"}
       to pick two for a dead heat &mdash; the pool then splits between them.</p>
     <div class="row" style="margin:0;align-items:flex-start">
@@ -3071,7 +3254,11 @@ function drawSettle(){
       <label class="small"><input type="checkbox" class="setlVoid"${R&&R.void?" checked":""}> Nobody won it</label>
       <button class="go setlGo" style="padding:5px 11px">${R?"Update":"Settle"}</button>
       ${R?`<button class="ghost setlUndo" style="padding:5px 11px">Unsettle</button>`:""}
+      ${R?"":`<button class="ghost setlOff" style="padding:5px 11px">${off?"Put it back on the board":"Withdraw it"}</button>`}
     </div>
+    ${off&&money>0?`<p class="note warn" style="margin:6px 0 0">This market is off the board but still holds
+      <b>£${money.toFixed(0)}</b>. To hand it back, tick <em>Nobody won it</em> and press Settle &mdash; that
+      refunds every stake in full.</p>`:""}
     <div class="small setlMsg"></div></div>`;});
  w.innerHTML=h;
  w.querySelectorAll("[data-sk]").forEach(card=>{
@@ -3089,21 +3276,38 @@ function drawSettle(){
    e.target.disabled=true;
    try{ await rpc("unsettle_market",{p_market:k,p_token:ADMIN_TOKEN}); await refresh(); drawAll(); }
    catch(err){ e.target.disabled=false; msg.innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,120))}</span>`; }});
+  /* Pull a market off the board. It goes into the published settings, so every phone sees it
+     within one refresh, and the database refuses stakes on it whatever a stale tab thinks. */
+  const of=card.querySelector(".setlOff");
+  if(of) of.addEventListener("click",async e=>{
+   e.target.disabled=true; msg.textContent="Saving…";
+   const cur=suspended().slice(), at=cur.indexOf(k);
+   if(at>=0) cur.splice(at,1); else cur.push(k);
+   try{ await saveSettings({suspended:cur}); await refresh(); drawAll();
+     msg.innerHTML=`<span class="pos">${at>=0?"Back on the board.":"Withdrawn. No further stakes accepted."}</span>`; }
+   catch(err){ e.target.disabled=false; msg.innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,120))}</span>`; }});
  });
  const S2=DB.settle||[];
  let t=`<tr><th>Who</th><th class="num">Staked</th><th class="num">Paid in</th><th class="num">Collected</th>
-   <th class="num">Net</th><th class="num">Settle up</th></tr>`;
- let ts=0,tc=0;
- S2.forEach(r=>{const net=+r.net, coll=+r.collected; ts+=r.staked; tc+=coll;
-  h="";
+   <th class="num">Paid out</th><th class="num">Net</th><th class="num">Where it stands</th></tr>`;
+ let ts=0,tc=0,tp=0,to=0;
+ S2.forEach(r=>{const net=+r.net, coll=+r.collected, po=+r.paid_out||0;
+  const owes=+r.owes||0, due=+r.due||0;
+  ts+=r.staked; tc+=coll; tp+=r.paid; to+=po;
   t+=`<tr><td>${esc(r.bettor)}</td><td class="num">£${r.staked}</td><td class="num">£${r.paid}</td>
-   <td class="num">${money0(coll)}</td>
+   <td class="num">${money0(coll)}</td><td class="num">${po?money0(po):"—"}</td>
    <td class="num ${net>0?"pos":net<0?"neg":""}"><b>${net>0?"+":""}${money0(net)}</b></td>
-   <td class="num small">${net>0?`pay him ${money0(net)}`:net<0?`he owes ${money0(-net)}`:"square"}</td></tr>`;});
+   <td class="num small">${
+     owes>0&&due>0 ? `<span class="neg">owes ${money0(owes)}</span> &middot; <span class="pos">due ${money0(due)}</span>`
+     : owes>0 ? `<span class="neg">owes the pot ${money0(owes)}</span>`
+     : due>0  ? `<span class="pos"><b>pay him ${money0(due)}</b></span>`
+     : "square"}</td></tr>`;});
  if(!S2.length) t=`<tr><td class="small">Nothing settled yet, so there is nothing to divide.</td></tr>`;
- else t+=`<tr><td><b>Total</b></td><td class="num"><b>£${ts}</b></td><td></td>
-   <td class="num"><b>${money0(tc)}</b></td><td class="num"><b>${money0(tc-ts)}</b></td><td></td></tr>`;
+ else t+=`<tr><td><b>Total</b></td><td class="num"><b>£${ts}</b></td><td class="num"><b>£${tp}</b></td>
+   <td class="num"><b>${money0(tc)}</b></td><td class="num"><b>${money0(to)}</b></td>
+   <td class="num"><b>${money0(tc-ts)}</b></td><td></td></tr>`;
  $("#setlSheet").innerHTML=t;
+ drawPayout();
  /* Money that won and had nobody on it. It has to be shown, not absorbed: it is the whole
     basis of the claim that the organiser takes nothing. */
  const U=(DB.unclaimed||[]).filter(x=>+x.unclaimed>0);
@@ -3119,6 +3323,92 @@ function drawSettle(){
   : "";
 }
 
+/* -------------------------------------------------------------------------------------------
+   WHO TO PAY. Settling a market is arithmetic; handing the money over is the bit that actually
+   goes wrong at eleven at night in a bar. This is deliberately the loudest thing in Admin: big
+   figures, one row per man, and a single button that records the handover the moment it happens
+   so you can be interrupted mid-list and pick it straight back up.
+   ------------------------------------------------------------------------------------------- */
+function drawPayout(){
+ const w=$("#poWrap"); if(!w) return;
+ if(!ADMIN_TOKEN){ w.innerHTML=""; return; }
+ const P=(DB.payout||[]).map(r=>({...r,won:+r.won,paid_out:+r.paid_out,outstanding:+r.outstanding}));
+ document.querySelectorAll("#poView button").forEach(b=>b.classList.toggle("on",b.dataset.v===(S.poView||"market")));
+ const dn=$("#poDone"); if(dn) dn.checked=!!S.poDone;
+ if(!P.length){
+   w.innerHTML=`<p class="note">Nothing is settled yet, so nobody is owed anything. This fills itself in the
+     moment you settle a market above.</p>`;
+   return;}
+ const show=r=>S.poDone||r.outstanding>0.004;
+ const owed=P.reduce((a,r)=>a+Math.max(0,r.outstanding),0);
+ const done=P.reduce((a,r)=>a+r.paid_out,0);
+ let h=`<div class="paytotals">
+   <div class="paytot big${owed>0?" due":" clear"}"><span>Still to hand over</span><b>${money0(owed)}</b></div>
+   <div class="paytot"><span>Already paid out</span><b>${money0(done)}</b></div>
+   <div class="paytot"><span>Won in total</span><b>${money0(P.reduce((a,r)=>a+r.won,0))}</b></div>
+ </div>`;
+ if(owed<=0.004) h+=`<p class="note pos" style="font-size:14px"><b>Everyone settled so far has been paid.
+   Nothing outstanding.</b></p>`;
+
+ if((S.poView||"market")==="market"){
+   const byM={}; P.forEach(r=>{(byM[r.market]=byM[r.market]||[]).push(r);});
+   const keys=Object.keys(byM).sort((a,b)=>
+     (new Date(byM[b][0].settled_at||0))-(new Date(byM[a][0].settled_at||0)));
+   keys.forEach(k=>{
+     const rows=byM[k].filter(show); if(!rows.length) return;
+     const out=byM[k].reduce((a,r)=>a+Math.max(0,r.outstanding),0);
+     h+=`<div class="paymk${out>0.004?"":" cleared"}">
+       <div class="paymkhd"><b>${esc(marketName(k))}</b>
+         <span class="${out>0.004?"paydue":"paydone"}">${out>0.004?money0(out)+" to pay":"all paid"}</span></div>
+       ${rows.map(r=>payRow(r,k)).join("")}</div>`;});
+ } else {
+   const byP={}; P.forEach(r=>{const key=r.bettor;(byP[key]=byP[key]||[]).push(r);});
+   const keys=Object.keys(byP).sort((a,b)=>
+     byP[b].reduce((x,r)=>x+Math.max(0,r.outstanding),0)-byP[a].reduce((x,r)=>x+Math.max(0,r.outstanding),0)
+     ||a.localeCompare(b));
+   keys.forEach(n=>{
+     const rows=byP[n].filter(show); if(!rows.length) return;
+     const out=byP[n].reduce((a,r)=>a+Math.max(0,r.outstanding),0);
+     h+=`<div class="paymk${out>0.004?"":" cleared"}">
+       <div class="paymkhd">${face(n,(DB.roster.find(x=>norm(x.name)===norm(n))||{}).team,"sm")}
+         <b>${esc(n)}</b>
+         <span class="${out>0.004?"paydue":"paydone"}">${out>0.004?money0(out)+" to pay":"all paid"}</span></div>
+       ${rows.map(r=>payRow(r,null)).join("")}</div>`;});
+ }
+ w.innerHTML=h;
+ w.querySelectorAll(".paygo").forEach(el=>el.addEventListener("click",async e=>{
+  const b=e.target.closest("button");
+  b.disabled=true; b.textContent="…";
+  try{ await rpc("record_payout",{p_bettor:b.dataset.w,p_market:b.dataset.mk,
+        p_amount:+b.dataset.amt,p_note:"handed over",p_token:ADMIN_TOKEN});
+    await refresh(); drawSettle(); }
+  catch(err){ b.disabled=false; b.textContent="Paid"; alert("Could not record it: "+(err.message||err)); }}));
+ w.querySelectorAll(".payundo").forEach(el=>el.addEventListener("click",async e=>{
+  const b=e.target.closest("button"); b.disabled=true;
+  try{ await rpc("unpay_market",{p_bettor:b.dataset.w,p_market:b.dataset.mk,p_token:ADMIN_TOKEN});
+    await refresh(); drawSettle(); }
+  catch(err){ b.disabled=false; alert("Could not undo it: "+(err.message||err)); }}));
+}
+/* One line of the pay-out sheet. showMarket is null in the by-person view, where the market name
+   belongs on the line rather than in the heading. */
+function payRow(r,groupedByMarket){
+ const left=r.outstanding>0.004;
+ const label=groupedByMarket?r.bettor:marketName(r.market);
+ const pic=groupedByMarket
+   ? face(r.bettor,(DB.roster.find(x=>norm(x.name)===norm(r.bettor))||{}).team,"sm")
+   : "";
+ return `<div class="payline${left?"":" paid"}">
+   ${pic}<div class="payname">${esc(label)}${r.is_void?' <span class="tag">refund</span>':""}
+     ${r.paid_out>0&&left?`<div class="small">${money0(r.paid_out)} of ${money0(r.won)} already handed over</div>`:""}</div>
+   <div class="payamt2">${left?money0(r.outstanding):`<span class="paydone">${money0(r.won)}</span>`}</div>
+   <div class="paybtn">${left
+     ?`<button class="go paygo" data-w="${esc(r.bettor)}" data-mk="${esc(r.market)}"
+        data-amt="${r.outstanding}">Paid</button>`
+     :`<span class="paytick">&#10004; paid</span>
+       <button class="ghost payundo" data-w="${esc(r.bettor)}" data-mk="${esc(r.market)}"
+        title="Undo — he has not actually had it">undo</button>`}</div>
+ </div>`;
+}
 function drawLedger(){
  const L=[...DB.ledger].sort((a,b)=>b.balance-a.balance);
  let h=`<tr><th>Who</th><th class="num">Bets</th><th class="num">Staked</th><th class="num">Paid</th>
@@ -3302,10 +3592,25 @@ $("#repCopy").addEventListener("click",async()=>{
 $("#acctChip").addEventListener("click",()=>{
  S.acctOpen=!S.acctOpen; save(); drawAuth();
  if(S.acctOpen){const p=$("#acctPanel"); if(p) p.scrollIntoView({behavior:"smooth",block:"nearest"});}});
-document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{
- document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
- document.querySelectorAll("section").forEach(x=>x.classList.remove("on"));
- b.classList.add("on");$("#"+b.dataset.t).classList.add("on");}));
+/* body > nav, NOT "nav button" — Admin now has a sub-nav of its own, and an unscoped selector
+   was about to make every sub-tab click try to switch the whole app to an undefined section. */
+document.querySelectorAll("body > nav button").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll("body > nav button").forEach(x=>x.classList.remove("on"));
+ document.querySelectorAll("main > section").forEach(x=>x.classList.remove("on"));
+ b.classList.add("on");$("#"+b.dataset.t).classList.add("on");
+ window.scrollTo({top:0,behavior:"instant"});}));
+/* Admin sub-tabs. Which one you were on is remembered, so settling twenty markets does not send
+   you back to the roster every time the page redraws. */
+document.querySelectorAll("#admNav button").forEach(b=>b.addEventListener("click",()=>{
+ setAdmPane(b.dataset.a);}));
+document.querySelectorAll("#poView button").forEach(b=>b.addEventListener("click",()=>{
+ S.poView=b.dataset.v; save(); drawPayout();}));
+if($("#poDone")) $("#poDone").addEventListener("change",e=>{S.poDone=e.target.checked;save();drawPayout();});
+function setAdmPane(a){
+ S.admPane=a; save();
+ document.querySelectorAll("#admNav button").forEach(x=>x.classList.toggle("on",x.dataset.a===a));
+ document.querySelectorAll(".admpane").forEach(x=>x.classList.toggle("on",x.dataset.a===a));
+}
 document.querySelectorAll("#oddsFmt button").forEach(b=>b.addEventListener("click",()=>{
  S.oddsFmt=b.dataset.f;save();paintFmt();drawOdds();drawPools();}));
 function paintFmt(){document.querySelectorAll("#oddsFmt button").forEach(b=>b.classList.toggle("on",b.dataset.f===S.oddsFmt));}
@@ -3468,7 +3773,7 @@ $("#stReset").addEventListener("click",()=>{S=freshState();save();runSim(6000);d
  document.head.appendChild(al);
 })();
 load();if(!S.oddsFmt)S.oddsFmt="frac";if(!S.slip)S.slip=[];if(S.me==null)S.me="";
-paintFmt();paintTheme();drawAll();tick();setInterval(tick,30000);
+paintFmt();paintTheme();setAdmPane(S.admPane||"settle");drawAll();tick();setInterval(tick,30000);
 /* The odds live in the database. A punter's phone reads them; it never computes them,
    so every screen shows the same price and nobody can reroll their way to a better one.
    Only the organiser simulates, and only to publish. */
