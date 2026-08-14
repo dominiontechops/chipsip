@@ -1099,6 +1099,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         <button class="go" id="admRun">Apply and re-run</button>
       </div>
       <div class="row" style="margin:2px 0 0"><span class="small" id="runMsg"></span></div>
+      <div id="runStale"></div>
     </div>
 
     <div class="card">
@@ -2113,7 +2114,7 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-14.40";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.41";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3061,6 +3062,12 @@ function drawPools(){
        <div class="poollegend">${top.map(x=>
         `<span><b style="background:${col(x)}"></b>${esc(x.label)} £${x.cash}</span>`).join("")}
         ${rest?`<span><b style="background:var(--dim)"></b>the rest £${rest}</span>`:""}</div>`;})()}
+   ${(m.type!=="novelty"&&rows.length&&rows.every(x=>x.prob==null))
+     ? `<p class="note" style="color:var(--warn)"><b>No model price on this market yet.</b> The organiser
+        has published a set of prices that predates it &mdash; one press of <em>Apply and re-run</em> and
+        <em>Publish these prices</em> fills the Should pay and Value columns in. <b>You can bet on it
+        perfectly safely in the meantime</b>: what you collect is decided by the pool when it settles,
+        never by the model.</p>`:""}
    ${m.type==="novelty"&&m.pk?`<p class="note">Prices here are shaped by handicap and form, not simulated —
     nobody logs this sort of thing. Treat them as a starting point and back your own eyes.</p>`:""}
    <div class="mkt">${t}${hidden?`<p class="note" style="margin:8px 0 0">Plus ${hidden} other
@@ -4447,6 +4454,41 @@ function drawAdmin(){
  h+=`<tr><td colspan="8" class="small ${nb!==nr?"neg":"pos"}">Blue ${nb} &middot; Red ${nr}
   ${nb!==nr?"— teams must be equal to simulate matches":"— balanced"}</td></tr>`;
  $("#admTbl").innerHTML=h;
+ /* The board can grow markets that the published price set has never heard of. That is invisible
+    to the organiser — every punter sees an empty Should pay column and he sees nothing wrong — so
+    it gets said here, next to a button that fixes it in one press. */
+ (function(){
+   const w=$("#runStale"); if(!w) return;
+   const unpriced=allMarkets().filter(m=>{
+     if(m.type==="novelty") return false;
+     const os=marketOutcomes(m);
+     return os.length&&os.every(o=>o.prob==null);});
+   w.innerHTML=unpriced.length
+     ? `<p class="note" style="color:var(--warn);margin:6px 0 4px"><b>${unpriced.length} market${unpriced.length===1?" has":"s have"}
+        no published price.</b> ${esc(unpriced.slice(0,4).map(m=>m.n).join(", "))}${unpriced.length>4?" and "+(unpriced.length-4)+" more":""}.
+        Every phone shows those columns empty until a fresh set goes out.</p>
+        <div class="row" style="margin:0"><button class="go" id="runPub">Re-run and publish now</button>
+        <span class="small" id="runPubMsg"></span></div>`
+     : "";
+   const b=$("#runPub");
+   if(b) b.addEventListener("click",async()=>{
+     b.disabled=true;
+     const m=$("#runPubMsg");
+     try{
+       m.textContent="Simulating\u2026";
+       runSim(+(($("#nsim")||{}).value)||20000);
+       if(!ODDS){ m.innerHTML='<span class="neg">Teams must be equal-sized before it can price anything.</span>';
+         b.disabled=false; return; }
+       m.textContent="Publishing\u2026";
+       await pushSettings({prices:{odds:ODDS,team:TEAMP,extra:EXTRA,at:Date.now(),
+         n:+(($("#nsim")||{}).value)||20000,plan:SIMPLAN}});
+       PUB=DB.settings.prices;
+       drawAll(); drawAdmin();
+       toast("Prices published \u2014 every market on the board now has one");
+     }catch(e){ b.disabled=false;
+       m.innerHTML=`<span class="neg">${esc(String(e.message||e).slice(0,140))}</span>`; }
+   });
+ })();
  /* Redrawing the table from inside the change handler tears out the very input that is still
     mid-blur, which Chromium reports as "the node to be removed is no longer a child". Yielding
     a tick lets the event finish before the table is replaced. */
@@ -4560,7 +4602,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-14.40</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-14.41</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
