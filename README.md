@@ -133,6 +133,32 @@ you a panel that refuses to save.
 The card is validated as it is typed, not only on save: a man in two matches in one session, or
 partnered with himself, is marked in red immediately and the save is refused.
 
+## The privacy guarantee, and how it was broken
+
+A QA pass on 14 August found the central promise — everyone sees the size of each pot, nobody sees
+another man's money — broken two ways, both reproduced against the live database before fixing.
+
+**`bet_detail_all()` was callable by anyone.** It is `SECURITY DEFINER` with no authorisation check
+of its own, which is correct because it is meant to be reached only through `my_bets()` and the
+admin functions. An earlier `REVOKE` named `anon` and `authenticated` but missed the **PUBLIC**
+grant Postgres applies by default, so the function stayed callable by anyone holding the
+publishable key that ships in the page. RLS on `bets` was doing its job perfectly and was simply
+walked around. Verified before: anonymous read of `bets` returned 0 rows while
+`bet_detail_all()` returned all 13 with names. Verified after: permission denied.
+
+**`claimed_names` was writable by anonymous callers**, and that escalated to full admin.
+It is a single-table view over `profiles`, which makes it auto-updatable, and the default Supabase
+grants allowed `DELETE`. Deleting the organiser's row frees his name; claiming it makes `is_owner()`
+true; `is_admin()` short-circuits on `is_owner()`. Anonymous to full admin in three steps.
+
+Both are closed, along with the blanket write grants on every other exposed relation, world-readable
+`payments`, and anonymous EXECUTE on every admin and write function. **Admin now requires a session
+as well as the passphrase** — the page says so before you try, rather than unlocking a screen whose
+every button then fails.
+
+The lesson worth keeping: `REVOKE ... FROM anon, authenticated` does not remove a PUBLIC grant.
+Always check `proacl` for a leading `=`.
+
 ## Money
 
 Settlement is one function in the database, `bet_detail_all()`, and everything else reads it:
