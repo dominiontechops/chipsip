@@ -29,7 +29,10 @@
 --flashG:rgba(63,158,99,.34);--flashR:rgba(200,80,63,.34)}
 /* Light theme. Same hues, flipped luminance, so the greens still read as Chip & Sip and not as a
    spreadsheet. Contrast is checked against the ink colour, not against white. */
-html[data-theme="light"]{--bg:#f4f7f3;--panel:#ffffff;--panel2:#eef3ec;--line:#d3e0d5;--ink:#132018;
+/* The light theme was white card stock on near-white paper, which is why it read as glaring and
+   flat. Warmed the paper, tinted the cards a shade off pure white, and deepened the rules so the
+   edges of things are visible without shouting. */
+html[data-theme="light"]{--bg:#eef2ea;--panel:#fdfefc;--panel2:#e9efe6;--line:#c8d8ca;--ink:#132018;
 --dim:#5d7466;--acc:#2f7d4b;--acc2:#1f6c3c;--blue:#2b62a8;--blue2:#204d85;--red:#b23e2c;--red2:#8f3324;
 --warn:#8a6212;--line2:#e2ebe2;--hdr1:#e7f0e7;--hdr2:#f4f7f3;--on:#ffffff;--okbd:#8fc4a4;
 --bluebd:#a9c4e6;--bluebg:#e6eefa;--redbd:#e6b3a8;--redbg:#fae9e5;--warnbd:#dcc68a;
@@ -162,6 +165,8 @@ main > section{display:none}main > section.on{display:block}
 .subnav button.on{background:var(--acc);color:var(--on)}
 .admpane{display:none}.admpane.on{display:block}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+html[data-theme="light"] .card{box-shadow:0 1px 2px rgba(19,32,24,.05),0 4px 14px rgba(19,32,24,.045)}
+html[data-theme="light"] .mkcard{box-shadow:0 1px 2px rgba(19,32,24,.05),0 6px 18px rgba(19,32,24,.05)}
 .card h2{margin:0 0 4px;font-size:15px}
 .card h3{margin:14px 0 6px;font-size:12px;color:var(--acc2);text-transform:uppercase;letter-spacing:.6px}
 .note{color:var(--dim);font-size:12.5px;margin:6px 0 0}
@@ -393,6 +398,11 @@ body.hasbar #toast.show,body.hasslip #toast.show{bottom:calc(84px + env(safe-are
   .betok path{animation:none;stroke-dashoffset:0}
 }
 /* ---- underbacked / overbacked, and which way the price is going --------------------------- */
+.mkname .small.pend{opacity:.6;font-style:italic}
+.msel{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.msel .mby{width:74px;text-align:center;font-family:var(--mono)}
+.msel .mby.bad{border-color:var(--red)}
+.res i{display:block;font-style:normal;font-size:10px;opacity:.75;font-family:var(--mono);font-weight:600}
 .valtag,.movetag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.4px;
   text-transform:uppercase;padding:2px 7px;border-radius:99px;border:1px solid;white-space:nowrap;
   vertical-align:1px}
@@ -530,6 +540,30 @@ html[data-theme="light"] .valtag.over2{color:#fff}
 .sbside.b b{color:var(--blue2)}.sbside.r b{color:var(--red2)}
 .sbmid{flex:0 0 84px;display:flex;flex-direction:column;align-items:center;justify-content:center;
 background:var(--panel2);font-size:11px;color:var(--dim);text-align:center;padding:6px}
+/* ---- the score hero ------------------------------------------------------------------------ */
+.card.hero{padding:16px;border-color:var(--line)}
+.hero .scoreboard{border:0;border-radius:12px}
+.sbside{position:relative}
+.sbside i{display:block;font-style:normal;font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.3}
+.sbside.b{background:linear-gradient(180deg,var(--bluebg),transparent)}
+.sbside.r{background:linear-gradient(180deg,var(--redbg),transparent)}
+.sbside b{font-size:42px}
+.sbmid b,.sbmid span{display:block}
+.sbmid{font-family:var(--mono);font-size:19px;color:var(--ink);font-weight:700}
+.sbmid span{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.herobar{position:relative;display:flex;height:16px;border-radius:99px;overflow:hidden;
+  background:var(--line2);margin:14px 0 5px}
+.herobar i{display:block;height:100%;transition:width .55s cubic-bezier(.22,.61,.36,1)}
+.herobar i.b{background:var(--blue)}
+.herobar i.r{background:var(--red);margin-left:auto}
+.herobar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;
+  border-radius:2px;transform:translateX(-1px)}
+.herobar u.o{opacity:.25}
+.herokey{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);
+  font-family:var(--mono)}
+.herokey .mid{font-weight:700;color:var(--ink)}
+@media(max-width:719px){ .sbside b{font-size:34px} .sbside i{font-size:9.5px} .sbmid{flex:0 0 66px} }
 .mtch{display:grid;grid-template-columns:1fr 62px 1fr;gap:6px;align-items:center;
 padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px}
 .mtch:last-child{border-bottom:0}
@@ -1840,7 +1874,7 @@ async function refresh(){
       sbFetch("roster?select=name,team,playing,role&order=name"),
       sbFetch("claimed_names?select=name"),
       sbFetch("results?select=market,outcomes,void,note,settled_at"),   /* what won: public */
-      sbFetch("matches?select=session,slot,blue,red,result&order=session,slot"),
+      sbFetch("matches?select=session,slot,blue,red,result,margin,ended&order=session,slot"),
       sbFetch("standings?select=*"),
       /* The money line. my_bets() is SECURITY DEFINER and filters on the caller's own claimed
          name, so this returns your bets and nobody else's — the return figures are computed
@@ -1975,8 +2009,42 @@ const MARKETS=[
  {k:"redTop",n:"Red Top Scorer",d:"Best of the Reds. 10 runners, twice the chance, and you get to enjoy it in front of them. Enjoy it "+"while it lasts",type:"model",round:"",only:"Red"},
  {k:"perfect",n:"Perfect Record",d:"4 from 4, no halves, nothing dropped. It has never been done on this trip, which is exactly "+"why the prices are long enough to be worth a fiver. Insufferable for a decade if it lands",type:"model",round:""},
  {k:"blank",n:"The Blank",d:"4 matches, nil points, 1 very quiet flight home. Somebody usually gets close, and the man you "+"pick is rarely the one you would guess on Wednesday",type:"model",round:""},
- {k:"singles",n:"Sunday Singles",d:"Wins his singles at Santa Maria. Nowhere to hide and no partner to blame, and the only market still "+"open on Sunday morning &mdash; so it is the one that gets sharper the moment the draw goes up",type:"model",round:"4"}
+ {k:"singles",n:"Sunday Singles",d:"Wins his singles at Santa Maria. Nowhere to hide and no partner to blame, and the only market still "+"open on Sunday morning &mdash; so it is the one that gets sharper the moment the draw goes up",type:"model",round:"4"},
+ /* ---- the whole trip, added 2026 ---------------------------------------------------------- */
+ {k:"spoon",n:"Wooden Spoon",d:"Fewest points across the 4 sessions. The mirror of MVP and, on past form, the more popular "+
+   "market of the two. A halved match still counts as half, so the only way to win this is to lose nearly everything",type:"model",round:""},
+ {k:"pairs",n:"Top Partnership",d:"Which 2 men take the most points playing together across the 3 pairs sessions. Runners appear "+
+   "as each draw goes up &mdash; a pairing nobody has drawn yet cannot be backed, because it does not exist yet. "+
+   "If a partnership you have backed never ends up playing, that bet is void and refunded",type:"model",round:"",dyn:"pairs"}
 ];
+/* ---- the day markets ------------------------------------------------------------------------
+   Four per round, and every one of them settles off the card the captains are entering anyway,
+   so none of it lands on the organiser to adjudicate on the Sunday night.
+
+   The outcome labels for the match markets are deliberately "Match 1", not the two men's names.
+   A bet stores the outcome it was struck on as TEXT, so a label that changed when the draw went
+   up would orphan every bet placed before it. The names are shown underneath instead, and appear
+   the moment the pairing is entered. */
+[1,2,3,4].forEach(r=>{
+ const R=String(r);
+ const day=["","Thursday at Marbella","Friday at Cabopino","Saturday at La Cala","Sunday at Santa Maria"][r];
+ const dayOnly=day.split(" at ")[0];
+ MARKETS.push(
+  {k:"day"+R,n:"Day "+R+" Winner",type:"model",round:R,team:true,dyn:"day",
+   d:"Who takes "+day+". Blue, Red, or honours even. The simplest bet on the whole board and the one "+
+     "to have if you have never had a bet in your life — it settles the moment the last putt of the day drops"},
+  {k:"motd"+R,n:"Match of the Day "+R,type:"model",round:R,dyn:"match",
+   d:"Which match goes the furthest — the one still alive on the highest hole. A match that goes down "+
+     "the last beats one that finished 4&3 on the 15th. If two go up the last they share it. Settles "+
+     "straight off the card, no argument"},
+  {k:"marg"+R,n:"Biggest Hiding "+R,type:"model",round:R,dyn:"match",
+   d:"Which match is won by the widest margin. 5&4 beats 3&2 beats 1 up. A halved match has no margin "+
+     "and cannot win it. Ties share the pool"},
+  {k:"swp"+R,n:"Clean Sweep "+R,type:"model",round:R,team:true,dyn:"sweep",
+   d:"Does either side take every single match on "+dayOnly+"? All of them, no halves, no exceptions. "+
+     "It has never happened on this trip, which is why it pays what it pays"}
+ );
+});
 const DEF_NOV=[
  {k:"nov_rob",n:"Rob's 30th",
   d:"Turns 30 on the coach, lands late on Wednesday night and tees off in a foursomes at 13:50. The coach "+
@@ -2045,7 +2113,7 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-14.39";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.40";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -2560,9 +2628,66 @@ function marketOutcomes(m){
        player:S.players.find(p=>p.name===o)||null}));
  }
  if(m.k==="team"){const T=teamSrc();return ["Blue","Red","Tie"].map(o=>({label:o,prob:T?T[o]:null,player:null}));}
+ /* ---- the markets whose runners depend on the draw ---------------------------------------- */
+ if(m.dyn) return dynOutcomes(m);
+ if(m.k==="spoon"){const O=priceSrc();
+   return S.players.filter(p=>p.in).map(p=>({label:p.name,player:p,prob:O&&O[p.name]?O[p.name].spoon:null}));}
  return S.players.filter(p=>p.in&&(!m.only||p.team===m.only))
    .map(p=>{const O=priceSrc();return{label:p.name,player:p,prob:O&&O[p.name]?O[p.name][m.k==="singles"?"singles":m.k]:null};});
 }
+/* The runners for a market that depends on the draw.
+
+   THE LABEL IS THE KEY. A bet stores the outcome as text, so "Match 2" has to stay "Match 2" for
+   the whole week however many times the captains redraw. The names go in `sub`, which is display
+   only and can change as often as it likes. That is the difference between a board that fills
+   itself in and a board that quietly orphans everyone's bets on Saturday night. */
+function dynOutcomes(m){
+ const E=extraSrc(), r=+m.round||0;
+ const c=S.courses[r-1]||{}, single=c.fmt==="singles";
+ if(m.dyn==="day"){
+   const d=E&&E.day&&E.day[r];
+   return ["Blue","Red","Tie"].map(o=>({label:o,prob:d?d[o]:null,player:null}));
+ }
+ if(m.dyn==="sweep"){
+   const w=E&&E.sweep&&E.sweep[r];
+   return [{label:"Blue win them all",prob:w?w.Blue:null,player:null},
+           {label:"Red win them all", prob:w?w.Red :null,player:null},
+           {label:"No sweep",         prob:w?w.No  :null,player:null}];
+ }
+ if(m.dyn==="match"){
+   const src=(m.k.slice(0,4)==="motd")?(E&&E.motd&&E.motd[r]):(E&&E.margin&&E.margin[r]);
+   const slots=single?10:5;
+   const out=[];
+   for(let i=1;i<=slots;i++){
+     const mt=(DB.matches||[]).find(x=>+x.session===r&&+x.slot===i);
+     const known=mt&&(mt.blue||[]).length&&(mt.red||[]).length;
+     out.push({label:"Match "+i,player:null,
+       prob:src&&src[i]!=null?src[i]:null,
+       sub:known?sideName(mt.blue)+" v "+sideName(mt.red)
+                :"drawn on the night — Blue v Red",
+       pending:!known});
+   }
+   return out;
+ }
+ if(m.dyn==="pairs"){
+   /* Only partnerships that have actually been drawn. Before the first card goes in there is
+      nothing to back, and the card says so rather than inventing 90 imaginary pairings. */
+   const seen={};
+   (DB.matches||[]).forEach(x=>{
+     const cc=S.courses[(+x.session||1)-1]||{};
+     if(cc.fmt==="singles") return;
+     [(x.blue||[]),(x.red||[])].forEach(side=>{
+       if(side.length===2) seen[pairKey(side[0],side[1])]=true;});});
+   const P=E&&E.pairs||{};
+   return Object.keys(seen).sort().map(k=>({label:k,player:null,
+     prob:P[k]!=null?P[k]:null,
+     sub:(S.players.find(p=>p.name===k.split(" & ")[0])||{}).team||""}));
+ }
+ return [];
+}
+/* Published if the organiser has published, otherwise this browser's own run. Same rule as the
+   player prices, so nobody can reroll their way to a better number. */
+const extraSrc=()=>PUB&&PUB.extra?PUB.extra:EXTRA;
 function passFilter(o,m){
  const t=$("#fTeam").value,hmin=parseFloat($("#fHmin").value),hmax=parseFloat($("#fHmax").value);
  if(t&&(!o.player||o.player.team!==t)&&!m.team)return false;
@@ -2791,7 +2916,9 @@ function drawPools(){
     const wt=weighted(v), imp=wt>0?money/wt:0;
     return{...o,a:v.a||0,o:v.o||0,cash:cash(v),wt,imp,
       ev:(cash(v)>0&&o.prob>0)?o.prob*imp-1:null};})
-   .sort((x,y)=>(y.prob||0)-(x.prob||0)||x.label.localeCompare(y.label));
+   .sort((x,y)=> m.dyn==="match"
+     ? (parseInt(x.label.replace(/\D+/g,""),10)-parseInt(y.label.replace(/\D+/g,""),10))
+     : ((y.prob||0)-(x.prob||0)||x.label.localeCompare(y.label)));
   /* Once a market is settled the interesting question is no longer "who is favourite" but
      "who won it". The winners go to the top of the list, whatever the model thought of them. */
   const RES=resultOf(m.k), WON=RES&&!RES.void?(RES.outcomes||[]):[];
@@ -2839,6 +2966,7 @@ function drawPools(){
        ${band&&band.c!=="fair"?` <span class="valtag ${band.c}" title="${esc(band.d)}">${band.t}</span>`:""}
        ${mv?` <span class="movetag ${mv.d<0?"in":"out"}" title="Was ${fmtDec(mv.was)}, now ${fmtDec(mv.now)}">${
           mv.d<0?"&#9660; shortening":"&#9650; drifting"} ${fmtDec(mv.was)}&rarr;${fmtDec(mv.now)}</span>`:""}
+       ${r.sub?`<div class="small${r.pending?" pend":""}">${esc(r.sub)}</div>`:""}
        ${who.length?`<div class="small">${esc(who.join(", "))}</div>`:""}${myLine(m.k,r.label)}
        ${mLive(m)?(()=>{
          /* What a bet struck RIGHT NOW would actually collect. The old line multiplied the stake by
@@ -2850,6 +2978,9 @@ function drawPools(){
          const f=mp==="antepost"?(S.apBonus||1):1;
          const st=10, np=money+st, nw=r.wt+st*f;
          if(!(nw>0)) return "";
+         /* With nothing in the pot yet a £10 bet collects its own £10 back, which is true and
+            completely useless. Say nothing until there is a pool to have a share of. */
+         if(!(money>0)) return "";
          const take=np*(st*f)/nw;
          return `<div class="small" style="opacity:.78">a £${st} bet now would collect
            <b>${money0(take)}</b> if it lands</div>`;})():""}
@@ -2859,7 +2990,7 @@ function drawPools(){
      <div class="mkfigs">
        <span class="mkfig" data-l="Money on">${r.cash?"£"+r.cash:"—"}</span>
        <span class="mkfig" data-l="${RES?"Paid":"Pays now"}">${r.imp?fmtDec(r.imp):"—"}</span>
-       <span class="mkfig strong" data-l="Should pay">${r.prob?dec(r.prob):"manual"}</span>
+       <span class="mkfig strong" data-l="Should pay">${r.prob!=null?dec(r.prob):"manual"}</span>
        <span class="mkfig ${ec}" data-l="Value">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</span>
      </div>
      <div class="mkact">${mp==="settled"?`<span class="small">${win?'<b class="pos">won</b>':"beaten"}</span>`
@@ -3517,14 +3648,27 @@ function drawScore(){
    Red need <b>${(T.red-S1.red).toFixed(1).replace(/\.0$/,"")}</b> to keep it. ${left} match${left===1?"":"es"} left.
    <span class="small">${esc(T.holder)} are the holders, so a ${(pointsOnOffer()/2)} apiece finish leaves it
    where it is.</span>`;
- $("#standWrap").innerHTML=`<div class="card">
-   <h2>The score</h2>
+ /* The hero. This is the first thing anybody looks at on a Saturday night, so it gets the whole
+    width, the team colours, and a bar underneath that shows the two targets as positions rather
+    than as numbers you have to hold in your head. */
+ const tot=pointsOnOffer();
+ const pb=Math.max(0,Math.min(100,S1.blue/tot*100)), pr=Math.max(0,Math.min(100,S1.red/tot*100));
+ const need=Math.round(T.win/tot*100);
+ $("#standWrap").innerHTML=`<div class="card hero">
    <div class="scoreboard">
-     <div class="sbside b"><span>Blue</span><b>${S1.blue.toFixed(1).replace(/\.0$/,"")}</b></div>
-     <div class="sbmid">${S1.played} of ${S1.scheduled}<br>played<br>
-       <span style="opacity:.7">${T.blue}&ndash;${T.red}<br>to hold it</span></div>
-     <div class="sbside r"><span>Red</span><b>${S1.red.toFixed(1).replace(/\.0$/,"")}</b></div>
+     <div class="sbside b"><span>Blue</span><b>${S1.blue.toFixed(1).replace(/\.0$/,"")}</b>
+       <i>${T.blue===T.win?"needs "+T.win+" to win it":"needs "+T.blue+" — a tie is enough"}</i></div>
+     <div class="sbmid">${S1.played}<span>of ${S1.scheduled}</span><span>played</span></div>
+     <div class="sbside r"><span>Red</span><b>${S1.red.toFixed(1).replace(/\.0$/,"")}</b>
+       <i>${T.red===T.win?"needs "+T.win+" to win it":"needs "+T.red+" — a tie is enough"}</i></div>
    </div>
+   <div class="herobar" title="${tot} points on offer">
+     <i class="b" style="width:${pb}%"></i>
+     <i class="r" style="width:${pr}%"></i>
+     <u style="left:${need}%" title="${T.win} wins it"></u>
+     <u class="o" style="left:${100-need}%"></u>
+   </div>
+   <div class="herokey"><span>0</span><span class="mid">${T.win} wins it</span><span>${tot}</span></div>
    <p class="note">${state}</p></div>`;
  let h="";
  SESSIONS.forEach(sc=>{
@@ -3539,8 +3683,9 @@ function drawScore(){
    </div><span class="chev">&#9662;</span></summary>
    ${ms.length?ms.map(m=>{
      const cls=m.result?"done":"todo";
-     const res=m.result==="blue"?`<span class="res b">BLUE</span>`
-       :m.result==="red"?`<span class="res r">RED</span>`
+     const by=byStr(m);
+     const res=m.result==="blue"?`<span class="res b">BLUE${by&&by!=="AS"?`<i>${esc(by)}</i>`:""}</span>`
+       :m.result==="red"?`<span class="res r">RED${by&&by!=="AS"?`<i>${esc(by)}</i>`:""}</span>`
        :m.result==="half"?`<span class="res">HALVED</span>`:`<span class="res">&mdash;</span>`;
      const pics=a=>(a||[]).map(n=>face(n,null,"sm")).join("");
      return `<div class="mtch ${cls}">
@@ -3554,6 +3699,26 @@ function drawScore(){
  const adm=$("#scoreAdm"); if(adm){ adm.style.display=(ADMIN_TOKEN||CAN_SCORE)?"block":"none";
   if(ADMIN_TOKEN||CAN_SCORE) drawScoreEdit(); }
 }
+/* "3&2" is the way every golfer on earth writes a match result, so that is what the box takes.
+   Two numbers come out of it: the margin (3) and the hole it finished on (18 - 2 = 16). Those
+   two settle Match of the Day and Biggest Hiding without anybody having to adjudicate anything. */
+function parseBy(t){
+ const v=String(t||"").trim().toLowerCase().replace(/\s+/g,"");
+ if(!v) return {margin:null,ended:null};
+ if(/^(as|a\/s|allsquare|halved|h)$/.test(v)) return {margin:0,ended:18};
+ let mm=v.match(/^(\d{1,2})[&\/](\d{1,2})$/);          /* 3&2 */
+ if(mm){const up=+mm[1],left=+mm[2];
+   if(up>=1&&up<=18&&left>=0&&left<=17) return {margin:up,ended:18-left};}
+ mm=v.match(/^(\d{1,2})(up|u)?$/);                     /* 1up, or just 1 */
+ if(mm){const up=+mm[1]; if(up>=0&&up<=18) return {margin:up,ended:18};}
+ return {margin:null,ended:null,bad:true};
+}
+const byStr=m=>{
+ if(!m||m.margin==null) return "";
+ if(+m.margin===0) return "AS";
+ const left=18-(+m.ended||18);
+ return left>0 ? m.margin+"&"+left : m.margin+" up";
+};
 function drawScoreEdit(){
  const names=(DB.roster.length?DB.roster:S.players.map(p=>({name:p.name,team:p.team})));
  const blue=names.filter(x=>x.team==="Blue").map(x=>x.name);
@@ -3572,7 +3737,8 @@ function drawScoreEdit(){
        <option value=""${!m.result?" selected":""}>Not played</option>
        <option value="blue"${m.result==="blue"?" selected":""}>Blue win</option>
        <option value="half"${m.result==="half"?" selected":""}>Halved</option>
-       <option value="red"${m.result==="red"?" selected":""}>Red win</option></select></div>
+       <option value="red"${m.result==="red"?" selected":""}>Red win</option></select>
+       <input class="mby" placeholder="3&2" value="${esc(byStr(m))}" title="How it finished — 3&2, 1 up, or AS"></div>
    </div>`;}
  });
  $("#scoreEdit").innerHTML=h;
@@ -3607,18 +3773,25 @@ async function saveCard(){
  const msg=$("#mMsg"); msg.textContent="Saving…";
  const rows=[...document.querySelectorAll(".medit")].map(el=>{
    const g=c=>{const x=el.querySelector(c);return x&&x.value?x.value:null;};
+   const by=parseBy(g(".mby"));
    return {s:+el.dataset.s,k:+el.dataset.k,
      blue:[g(".mb1"),g(".mb2")].filter(Boolean),
      red:[g(".mr1"),g(".mr2")].filter(Boolean),
-     res:g(".mres")};});
+     res:g(".mres"), margin:by.margin, ended:by.ended, byBad:!!by.bad};});
  /* Belt and braces: the live check above marks them as you pick, this one refuses the save.
     One man cannot be in two matches in a session, nor partnered with himself. */
  const bad=checkCard();
  if(bad.length){ msg.innerHTML=`<span class="neg">${esc(bad.join("; "))}. Fix it before saving.</span>`; return; }
+ const mess=rows.filter(r=>r.byBad);
+ if(mess.length){ msg.innerHTML=`<span class="neg">${mess.length} score${mess.length===1?"":"s"} I cannot read.
+   Write them as <b>3&amp;2</b>, <b>1 up</b> or <b>AS</b>.</span>`;
+   document.querySelectorAll(".mby").forEach(x=>x.classList.toggle("bad",parseBy(x.value).bad));
+   return; }
  try{
    for(const r of rows)
      await rpc("save_match",{p_session:r.s,p_slot:r.k,p_blue:r.blue,p_red:r.red,
-       p_result:r.res,p_token:ADMIN_TOKEN});
+       p_result:r.res,p_margin:r.margin==null?-1:r.margin,p_ended:r.ended==null?-1:r.ended,
+       p_token:ADMIN_TOKEN});
    await refresh(); drawAll();
    $("#mMsg").innerHTML='<span class="pos">Card saved. The score and every settled market follow from it.</span>';
  }catch(e){ msg.innerHTML=`<span class="neg">${esc(String(e.message||e).slice(0,140))}</span>`; }
@@ -4387,7 +4560,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-14.39</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-14.40</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -4724,7 +4897,7 @@ $("#publish").addEventListener("click",async()=>{
  if(!ADMIN_TOKEN){$("#simStat").textContent="Unlock Admin first.";return;}
  if(!ODDS){$("#simStat").textContent="Run it first.";return;}
  $("#simStat").textContent="publishing…";
- try{ await pushSettings({prices:{odds:ODDS,team:TEAMP,at:Date.now(),n:+$("#nsim").value||6000}});
+ try{ await pushSettings({prices:{odds:ODDS,team:TEAMP,extra:EXTRA,at:Date.now(),n:+$("#nsim").value||6000}});
    PUB=DB.settings.prices; drawAll();
    $("#simStat").textContent="Published. Everyone sees these now."; }
  catch(e){ $("#simStat").textContent="Could not publish: "+e.message; }});
@@ -4753,7 +4926,7 @@ $("#admRun").addEventListener("click",async e=>{
    return; }
  try{
    await pushSettings({hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form})),blindScale:S.blindScale,
-     prices:{odds:ODDS,team:TEAMP,at:Date.now(),n:N,plan:SIMPLAN}});
+     prices:{odds:ODDS,team:TEAMP,extra:EXTRA,at:Date.now(),n:N,plan:SIMPLAN}});
    PUB=DB.settings.prices; drawAll();
    const moved=S.players.filter(p=>p.base&&Math.abs(p.hcp-p.base.hcp)>0.001).length;
    /* A mark that disagrees violently with the man's own scoring is nearly always a slip of the
