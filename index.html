@@ -81,11 +81,13 @@ max-width:420px;width:100%}
 html[data-theme="light"] .brand img{background:#132018;border-radius:10px;padding:3px}
 /* Market cards are collapsed until pressed. The whole summary row is the hit area — thumbs are
    not precise, and a market that only opens if you hit the little arrow is a market nobody backs. */
-.mkcard>summary{list-style:none;cursor:pointer;display:flex;align-items:flex-start;gap:10px;
+.mkcard>summary,.foldcard>summary{list-style:none;cursor:pointer;display:flex;align-items:flex-start;gap:10px;
 margin:-14px;padding:14px;border-radius:12px;-webkit-tap-highlight-color:transparent}
-.mkcard>summary::-webkit-details-marker{display:none}
-.mkcard>summary:hover{background:var(--panel2)}
-.mkcard[open]>summary{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.mkcard>summary::-webkit-details-marker,.foldcard>summary::-webkit-details-marker{display:none}
+.mkcard>summary:hover,.foldcard>summary:hover{background:var(--panel2)}
+.mkcard[open]>summary,.foldcard[open]>summary{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.foldcard[open] .chev{transform:rotate(180deg)}
+.foldcard[open]>summary{margin-bottom:10px}
 .mksumin{flex:1 1 auto;min-width:0}
 .mksumin h2{margin:0 0 3px;font-size:15px}
 .mksumin .note{margin:0}
@@ -186,14 +188,35 @@ letter-spacing:.5px;color:#fff;border:2px solid transparent;background-size:cove
 #sinceWrap:not(:empty),#onbWrap:not(:empty),#installWrap:not(:empty){padding:12px 16px 0;max-width:1100px;margin:0 auto}
 .install{border-left:3px solid var(--acc)}
 .install ol{margin:8px 0 0;padding-left:20px;font-size:13.5px;line-height:1.6}
+/* The rules card. It has to fit a small phone in one piece, because the accept button is the only
+   way past it and a button pushed off the bottom of the screen is a locked door. So: the card is a
+   column, the middle scrolls, and the buttons are pinned to the bottom of the card where they can
+   always be reached. dvh not vh — on iOS Safari, vh measures the viewport WITHOUT the address bar
+   and the card ends up taller than the screen it is sitting in. */
 .onb{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.62);display:flex;align-items:center;
-justify-content:center;padding:16px}
-.onbcard{background:var(--panel);border:1px solid var(--acc);border-radius:16px;padding:20px;
-max-width:460px;width:100%;max-height:88vh;overflow-y:auto}
-.onbcard h2{margin:0 0 2px;font-size:19px}
-.onbcard .step{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--dim)}
-.onbcard ul{margin:12px 0 0;padding-left:18px}
+justify-content:center;padding:12px;padding-top:calc(12px + env(safe-area-inset-top));
+padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+.onbcard{background:var(--panel);border:1px solid var(--acc);border-radius:16px;padding:18px;
+max-width:460px;width:100%;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;overflow:hidden}
+.onbcard h2{margin:0 0 2px;font-size:19px;flex:0 0 auto}
+.onbcard .step{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--dim);flex:0 0 auto}
+.onbcard > p.note{flex:0 0 auto}
+.onbcard ul{margin:12px 0 0;padding-left:18px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  flex:1 1 auto;min-height:0}
 .onbcard li{margin-bottom:9px;font-size:14px;line-height:1.45}
+.onbcard > .row{flex:0 0 auto}
+.onbfoot{flex:0 0 auto}
+@media(max-height:700px){
+  .onbcard{padding:14px}
+  .onbcard h2{font-size:17px}
+  .onbcard li{font-size:13px;line-height:1.4;margin-bottom:7px}
+  .onbcard ul{margin-top:8px}
+  .onbfoot{display:none}          /* the small print goes before the button ever does */
+}
+@media(max-width:380px){
+  .onbcard li{font-size:12.5px}
+  .onbcard ul{padding-left:16px}
+}
 .onbdots{display:flex;gap:6px;align-items:center}
 .onbdots i{width:7px;height:7px;border-radius:99px;background:var(--line);display:block}
 .onbdots i.on{background:var(--acc)}
@@ -404,7 +427,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <img id="logo" alt="Chip &amp; Sip Championship" src="data:image/png;base64,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">
     <div><h1>CHIP &amp; SIP <span>2026</span></h1>
       <div class="sub" id="hdr">loading&hellip;</div>
-      <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-14.33</div></div>
+      <div class="small" style="opacity:.5;font-size:10.5px;margin-top:2px">build 2026-08-14.34</div></div>
   </div>
   <div class="hctl">
     <div class="seg" id="oddsFmt"><button data-f="frac">Fractions</button><button data-f="dec">Decimals</button></div>
@@ -449,19 +472,27 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 </section>
 
 <section id="pools" class="on">
-  <div class="card">
-    <h2>How the betting works</h2>
-    <p class="note">Everyone buys in, the pool splits between backers of the winner, the house takes
-    <b>nothing</b>. Implied odds move as money lands; the model price beside each is what the simulation
-    says is fair. Where implied is longer than fair, that outcome is underbacked.</p>
-    <p class="note"><b>Reading a market:</b> <b>Backed</b> is money already on that outcome. <b>Implied</b> is
-    what the pool would pay it as things stand. <b>Fair</b> is what the simulation thinks it should pay.
-    <b>Edge</b> is the gap between the two, so a positive edge means that outcome is underbacked right now.
-    None of it is a promise: every figure moves each time somebody bets, and what you actually collect is
-    settled by the pool at the moment the market shuts.</p>
+  <details class="card foldcard" id="howCard">
+    <summary>
+      <div class="mksumin"><h2>How the betting works</h2>
+        <p class="note">The pool, the four numbers on every line, and what you actually collect &mdash; tap to read it</p></div>
+      <span class="chev" aria-hidden="true">&#9662;</span></summary>
+    <p class="note">Everyone's money goes into one pot per market. When it is decided, that pot is split
+    between whoever backed the winner, in proportion to what they put on. <b>Nobody takes a cut</b> &mdash;
+    not the organiser, not the site. Every pound in comes back out to somebody.</p>
+    <p class="note"><b>The four numbers on every line.</b>
+    <b>Money on</b> &mdash; what has already been staked on that outcome.
+    <b>Pays now</b> &mdash; what the pot would pay it if it won this minute. The more money piles onto an
+    outcome, the less it pays; the fewer people fancy it, the more.
+    <b>Should pay</b> &mdash; what the simulation reckons it ought to pay, given the handicaps and the form.
+    <b>Value</b> &mdash; the gap between those two. A green plus means the pot is paying more than the
+    outcome is worth, because not enough people have backed it yet. That is the one to look for.</p>
+    <p class="note">None of it is a promise. Every figure moves each time anybody bets, and what you
+    actually collect is worked out from the pot at the moment the market shuts &mdash; not the number that
+    was on screen when you struck the bet.</p>
     <div id="simInfo" class="note"></div>
     <div id="payWrap"></div>
-  </div>
+  </details>
   <div id="netWrap"></div>
   <div id="squadWrap"></div>
   <div id="phaseWrap"></div>
@@ -709,8 +740,9 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     </ul>
     <p class="note">Private betting between friends is lawful in the UK and winnings are untaxed. What would
     change that is the organiser taking a cut or building a margin — that is bookmaking and needs a licence.
-    Hence no rake, ever, including out of an unwon pool: the 2027 pot is the group's, not his, and anyone can
-    ask for his stake back up to the flight home.</p>
+    So the organiser never takes a cut &mdash; not a percentage, not a rounding, not a pound out of a pool
+    nobody won. Money that goes unclaimed belongs to the group and rolls into next year's trip, and anyone
+    can ask for his stake back out of it up to the flight home.</p>
   </div>
 </section>
 
@@ -745,6 +777,14 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     </nav>
 
     <div class="admpane on" data-a="settle">
+    <div class="card" style="border-color:var(--acc)">
+      <h2>The pot &mdash; where the money actually is</h2>
+      <p class="note">The board deals in stakes. Your bank deals in cash. These are not the same number
+      until everyone has paid, and this is the line that tells you which. <b>Should be in the account</b> is
+      the only figure you can check against Starling.</p>
+      <div id="reconWrap"></div>
+    </div>
+
     <div class="card">
 <h2>Settle the markets</h2>
       <p class="note">Call each market as it is decided. Pick the winning outcome &mdash; or more than one for a
@@ -902,7 +942,40 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     </div>
 
     <div class="admpane" data-a="tools">
+        <div class="card">
+      <h2>Something worth telling the group</h2>
+      <p class="note">The board watches for the four things people actually want to hear about &mdash; a
+      market about to shut, a session finished, the pot passing a round number, and a winner still waiting
+      to be paid. Anything it has spotted since you last looked is below, written as a message short enough
+      that people will read it on a phone. <b>Share</b> opens WhatsApp straight from here on a phone;
+      <b>Copy</b> is the fallback on a laptop.</p>
+      <div class="row" style="margin:0 0 8px">
+        <button class="go" id="alGo">Check for news</button>
+        <button class="ghost" id="alShare">Share it</button>
+        <button class="ghost" id="alCopy">Copy it</button>
+        <span class="small" id="alMsg"></span>
+      </div>
+      <div id="alWrap"></div>
+      <textarea id="alOut" spellcheck="false" placeholder="Press the button and the message appears here"></textarea>
+    </div>
+
     <div class="card">
+      <h2>Backups</h2>
+      <p class="note">The whole book &mdash; every stake, payment, payout, result, the roster, the card and
+      the settings &mdash; is snapshotted <b>every night at half past two</b>, automatically, by the database
+      itself. Nothing has to be running and nobody has to remember. The last forty are kept.</p>
+      <p class="note">This is insurance against the mistake that actually happens: a market settled on the
+      wrong man, or a roster edit that takes a name off mid-week. <b>Take one now</b> before anything you
+      are nervous about. <b>Download</b> puts a copy on your phone, which is the only version that survives
+      the database itself going away &mdash; do that once on the Sunday night.</p>
+      <div class="row" style="margin:0 0 8px">
+        <button class="go" id="bkGo">Take one now</button>
+        <span class="small" id="bkMsg"></span>
+      </div>
+      <div class="wrap"><table id="bkTbl"></table></div>
+    </div>
+
+<div class="card">
 <h2>Morning report</h2>
       <p class="note">The message for the group. Score, who still owes, and the biggest pools, in plain text
       with no columns &mdash; WhatsApp will not keep them lined up. Anyone who has ticked <em>already paid</em>
@@ -910,6 +983,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       that is already sitting in your account.</p>
       <div class="row">
         <button class="go" id="repGo">Write today's report</button>
+        <button class="ghost" id="repShare">Share it</button>
         <button class="ghost" id="repCopy">Copy it</button>
         <label class="small"><input type="checkbox" id="repPools" checked> include the big pools</label>
         <span class="small" id="repMsg"></span>
@@ -1584,13 +1658,14 @@ async function refresh(){
              rpc("admin_ledger",{p_token:ADMIN_TOKEN}), rpc("admin_bets",{p_token:ADMIN_TOKEN}),
              rpc("admin_accounts",{p_token:ADMIN_TOKEN})]);
            DB.ledger=al||[]; DB.bets=(ab||[]).filter(b=>!b.voided); DB.accounts=ac||[];
-           const [se,un,cl,ps]=await Promise.all([
+           const [se,un,cl,ps,bk]=await Promise.all([
              rpc("admin_settlement",{p_token:ADMIN_TOKEN}).catch(()=>[]),
              sbFetch("rpc/unclaimed_pools",{method:"POST",body:"{}"}).catch(()=>[]),
              rpc("admin_claims",{p_token:ADMIN_TOKEN}).catch(()=>[]),
-             rpc("admin_payout_sheet",{p_token:ADMIN_TOKEN}).catch(()=>[])]);
-           DB.settle=se||[]; DB.unclaimed=un||[]; DB.claims=cl||[]; DB.payout=ps||[];
-      }catch(e){ DB.ledger=[]; DB.bets=[]; DB.accounts=[]; DB.settle=[]; DB.unclaimed=[]; DB.claims=[]; DB.payout=[]; }
+             rpc("admin_payout_sheet",{p_token:ADMIN_TOKEN}).catch(()=>[]),
+             rpc("admin_backups",{p_token:ADMIN_TOKEN}).catch(()=>[])]);
+           DB.settle=se||[]; DB.unclaimed=un||[]; DB.claims=cl||[]; DB.payout=ps||[]; DB.backups=bk||[];
+      }catch(e){ DB.ledger=[]; DB.bets=[]; DB.accounts=[]; DB.settle=[]; DB.unclaimed=[]; DB.claims=[]; DB.payout=[]; DB.backups=[]; }
     } else { DB.ledger=[]; DB.bets=DB.mine; }
     DB.online=true; DB.err="";
     S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
@@ -1760,11 +1835,11 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-14.33";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.34";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
- admPane:"settle",poView:"market",poDone:false,
+ admPane:"settle",poView:"market",poDone:false,alSeen:[],phaseOpen:false,howOpen:false,
  onboarded:false,onbStep:0,rulesV:0,rulesAt:0,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
  players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
@@ -1795,6 +1870,9 @@ function load(){
  if(saved.installDone) S.installDone=true;
  if(saved.admPane)     S.admPane=saved.admPane;
  if(saved.poView)      S.poView=saved.poView;
+ if(Array.isArray(saved.alSeen)) S.alSeen=saved.alSeen;
+ if(saved.phaseOpen) S.phaseOpen=true;
+ if(saved.howOpen)   S.howOpen=true;
  /* the slip is deliberately dropped: it can hold selections on players who have since
     been renamed or removed, and an unplaceable bet on a ghost is worse than no bet */
  save();
@@ -2237,10 +2315,16 @@ function drawPools(){
  }
  const ph=phase(),PH=PHASE[ph];
  const lockA=ph!=="antepost"&&!S.override, lockO=ph!=="open"&&!S.override;
- $("#phaseWrap").innerHTML=`<div class="card" style="border-color:${PH.c}">
-   <h2 style="color:${PH.c}">Betting is ${PH.n.toUpperCase()}</h2>
+ /* Folded by default. What phase the book is in matters once; the paragraph explaining it matters
+    once; and neither should be between a man and the markets every time he opens the app. The
+    headline stays visible on the summary row, which is the part he actually needs. */
+ $("#phaseWrap").innerHTML=`<details class="card foldcard" id="phaseCard" style="border-color:${PH.c}"${S.phaseOpen?" open":""}>
+   <summary>
+     <div class="mksumin"><h2 style="color:${PH.c}">Betting is ${PH.n.toUpperCase()}</h2>
+       <p class="note"><b>${PH.accepts}</b>${S.override?' <span class="tag low">admin override on</span>':""}
+         ${ph==="closed"?"":`&middot; next market shuts in <b>${untilStr(deadline(allMarkets().filter(m=>mLive(m)).sort((a,b)=>deadline(a)-deadline(b))[0]||{}))}</b>`}</p></div>
+     <span class="chev" aria-hidden="true">&#9662;</span></summary>
    <p class="note">${PH.d}</p>
-   <p class="note"><b>${PH.accepts}</b>${S.override?' <span class="tag low">admin override on — both columns editable</span>':""}</p>
    ${ph==="antepost"&&(S.blindScale==null||S.blindScale>0)?`<p class="note">Prices are <b>widened for
    uncertainty</b> while handicaps are undeclared. The model re-draws every player's handicap and form on
    each simulation, so favourites are longer and outsiders shorter than they will be once the marks are
@@ -2268,7 +2352,7 @@ function drawPools(){
       const d=cutoffOf(ROUND_TEE[r]),shut=S.closed||new Date()>=d;
       return `<tr><td>${lbl}</td><td class="num small">${d.toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"Europe/Madrid"})} ${esTime(d)} <span class="small">(${ukTime(d)} UK)</span></td>
       <td class="num ${shut?"neg":"pos"}">${shut?"closed":untilStr(d)}</td></tr>`;}).join("")
-   }</table></div></div>`;
+   }</table></div></details>`;
  const mk=$("#fMarket").value,rd=$("#fRound").value,ty=$("#fType").value,st=$("#fStatus").value;
  let out="",shown=0;
  /* Twenty cards in declaration order is a scroll, and on a phone in a bar nobody touches a
@@ -2316,8 +2400,11 @@ function drawPools(){
       ||(DB.detail||[]).some(bt=>bt.market===m.k&&bt.outcome===r.label));
     if(keep.length&&keep.length<rows.length){ hidden=rows.length-keep.length; rows=keep; }
   }
-  let t=`<div class="mkhead"><span></span><span>Outcome</span><span class="num">Backed</span><span class="num">Implied</span>
-   <span class="num">Fair</span><span class="num">Edge</span><span></span></div>`;
+  /* "Implied", "Fair" and "Edge" are bookmaker's words. Half this group has never had a bet in
+     their lives and the labels were doing the opposite of explaining. Same four numbers, said
+     in English: what is on it, what it pays now, what it ought to pay, and the gap. */
+  let t=`<div class="mkhead"><span></span><span>Outcome</span><span class="num">Money on</span><span class="num">Pays now</span>
+   <span class="num">Should pay</span><span class="num">Value</span><span></span></div>`;
   rows.forEach(r=>{const ec=r.ev===null?"":r.ev>0.05?"pos":r.ev<-0.05?"neg":"";
    const inSlip=S.slip.find(x=>x.market===m.k&&x.outcome===r.label);
    const blocked=blockReason(m,r.label);
@@ -2335,10 +2422,10 @@ function drawPools(){
          ?`took <b>${money0(money/Math.max(1,WON.length))}</b> of the pool, shared across £${r.cash} of stakes`
          :"nobody had a penny on it &mdash; the pool goes unclaimed"}</div>`:""}</div>
      <div class="mkfigs">
-       <span class="mkfig" data-l="Backed">${r.cash?"£"+r.cash:"—"}</span>
-       <span class="mkfig" data-l="${RES?"Paid":"Implied"}">${r.imp?fmtDec(r.imp):"—"}</span>
-       <span class="mkfig strong" data-l="Fair">${r.prob?dec(r.prob):"manual"}</span>
-       <span class="mkfig ${ec}" data-l="Edge">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</span>
+       <span class="mkfig" data-l="Money on">${r.cash?"£"+r.cash:"—"}</span>
+       <span class="mkfig" data-l="${RES?"Paid":"Pays now"}">${r.imp?fmtDec(r.imp):"—"}</span>
+       <span class="mkfig strong" data-l="Should pay">${r.prob?dec(r.prob):"manual"}</span>
+       <span class="mkfig ${ec}" data-l="Value">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</span>
      </div>
      <div class="mkact">${mp==="settled"?`<span class="small">${win?'<b class="pos">won</b>':"beaten"}</span>`
       :mp==="off"?'<span class="small">withdrawn</span>'
@@ -2425,6 +2512,9 @@ function drawPools(){
  $("#poolWrap").innerHTML=out||`<div class="card"><p class="note">Nothing matches that. You have filtered your way
  into an empty room.</p></div>`;
  if($("#retry"))$("#retry").addEventListener("click",async()=>{await refresh();drawAll();});
+ /* The two explainer cards remember whether they were left open, exactly like a market does. */
+ const pc=$("#phaseCard");
+ if(pc) pc.addEventListener("toggle",()=>{S.phaseOpen=pc.open;save();});
  document.querySelectorAll(".mkcard").forEach(el=>el.addEventListener("toggle",()=>{
   const k=el.dataset.k, cur=new Set(S.openMk||[]);
   el.open?cur.add(k):cur.delete(k);
@@ -2836,8 +2926,10 @@ const ONB=[
      "So the odds are not a promise. They show how the pot would split <em>right now</em>. Back an "
      +"outcome nobody else fancies and your share is bigger; back the popular one and it is smaller."]},
  {h:"How to have a bet",
-  b:["Tap a market to open it, then tap <b>£5</b>, <b>£10</b> or <b>£20</b> against your selection. "
-     +"Tap the same amount again to take it off.",
+  b:["Tap a market to open it, then tap a stake against your selection &mdash; <b>£1</b>, <b>£5</b>, "
+     +"<b>£10</b> or <b>£20</b>. Tap the same amount again to take it off.",
+     "Those four are shortcuts, not the only options. <b>Any whole number of pounds works</b> &mdash; open "
+     +"the slip and type it.",
      "Your selections gather in the bar at the bottom. Press <b>Place</b> when you are happy.",
      "<b>Every line is its own bet.</b> Three selections is three singles, not a treble.",
      "Then pay into the pot with the button in the header. It shows what you owe."]}];
@@ -2863,8 +2955,8 @@ function drawOnboarding(){
        ${i>0?`<button class="ghost" id="onbBack">Back</button>`:""}
        <button class="go" id="onbNext">${last?"I accept":"Next"}</button></div>
    </div>
-   ${last?`<p class="note" style="margin:10px 0 0;text-align:right">Pressing accept means you have read
-     them. The full rules are on the Rules tab and never change without everyone being told.</p>`:""}
+   ${last?`<p class="note onbfoot" style="margin:10px 0 0;text-align:right">Pressing accept means you have
+     read them. The full rules are on the Rules tab and never change without everyone being told.</p>`:""}
    </div></div>`;
  const bk=$("#onbBack"); if(bk) bk.addEventListener("click",()=>{S.onbStep=i-1;save();drawOnboarding();});
  $("#onbNext").addEventListener("click",()=>{
@@ -3346,7 +3438,7 @@ function drawSettle(){
    <td class="num"><b>${money0(tc)}</b></td><td class="num"><b>${money0(to)}</b></td>
    <td class="num"><b>${money0(tc-ts)}</b></td><td></td></tr>`;
  $("#setlSheet").innerHTML=t;
- drawPayout();
+ drawPayout(); drawRecon(); drawBackups(); drawAlerts(false);
  /* Money that won and had nobody on it. It has to be shown, not absorbed: it is the whole
     basis of the claim that the organiser takes nothing. */
  const U=(DB.unclaimed||[]).filter(x=>+x.unclaimed>0);
@@ -3368,6 +3460,181 @@ function drawSettle(){
    figures, one row per man, and a single button that records the handover the moment it happens
    so you can be interrupted mid-list and pick it straight back up.
    ------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------
+   POT RECONCILIATION. Two different numbers get called "the pot" and confusing them is how an
+   organiser ends up out of pocket. What men have STAKED is what they owe. What has been PAID IN
+   is what has actually arrived in the bank. What has been PAID OUT has left it. Only the last two
+   are cash, and only their difference can be checked against Starling.
+   ------------------------------------------------------------------------------------------- */
+function drawRecon(){
+ const w=$("#reconWrap"); if(!w) return;
+ if(!ADMIN_TOKEN){ w.innerHTML=""; return; }
+ const L=DB.ledger||[], S2=DB.settle||[];
+ const staked  = L.reduce((a,r)=>a+(+r.staked||0),0);
+ const paidIn  = L.reduce((a,r)=>a+(+r.paid||0),0);
+ const owed    = L.reduce((a,r)=>a+Math.max(0,+r.balance||0),0);
+ const paidOut = S2.reduce((a,r)=>a+(+r.paid_out||0),0);
+ const due     = S2.reduce((a,r)=>a+(+r.due||0),0);
+ const collected=S2.reduce((a,r)=>a+(+r.collected||0),0);
+ const unclaimed=(DB.unclaimed||[]).reduce((a,x)=>a+ +x.unclaimed,0);
+ /* Money still riding on markets nobody has called yet. It is the bulk of what you are holding
+    for most of the week and leaving it out was what made the reconciliation cry wolf. */
+ const running=allMarkets().filter(m=>!resultOf(m.k)).reduce((a,m)=>a+poolTotals(m.k).money,0);
+ const inHand  = paidIn - paidOut;
+ /* Two different questions, and they get two different lines.
+    NOW: what should be sitting in Starling this minute. Paid in less paid out. Checkable.
+    AT THE END: what will be left when every man has paid and every winner has been handed his
+    money. That is stakes less returns, and it should be exactly the markets still running plus
+    the money that won with nobody on it. If those two do not match, the arithmetic is wrong
+    somewhere and it is worth knowing now rather than at midnight on the Sunday. */
+ const atEnd = Math.round((staked - collected)*100)/100;
+ const should= Math.round((running + unclaimed)*100)/100;
+ const drift = Math.round((atEnd - should)*100)/100;
+ w.innerHTML=`<div class="paytotals">
+   <div class="paytot big clear"><span>Should be in the account now</span><b>${money0(inHand)}</b></div>
+   <div class="paytot"><span>Still to come in</span><b class="${owed>0?"neg":""}">${money0(owed)}</b></div>
+   <div class="paytot"><span>Still to hand over</span><b class="${due>0?"neg":""}">${money0(due)}</b></div>
+ </div>
+ <div class="wrap"><table>
+   <tr><th>Cash</th><th class="num">Amount</th><th>What it means</th></tr>
+   <tr><td>Paid into the pot</td><td class="num pos">${money0(paidIn)}</td>
+     <td class="small">Money that has actually reached your account.</td></tr>
+   <tr><td>Handed back to winners</td><td class="num">${money0(paidOut)}</td>
+     <td class="small">Money that has left it, ticked off on Who to pay.</td></tr>
+   <tr><td><b>Should be in the account now</b></td><td class="num"><b>${money0(inHand)}</b></td>
+     <td class="small"><b>This is the one to check against Starling.</b> Nothing else here is cash.</td></tr>
+   <tr><th>Owed</th><th class="num">Amount</th><th>&nbsp;</th></tr>
+   <tr><td>Staked on the board</td><td class="num">${money0(staked)}</td>
+     <td class="small">Everything anybody has struck. A promise of money, not money.</td></tr>
+   <tr><td>Still to come in</td><td class="num ${owed>0?"neg":""}"><b>${money0(owed)}</b></td>
+     <td class="small">${owed>0?"Men who have bet and not paid. Chase them with the morning report.":"Nobody owes a penny."}</td></tr>
+   <tr><td>Won on settled markets</td><td class="num">${money0(collected)}</td>
+     <td class="small">What the settled pools have paid out to their backers.</td></tr>
+   <tr><td>Still to hand over</td><td class="num ${due>0?"neg":""}"><b>${money0(due)}</b></td>
+     <td class="small">${due>0?"Winners waiting to be paid. They are listed under Who to pay.":"Everyone who has won has had it."}</td></tr>
+   <tr><th>When it is all done</th><th class="num">Amount</th><th>&nbsp;</th></tr>
+   <tr><td>Riding on markets not yet called</td><td class="num">${money0(running)}</td>
+     <td class="small">Still in play. It leaves the account as each market is settled and paid.</td></tr>
+   <tr><td>Unclaimed &mdash; the 2027 pot</td><td class="num">${money0(unclaimed)}</td>
+     <td class="small">Won by outcomes nobody backed. Stays put and rolls into next year.</td></tr>
+   <tr><td><b>Left when everyone has paid up</b></td><td class="num"><b>${money0(atEnd)}</b></td>
+     <td class="small">Stakes less winnings. Should equal the two lines above it.</td></tr>
+ </table></div>
+ ${Math.abs(drift)>0.02
+   ? `<p class="note" style="color:var(--warn)"><b>${money0(Math.abs(drift))} does not add up.</b>
+      Stakes less winnings leaves ${money0(atEnd)}, but the markets still running plus the unclaimed money
+      come to ${money0(should)}. ${drift>0
+        ? "Most likely a market has been settled on an outcome that had money on it which is not being counted, or a bet was voided after it settled."
+        : "Most likely a pool has been paid out twice, or a market was settled and then re-settled on a different outcome."}
+      Nothing is lost &mdash; every bet is still in the database &mdash; but do not pay anybody out on these
+      figures until it reconciles.</p>`
+   : `<p class="note pos">Everything reconciles. ${running>0
+      ? `Once every man has paid up and every settled market has been handed over, ${money0(atEnd)} would be
+         left in the account &mdash; ${money0(running)} still riding on markets nobody has called yet${
+         unclaimed>0?` and ${money0(unclaimed)} unclaimed for 2027`:""}.`
+      : unclaimed>0
+        ? `Everything is settled. ${money0(unclaimed)} of unclaimed money stays in the account for next year.`
+        : "Everything is settled and every pool found a winner. The account empties to nothing, which is exactly right."}</p>`}`;
+}
+
+/* -------------------------------------------------------------------------------------------
+   NEWS FOR THE GROUP. Not a notification system — nobody wants a push at seven in the morning
+   from a golf sweepstake. It watches for the four things men actually reply to and writes them
+   as one short message you send yourself, when you feel like it.
+   ------------------------------------------------------------------------------------------- */
+const AL_MILESTONES=[50,100,150,200,250,300,400,500,750,1000,1500,2000];
+function alertsNow(){
+ const out=[], now=new Date();
+ /* 1. Shutting soon. Two hours is enough warning to get a bet on from a bar, and short enough
+       that it is still news rather than a diary entry. */
+ allMarkets().forEach(m=>{
+   if(!mLive(m)) return;
+   const mins=(deadline(m)-now)/60000;
+   if(mins>0&&mins<=150){
+     const {money}=poolTotals(m.k);
+     out.push({k:"shut:"+m.k, pri:1,
+       t:`⏰ *${m.n}* shuts in ${Math.round(mins)} minutes${money?` — £${money.toFixed(0)} in the pot`:", and there is nothing in it yet"}.`});
+   }});
+ /* 2. A session finished. */
+ const sc=scoreOf();
+ [1,2,3,4].forEach(sess=>{
+   const ms=(DB.matches||[]).filter(x=>+x.session===sess);
+   if(!ms.length||!ms.every(x=>x.result)) return;
+   let bl=0,rd=0; ms.forEach(x=>{ if(x.result==="blue")bl++; else if(x.result==="red")rd++; else {bl+=0.5;rd+=0.5;} });
+   out.push({k:"sess:"+sess, pri:0,
+     t:`⛳ *Session ${sess} is done* — Blue ${bl}, Red ${rd}. Overall it is *${sc.blue}–${sc.red}*.`});
+ });
+ /* 3. The pot passing a round number. */
+ const pot=(DB.totals||[]).reduce((a,r)=>a+(r.staked||0),0);
+ const hit=AL_MILESTONES.filter(v=>pot>=v).pop();
+ if(hit) out.push({k:"pot:"+hit, pri:2, t:`💷 *£${pot.toFixed(0)} is now on the board* across ${(DB.totals||[]).length} outcomes.`});
+ /* 4. A settled market whose winners are still waiting. */
+ const owed={};
+ (DB.payout||[]).forEach(r=>{ if(+r.outstanding>0.004) owed[r.market]=(owed[r.market]||0)+ +r.outstanding; });
+ Object.keys(owed).forEach(k=>{
+   const R=resultOf(k); if(!R) return;
+   out.push({k:"pay:"+k+":"+owed[k].toFixed(2), pri:0,
+     t:`🏆 *${marketName(k)}* is settled — ${R.void?"nobody won it, so every stake comes back":"won by "+(R.outcomes||[]).join(" and ")}. £${owed[k].toFixed(2)} to hand over.`});
+ });
+ return out.sort((a,b)=>a.pri-b.pri);
+}
+function drawAlerts(fresh){
+ const w=$("#alWrap"); if(!w) return;
+ if(!ADMIN_TOKEN){ w.innerHTML=""; return; }
+ const seen=new Set(S.alSeen||[]);
+ const all=alertsNow();
+ const news=all.filter(a=>!seen.has(a.k));
+ w.innerHTML = all.length
+  ? `<div class="wrap"><table><tr><th>What has happened</th><th class="num">New?</th></tr>
+     ${all.map(a=>`<tr><td>${esc(a.t.replace(/\*/g,""))}</td>
+       <td class="num small">${seen.has(a.k)?"told them":'<b class="pos">new</b>'}</td></tr>`).join("")}
+     </table></div>`
+  : `<p class="note">Nothing worth a message. No market shuts in the next couple of hours, no session has
+     just finished, and nobody is waiting to be paid.</p>`;
+ if(fresh){
+   const use=news.length?news:all;
+   const box=$("#alOut");
+   if(box) box.value = use.length
+     ? "*CHIP & SIP*\n\n"+use.map(a=>a.t).join("\n")+"\n\n"+location.origin+location.pathname
+     : "";
+   const msg=$("#alMsg");
+   if(msg) msg.innerHTML = news.length
+     ? `<span class="pos">${news.length} thing${news.length===1?"":"s"} to tell them.</span>`
+     : all.length ? `<span class="warn">Nothing new since last time — the message below repeats what they already know.</span>`
+     : `<span>Nothing to say.</span>`;
+   S.alSeen=all.map(a=>a.k); save();
+ }
+}
+
+/* -------------------------------------------------------------------------------------------
+   BACKUPS. Taken by the database on a schedule, so nothing on anybody's phone has to be awake.
+   ------------------------------------------------------------------------------------------- */
+function drawBackups(){
+ const t=$("#bkTbl"); if(!t) return;
+ if(!ADMIN_TOKEN){ t.innerHTML=""; return; }
+ const B=DB.backups||[];
+ if(!B.length){ t.innerHTML=`<tr><td class="small">No snapshot yet. The first one is taken tonight at 02:30,
+   or press the button to take one now.</td></tr>`; return; }
+ t.innerHTML=`<tr><th>Taken</th><th>Why</th><th class="num">Bets</th><th class="num">Staked</th><th class="num">Size</th><th></th></tr>`
+  +B.map(b=>{const d=new Date(b.taken_at);
+   return `<tr><td>${d.toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
+     <div class="small">${ageStr(Date.now()-d.getTime())}</div></td>
+    <td class="small">${esc(b.reason)}</td><td class="num">${b.bets}</td><td class="num">£${b.staked}</td>
+    <td class="num small">${(b.bytes/1024).toFixed(0)} KB</td>
+    <td><button class="ghost bkDl" data-id="${b.id}" data-at="${esc(b.taken_at)}" style="padding:3px 9px">Download</button></td></tr>`;}).join("");
+ t.querySelectorAll(".bkDl").forEach(el=>el.addEventListener("click",async e=>{
+  const b=e.target.closest("button"); b.disabled=true; const was=b.textContent; b.textContent="…";
+  try{
+    const book=await rpc("admin_backup_get",{p_id:b.dataset.id,p_token:ADMIN_TOKEN});
+    const blob=new Blob([JSON.stringify(book,null,1)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="chipsip-book-"+String(b.dataset.at).slice(0,16).replace(/[: ]/g,"-")+".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    b.textContent=was; b.disabled=false;
+  }catch(err){ b.textContent=was; b.disabled=false; $("#bkMsg").innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,120))}</span>`; }}));
+}
 function drawPayout(){
  const w=$("#poWrap"); if(!w) return;
  if(!ADMIN_TOKEN){ w.innerHTML=""; return; }
@@ -3628,6 +3895,37 @@ $("#repCopy").addEventListener("click",async()=>{
  try{ await navigator.clipboard.writeText(t.value); $("#repMsg").innerHTML='<span class="pos">Copied. Paste it in the group.</span>'; }
  catch(e){ /* clipboard is blocked without a secure context or a gesture the browser trusts */
    t.select(); $("#repMsg").innerHTML='<span class="warn">Selected it — copy with Cmd/Ctrl+C.</span>'; }});
+/* Share, not send. The board cannot post to WhatsApp and should not pretend it can — this hands
+   the message to the phone's own share sheet, where WhatsApp is the first icon. On a laptop there
+   is no share sheet, so it falls back to the clipboard without making a fuss about it. */
+async function shareText(text,msgEl,label){
+ const m=$(msgEl);
+ if(!text){ if(m) m.innerHTML='<span class="warn">Nothing to send yet — press the other button first.</span>'; return; }
+ if(navigator.share){
+   try{ await navigator.share({text}); if(m) m.innerHTML='<span class="pos">Sent to the share sheet.</span>'; return; }
+   catch(e){ if(e&&e.name==="AbortError"){ if(m) m.textContent=""; return; } }
+ }
+ try{ await navigator.clipboard.writeText(text);
+   if(m) m.innerHTML='<span class="pos">No share sheet on this device &mdash; copied instead. Paste it in the group.</span>'; }
+ catch(e){ const t=$(label); if(t){t.select();} if(m) m.innerHTML='<span class="warn">Selected it — copy with Cmd/Ctrl+C.</span>'; }
+}
+if($("#repShare")) $("#repShare").addEventListener("click",()=>{
+ const t=$("#repOut"); if(!t.value) t.value=buildReport($("#repPools").checked);
+ shareText(t.value,"#repMsg","#repOut");});
+$("#alGo").addEventListener("click",()=>{ drawAlerts(true); });
+$("#alShare").addEventListener("click",()=>shareText($("#alOut").value,"#alMsg","#alOut"));
+$("#alCopy").addEventListener("click",async()=>{
+ const t=$("#alOut");
+ if(!t.value){ $("#alMsg").innerHTML='<span class="warn">Press <b>Check for news</b> first.</span>'; return; }
+ try{ await navigator.clipboard.writeText(t.value); $("#alMsg").innerHTML='<span class="pos">Copied. Paste it in the group.</span>'; }
+ catch(e){ t.select(); $("#alMsg").innerHTML='<span class="warn">Selected it — copy with Cmd/Ctrl+C.</span>'; }});
+$("#bkGo").addEventListener("click",async e=>{
+ const b=e.target; b.disabled=true; $("#bkMsg").textContent="Taking a snapshot…";
+ try{ await rpc("admin_take_backup",{p_reason:"by hand",p_token:ADMIN_TOKEN});
+   await refresh(); drawBackups();
+   $("#bkMsg").innerHTML='<span class="pos">Done. The book as it stands is safe.</span>'; }
+ catch(err){ $("#bkMsg").innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,140))}</span>`; }
+ b.disabled=false;});
 $("#acctChip").addEventListener("click",()=>{
  S.acctOpen=!S.acctOpen; save(); drawAuth();
  if(S.acctOpen){const p=$("#acctPanel"); if(p) p.scrollIntoView({behavior:"smooth",block:"nearest"});}});
@@ -3878,7 +4176,10 @@ load();if(!S.oddsFmt)S.oddsFmt="frac";if(!S.slip)S.slip=[];if(S.me==null)S.me=""
 /* Anybody who has not accepted starts again at screen one. Walking away halfway through and
    coming back to the last screen would let a man accept rules he closed before reading. */
 if(!rulesAccepted()) S.onbStep=0;
-paintFmt();paintTheme();setAdmPane(S.admPane||"settle");drawAll();drawInstall();tick();setInterval(tick,30000);
+paintFmt();paintTheme();setAdmPane(S.admPane||"settle");
+(function(){const h=$("#howCard"); if(!h) return;
+ h.open=!!S.howOpen; h.addEventListener("toggle",()=>{S.howOpen=h.open;save();});})();
+drawAll();drawInstall();tick();setInterval(tick,30000);
 /* The odds live in the database. A punter's phone reads them; it never computes them,
    so every screen shows the same price and nobody can reroll their way to a better one.
    Only the organiser simulates, and only to publish. */
