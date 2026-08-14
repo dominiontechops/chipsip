@@ -23,13 +23,17 @@
 /* Everything below used to be a hard-coded hex scattered through the sheet. They are variables now
    so the light theme can move them; add no new bare hexes or half the page will stay dark. */
 --line2:#1e2b23;--hdr1:#18261d;--hdr2:#0e1512;--on:#06120b;--okbd:#2f6b45;
---bluebd:#26507f;--bluebg:#13243a;--redbd:#6d2f26;--redbg:#2e1512;--warnbd:#5a4a1f}
+--bluebd:#26507f;--bluebg:#13243a;--redbd:#6d2f26;--redbg:#2e1512;--warnbd:#5a4a1f;
+/* one colour per group of markets, in daylight order */
+--gTrip:#c9a227;--gR1:#e08b3c;--gR2:#3f9e63;--gR3:#3d9fb0;--gR4:#c8503f;--gNov:#a06bd4}
 /* Light theme. Same hues, flipped luminance, so the greens still read as Chip & Sip and not as a
    spreadsheet. Contrast is checked against the ink colour, not against white. */
 html[data-theme="light"]{--bg:#f4f7f3;--panel:#ffffff;--panel2:#eef3ec;--line:#d3e0d5;--ink:#132018;
 --dim:#5d7466;--acc:#2f7d4b;--acc2:#1f6c3c;--blue:#2b62a8;--blue2:#204d85;--red:#b23e2c;--red2:#8f3324;
 --warn:#8a6212;--line2:#e2ebe2;--hdr1:#e7f0e7;--hdr2:#f4f7f3;--on:#ffffff;--okbd:#8fc4a4;
---bluebd:#a9c4e6;--bluebg:#e6eefa;--redbd:#e6b3a8;--redbg:#fae9e5;--warnbd:#dcc68a}
+--bluebd:#a9c4e6;--bluebg:#e6eefa;--redbd:#e6b3a8;--redbg:#fae9e5;--warnbd:#dcc68a;
+/* Darker on white so the same six colours still read against pale card stock */
+--gTrip:#a17d10;--gR1:#b4661f;--gR2:#2f7d4b;--gR3:#25798a;--gR4:#b23e2c;--gNov:#7a45ad}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 /* ---------- masthead -----------------------------------------------------------------------
@@ -468,10 +472,22 @@ padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px}
 @media(max-width:719px){ .medit{grid-template-columns:1fr 1fr;} .medit .msel{grid-column:1/-1} }
 
 /* ---- Grouped pools --------------------------------------------------------------------- */
-.grouphd{display:flex;align-items:baseline;gap:8px;margin:18px 0 8px;padding-top:4px}
-.grouphd h3{margin:0;font-size:12px;color:var(--acc2);text-transform:uppercase;letter-spacing:.7px}
+.grouphd{display:flex;align-items:center;gap:9px;margin:20px 0 9px;padding:0 0 7px;
+  border-bottom:2px solid var(--gc,var(--line))}
+.grouphd h3{margin:0;font-size:12.5px;color:var(--gc,var(--acc2));text-transform:uppercase;
+  letter-spacing:.9px;font-weight:800;display:flex;align-items:center;gap:7px}
 .grouphd .small{color:var(--dim)}
+.grouphd .gpot{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;
+  color:var(--gc,var(--acc2));white-space:nowrap}
 .grouphd:first-child{margin-top:0}
+/* the little glyph that runs through the heading, the card and the market filter */
+.mico{width:17px;height:17px;flex:0 0 auto;display:inline-block;vertical-align:-3px}
+.mico path,.mico circle,.mico line{stroke:currentColor;stroke-width:1.7;fill:none;
+  stroke-linecap:round;stroke-linejoin:round}
+.mico .fill{fill:currentColor;stroke:none}
+/* every market card carries its group's colour down the left edge */
+.mkcard{border-left:4px solid var(--gc,var(--line))}
+.mksumin h2 .mico{color:var(--gc,var(--acc2))}
 
 /* ---- Slip as a persistent bar ---------------------------------------------------------- */
 #slipbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);
@@ -1958,7 +1974,7 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-14.36";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.37";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -2470,6 +2486,16 @@ function valueBand(ev){
    d:"More money is on this than the model thinks it deserves, so it pays less than it should."};
  return {c:"fair", t:"about right", d:"The pot is paying roughly what the model says it is worth."};
 }
+/* A handful of line glyphs, drawn rather than fetched — no image requests, they take the colour of
+   whatever they sit in, and they stay sharp on any screen. One per group of markets. */
+const ICONS={
+ trophy:'<path d="M6 3h8v4a4 4 0 0 1-8 0z"/><path d="M6 4H3.5v1.5A3 3 0 0 0 6 8.4"/><path d="M14 4h2.5v1.5A3 3 0 0 1 14 8.4"/><path d="M10 11v3"/><path d="M7 17h6"/><path d="M8.5 14h3l.7 3h-4.4z"/>',
+ pair:  '<circle cx="7" cy="6" r="2.4"/><circle cx="13.6" cy="6" r="2.4"/><path d="M3.4 16.5c0-2.4 1.6-4 3.6-4s3.6 1.6 3.6 4"/><path d="M10.2 16.5c0-2.4 1.5-4 3.4-4s3.4 1.6 3.4 4"/>',
+ flag:  '<path d="M5.5 17V3"/><path d="M5.5 3.6h9l-2.4 3 2.4 3h-9"/><ellipse cx="10" cy="17" rx="5" ry="1.4"/>',
+ pint:  '<path d="M5.5 5h7l-.7 12h-5.6z"/><path d="M12.6 7.2h1.9a1.9 1.9 0 0 1 0 3.8h-2.1"/><path d="M5.6 8h6.8"/>',
+ ball:  '<circle cx="10" cy="10" r="6.4"/><circle class="fill" cx="8" cy="8" r=".8"/><circle class="fill" cx="11.4" cy="8.4" r=".8"/><circle class="fill" cx="9.6" cy="11.4" r=".8"/><circle class="fill" cx="12.4" cy="11.8" r=".8"/>'
+};
+const icon=k=>`<svg class="mico" viewBox="0 0 20 20" aria-hidden="true">${ICONS[k]||ICONS.ball}</svg>`;
 function drawPools(){
  /* Reveal the panel the moment we know who he is, without waiting for a tab click. */
  if(ADMIN_TOKEN){const lk=$("#adminLock"),bd=$("#admBody");
@@ -2569,13 +2595,17 @@ function drawPools(){
     filter. Group them the way people actually think about them — the trip, then day by day,
     then the daft ones — and put the biggest pool at the top of each group, because that is
     where the action is and where the next fiver wants to go. */
+ /* A colour each. Twenty white cards in a column is a spreadsheet; the same twenty with a day's
+    colour down the edge is a board you can navigate by eye from across a bar. The hues run in
+    daylight order — morning amber through to Sunday red — and none of them is Blue or Red team
+    green-blue, so nothing here can be mistaken for a team. */
  const GROUPS=[
-  {id:"trip", n:"The whole trip",  hint:"Settle on Sunday night", pick:m=>m.type!=="novelty"&&!m.round},
-  {id:"r1",   n:"Round 1 — Foursomes", hint:"Thu 24 Sep", pick:m=>m.type!=="novelty"&&m.round==="1"},
-  {id:"r2",   n:"Round 2 — Fourball",  hint:"Fri 25 Sep", pick:m=>m.type!=="novelty"&&m.round==="2"},
-  {id:"r3",   n:"Round 3 — Scramble",  hint:"Sat 26 Sep", pick:m=>m.type!=="novelty"&&m.round==="3"},
-  {id:"r4",   n:"Round 4 — Singles",   hint:"Sun 27 Sep", pick:m=>m.type!=="novelty"&&m.round==="4"},
-  {id:"nov",  n:"Novelty",  hint:"Settled by the organiser, on the evidence", pick:m=>m.type==="novelty"}];
+  {id:"trip", c:"var(--gTrip)", ic:"trophy", n:"The whole trip",  hint:"Settle on Sunday night", pick:m=>m.type!=="novelty"&&!m.round},
+  {id:"r1",   c:"var(--gR1)",   ic:"pair",   n:"Round 1 — Foursomes", hint:"Thu 24 Sep", pick:m=>m.type!=="novelty"&&m.round==="1"},
+  {id:"r2",   c:"var(--gR2)",   ic:"pair",   n:"Round 2 — Fourball",  hint:"Fri 25 Sep", pick:m=>m.type!=="novelty"&&m.round==="2"},
+  {id:"r3",   c:"var(--gR3)",   ic:"pair",   n:"Round 3 — Scramble",  hint:"Sat 26 Sep", pick:m=>m.type!=="novelty"&&m.round==="3"},
+  {id:"r4",   c:"var(--gR4)",   ic:"flag",   n:"Round 4 — Singles",   hint:"Sun 27 Sep", pick:m=>m.type!=="novelty"&&m.round==="4"},
+  {id:"nov",  c:"var(--gNov)",  ic:"pint",   n:"Novelty",  hint:"Settled by the organiser, on the evidence", pick:m=>m.type==="novelty"}];
  const ordered=[]; const seenK=new Set();
  GROUPS.forEach(g=>{
    const ms=allMarkets().filter(m=>g.pick(m)&&!seenK.has(m.k))
@@ -2685,10 +2715,10 @@ function drawPools(){
      time a selection is added and it would be maddening to have the card shut under your thumb. */
   const isOpen=(S.openMk||[]).indexOf(m.k)>=0;
   if(g!==lastG){ out+=`<!--GH:${g.id}-->`; lastG=g; }
-  out+=`<details class="card mkcard${mp==="settled"?" issettled":""}" data-k="${esc(m.k)}"${isOpen?" open":""}${
-    mp==="closed"||mp==="off"?' style="opacity:.62"':""}>
+  out+=`<details class="card mkcard${mp==="settled"?" issettled":""}" data-k="${esc(m.k)}"${isOpen?" open":""}
+    style="--gc:${g.c}${mp==="closed"||mp==="off"?";opacity:.62":""}">
    <summary class="mksum">
-    <div class="mksumin"><h2>${esc(m.n)} ${chip}
+    <div class="mksumin"><h2>${icon(g.ic)}${esc(m.n)} ${chip}
       ${m.type==="novelty"?'<span class="tag">novelty</span>':""}
       ${m.round?`<span class="tag">R${m.round}</span>`:'<span class="tag">whole trip</span>'}
       ${mine?`<span class="tag" style="border-color:var(--acc);color:var(--acc2)">${mine} on your slip</span>`:""}</h2>
@@ -2741,8 +2771,9 @@ function drawPools(){
  function groupHead(g){
    const ms=ordered.filter(o=>o.g.id===g.id).map(o=>o.m);
    const tot=ms.reduce((a,m)=>a+poolTotals(m.k).money,0);
-   return `<div class="grouphd"><h3>${esc(g.n)}</h3>
-     <span class="small">${esc(g.hint)}${tot?` &middot; £${tot.toFixed(0)} in play`:""}</span></div>`;
+   return `<div class="grouphd" style="--gc:${g.c}"><h3>${icon(g.ic)}${esc(g.n)}</h3>
+     <span class="small">${esc(g.hint)}</span>
+     ${tot?`<span class="gpot">£${tot.toFixed(0)}</span>`:""}</div>`;
  }
  /* Headings are stamped as markers first and filled in afterwards, so a group whose markets
     were all filtered out never leaves an empty heading behind. */
@@ -3676,7 +3707,7 @@ function drawSettle(){
    e.target.disabled=true; msg.textContent="Saving…";
    const cur=suspended().slice(), at=cur.indexOf(k);
    if(at>=0) cur.splice(at,1); else cur.push(k);
-   try{ await saveSettings({suspended:cur}); await refresh(); drawAll();
+   try{ await pushSettings({suspended:cur}); await refresh(); drawAll();
      msg.innerHTML=`<span class="pos">${at>=0?"Back on the board.":"Withdrawn. No further stakes accepted."}</span>`; }
    catch(err){ e.target.disabled=false; msg.innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,120))}</span>`; }});
  });
@@ -4162,7 +4193,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-14.36</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-14.37</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
