@@ -25,7 +25,8 @@
 --line2:#1e2b23;--hdr1:#18261d;--hdr2:#0e1512;--on:#06120b;--okbd:#2f6b45;
 --bluebd:#26507f;--bluebg:#13243a;--redbd:#6d2f26;--redbg:#2e1512;--warnbd:#5a4a1f;
 /* one colour per group of markets, in daylight order */
---gTrip:#c9a227;--gR1:#e08b3c;--gR2:#3f9e63;--gR3:#3d9fb0;--gR4:#c8503f;--gNov:#a06bd4}
+--gTrip:#c9a227;--gR1:#e08b3c;--gR2:#3f9e63;--gR3:#3d9fb0;--gR4:#c8503f;--gNov:#a06bd4;
+--flashG:rgba(63,158,99,.34);--flashR:rgba(200,80,63,.34)}
 /* Light theme. Same hues, flipped luminance, so the greens still read as Chip & Sip and not as a
    spreadsheet. Contrast is checked against the ink colour, not against white. */
 html[data-theme="light"]{--bg:#f4f7f3;--panel:#ffffff;--panel2:#eef3ec;--line:#d3e0d5;--ink:#132018;
@@ -33,7 +34,8 @@ html[data-theme="light"]{--bg:#f4f7f3;--panel:#ffffff;--panel2:#eef3ec;--line:#d
 --warn:#8a6212;--line2:#e2ebe2;--hdr1:#e7f0e7;--hdr2:#f4f7f3;--on:#ffffff;--okbd:#8fc4a4;
 --bluebd:#a9c4e6;--bluebg:#e6eefa;--redbd:#e6b3a8;--redbg:#fae9e5;--warnbd:#dcc68a;
 /* Darker on white so the same six colours still read against pale card stock */
---gTrip:#a17d10;--gR1:#b4661f;--gR2:#2f7d4b;--gR3:#25798a;--gR4:#b23e2c;--gNov:#7a45ad}
+--gTrip:#a17d10;--gR1:#b4661f;--gR2:#2f7d4b;--gR3:#25798a;--gR4:#b23e2c;--gNov:#7a45ad;
+--flashG:rgba(47,125,75,.22);--flashR:rgba(178,62,44,.22)}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 /* ---------- masthead -----------------------------------------------------------------------
@@ -81,7 +83,7 @@ html[data-theme="light"] .hs{background:rgba(0,0,0,.03)}
 .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:13px;min-width:0}
 @media(max-width:719px){
-  .hwrap{padding:11px 12px 0}
+  .hwrap{padding:11px 10px 0}
   .crest{width:46px;height:46px;border-radius:12px}
   .crest img{width:38px;height:38px}
   .brand{gap:10px}
@@ -139,8 +141,14 @@ margin:-14px;padding:14px;border-radius:12px;-webkit-tap-highlight-color:transpa
 .mksumin .note{margin:0}
 .chev{flex:0 0 auto;color:var(--dim);font-size:15px;line-height:1.4;transition:transform .15s}
 .mkcard[open] .chev{transform:rotate(180deg)}
-nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20}
-nav button{flex:0 0 auto;background:none;border:0;color:var(--dim);padding:13px 15px;font-size:13.5px;
+/* The tab bar is full width so its rule and background span the window, but its BUTTONS have to
+   line up with the masthead and the cards, which sit in an 1100px column. Padding the bar by
+   whatever is left over does both. On a narrow screen the leftover is nothing, so it collapses to
+   an ordinary scrolling bar. */
+nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20;
+  padding:0 calc(max(0px, 100% - 1100px) / 2);scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;background:none;border:0;color:var(--dim);padding:13px 16px;font-size:13.5px;
 font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
 nav button.on{color:var(--ink);border-bottom-color:var(--acc)}
 main{padding:16px;max-width:1100px;margin:0 auto}
@@ -255,6 +263,14 @@ letter-spacing:.5px;color:#fff;border:2px solid transparent;background-size:cove
 .poollegend b{width:8px;height:8px;border-radius:2px;display:inline-block}
 #sinceWrap:not(:empty),#onbWrap:not(:empty),#installWrap:not(:empty){padding:12px 16px 0;max-width:1100px;margin:0 auto}
 .install{border-left:3px solid var(--acc)}
+/* ---- the blocking update ------------------------------------------------------------------- */
+#updveil{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.72);display:flex;
+  align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+#updbox{background:var(--panel);border:1px solid var(--acc);border-radius:16px;padding:22px;
+  max-width:430px;width:100%;text-align:left;animation:popIn .24s ease-out}
+#updbox .updtag{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--acc2);font-weight:800}
+#updbox h2{margin:4px 0 8px;font-size:19px;line-height:1.2}
+#updbox .go{width:100%;margin-top:14px;padding:13px;font-size:15px}
 /* One line each, with the team's own colour down the side, rather than both camps run together
    in a single paragraph with a middle dot between them. */
 .camp{border-left:3px solid;padding-left:9px;margin:6px 0}
@@ -320,6 +336,61 @@ min-width:42px}
   font-size:10px;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin-right:2px}
 .mkfig.strong{color:var(--acc2)}
 .mkrow.barred{opacity:.5}
+/* ---- movement ------------------------------------------------------------------------------
+   Green and up for a price that has lengthened, red and down for one that has shortened. The
+   whole thing lasts 1.1 seconds and leaves no trace, because a board covered in permanent
+   highlights tells you nothing about what changed just now. */
+@keyframes flashUp{
+  0%{background:transparent;transform:translateY(6px);opacity:.35}
+  18%{background:var(--flashG);transform:translateY(0);opacity:1}
+  70%{background:var(--flashG)}
+  100%{background:transparent}}
+@keyframes flashDown{
+  0%{background:transparent;transform:translateY(-6px);opacity:.35}
+  18%{background:var(--flashR);transform:translateY(0);opacity:1}
+  70%{background:var(--flashR)}
+  100%{background:transparent}}
+.mkfig.flashup{animation:flashUp 1.1s ease-out;border-radius:5px}
+.mkfig.flashdown{animation:flashDown 1.1s ease-out;border-radius:5px}
+.mkfig.flashup::after{content:" \25B2";font-size:9px;color:var(--acc2)}
+.mkfig.flashdown::after{content:" \25BC";font-size:9px;color:var(--red2)}
+/* the money bar slides to its new proportions instead of snapping */
+.poolbar i,.bar i,.split i{transition:width .55s cubic-bezier(.22,.61,.36,1)}
+/* a market card opening. details cannot transition height, so the CONTENT is animated instead. */
+@keyframes cardIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.mkcard[open] > *:not(summary){animation:cardIn .22s ease-out}
+.foldcard[open] > *:not(summary),.filterfold[open] > *:not(summary){animation:cardIn .22s ease-out}
+/* the score, when a result lands */
+@keyframes pulse{0%{transform:scale(1)}35%{transform:scale(1.13)}100%{transform:scale(1)}}
+.pulse{animation:pulse .5s ease-out}
+/* the tick that draws itself when a bet goes on */
+@keyframes drawTick{to{stroke-dashoffset:0}}
+@keyframes popIn{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+.betok{position:fixed;inset:0;z-index:65;display:flex;align-items:center;justify-content:center;
+  pointer-events:none}
+.betok .inner{background:var(--panel);border:1px solid var(--acc);border-radius:16px;
+  padding:20px 26px;text-align:center;animation:popIn .22s ease-out;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.betok svg{width:54px;height:54px;display:block;margin:0 auto 6px}
+.betok circle{fill:none;stroke:var(--acc);stroke-width:3;opacity:.3}
+.betok path{fill:none;stroke:var(--acc2);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:40;stroke-dashoffset:40;animation:drawTick .42s .1s ease-out forwards}
+.betok b{display:block;font-size:16px}
+.betok span{font-size:12.5px;color:var(--dim)}
+/* the toast */
+#toast{position:fixed;left:50%;bottom:-70px;transform:translateX(-50%);z-index:66;
+  background:var(--panel2);border:1px solid var(--acc);color:var(--ink);
+  padding:9px 16px;border-radius:99px;font-size:13px;font-weight:600;white-space:nowrap;
+  transition:bottom .3s cubic-bezier(.22,.61,.36,1);box-shadow:0 6px 24px rgba(0,0,0,.3);
+  max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+#toast.show{bottom:calc(18px + env(safe-area-inset-bottom))}
+body.hasbar #toast.show,body.hasslip #toast.show{bottom:calc(84px + env(safe-area-inset-bottom))}
+#toast.warn{border-color:var(--warn)}
+@media(prefers-reduced-motion: reduce){
+  .mkfig.flashup,.mkfig.flashdown,.pulse,.mkcard[open] > *:not(summary),
+  .foldcard[open] > *:not(summary),.filterfold[open] > *:not(summary),.betok .inner{animation:none}
+  .poolbar i,.bar i,.split i{transition:none}
+  .betok path{animation:none;stroke-dashoffset:0}
+}
 /* ---- underbacked / overbacked, and which way the price is going --------------------------- */
 .valtag,.movetag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.4px;
   text-transform:uppercase;padding:2px 7px;border-radius:99px;border:1px solid;white-space:nowrap;
@@ -408,8 +479,8 @@ html[data-theme="light"] .valtag.over2{color:#fff}
   main{padding:10px}
   .card{padding:12px;border-radius:10px}
   h1{font-size:17px}
-  header{padding:12px 12px 10px}
-  nav button{padding:12px 13px;font-size:13px}
+  header{padding:0}
+  nav button{padding:12px 10px;font-size:13px}
   .filters{padding:8px;gap:6px}
   /* On a phone each filter gets a full row of its own and the control fills it, so no single
      long option can push the page sideways. */
@@ -421,7 +492,6 @@ html[data-theme="light"] .valtag.over2{color:#fff}
   input[type=number]{width:70px}
   button{min-height:44px}
   .seg button{min-height:36px;padding:7px 12px}
-  header{padding:10px 12px 8px}
   h1{font-size:16px;letter-spacing:.2px}
   .sub{font-size:11.5px}
   .kpi div{min-width:calc(50% - 5px);flex:1 1 calc(50% - 5px)}
@@ -1974,7 +2044,7 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-14.37";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-14.38";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -2493,8 +2563,21 @@ const ICONS={
  pair:  '<circle cx="7" cy="6" r="2.4"/><circle cx="13.6" cy="6" r="2.4"/><path d="M3.4 16.5c0-2.4 1.6-4 3.6-4s3.6 1.6 3.6 4"/><path d="M10.2 16.5c0-2.4 1.5-4 3.4-4s3.4 1.6 3.4 4"/>',
  flag:  '<path d="M5.5 17V3"/><path d="M5.5 3.6h9l-2.4 3 2.4 3h-9"/><ellipse cx="10" cy="17" rx="5" ry="1.4"/>',
  pint:  '<path d="M5.5 5h7l-.7 12h-5.6z"/><path d="M12.6 7.2h1.9a1.9 1.9 0 0 1 0 3.8h-2.1"/><path d="M5.6 8h6.8"/>',
- ball:  '<circle cx="10" cy="10" r="6.4"/><circle class="fill" cx="8" cy="8" r=".8"/><circle class="fill" cx="11.4" cy="8.4" r=".8"/><circle class="fill" cx="9.6" cy="11.4" r=".8"/><circle class="fill" cx="12.4" cy="11.8" r=".8"/>'
+ ball:  '<circle cx="10" cy="10" r="6.4"/><circle class="fill" cx="8" cy="8" r=".8"/><circle class="fill" cx="11.4" cy="8.4" r=".8"/><circle class="fill" cx="9.6" cy="11.4" r=".8"/><circle class="fill" cx="12.4" cy="11.8" r=".8"/>',
+ /* one apiece for the daft markets, so a novelty card is recognisable before you read it */
+ buggy: '<circle cx="6" cy="14.5" r="2.1"/><circle cx="14.6" cy="14.5" r="2.1"/><path d="M4 12V8.5h8.5V12"/><path d="M4 8.5 5.6 5h5.3l1.6 3.5"/><path d="M12.5 12h4.2l-1.2-3.2h-3"/>',
+ water: '<path d="M10 3.2s4.4 5 4.4 7.9A4.4 4.4 0 0 1 10 15.5a4.4 4.4 0 0 1-4.4-4.4C5.6 8.2 10 3.2 10 3.2z"/><path d="M3 17.6c1.6-1.1 3-1.1 4.6 0s3 1.1 4.6 0 3-1.1 4.6 0"/>',
+ club:  '<path d="M12.6 3.4 8.2 13.8"/><path d="M7.8 14.2c-1.6.5-2.6 1.6-2.6 2.6 1 .3 2.5-.3 3.4-1.6"/><path d="M11 4.6l2.6 1.2"/>',
+ sun:   '<circle cx="10" cy="10" r="3.6"/><path d="M10 2.4v1.8M10 15.8v1.8M2.4 10h1.8M15.8 10h1.8M4.6 4.6l1.3 1.3M14.1 14.1l1.3 1.3M15.4 4.6l-1.3 1.3M5.9 14.1l-1.3 1.3"/>',
+ putt:  '<circle cx="6.2" cy="14.6" r="1.9"/><path d="M15.4 3.6v8.2"/><path d="M13.2 11.8h4.4"/><path d="M8.1 14.6h4"/>',
+ row:   '<path d="M3.2 4.6h6.4v4.6H6l-2.8 2.4V9.2H3.2z"/><path d="M10.6 8h6.2v4.4h-2.6l2.2 2.2-3.4-2.2h-2.4z"/>',
+ mouth: '<circle cx="10" cy="10" r="6.6"/><path d="M6.6 11.6c1.1 1.3 2.1 1.9 3.4 1.9s2.3-.6 3.4-1.9"/><path d="M7.4 7.8h1.4M11.2 7.8h1.4"/>'
 };
+/* Which glyph belongs to which novelty market. The `pk` on each market is the pricing model it
+   uses, which happens to be exactly the right key for this. */
+const NOV_ICON={cart:"buggy",water:"water",clubs:"club",burn:"sun",putt3:"putt",putts:"putt",
+ miss3:"putt",air:"ball",balls:"ball",heat:"row",cunt:"mouth",drunk:"pint",rob30:"pint"};
+const iconFor=(g,m)=>g.id==="nov"?icon(NOV_ICON[m&&m.pk]||NOV_ICON[(m&&m.k||"").replace(/^nov_/,"")]||"pint"):icon(g.ic);
 const icon=k=>`<svg class="mico" viewBox="0 0 20 20" aria-hidden="true">${ICONS[k]||ICONS.ball}</svg>`;
 function drawPools(){
  /* Reveal the panel the moment we know who he is, without waiting for a tab click. */
@@ -2665,7 +2748,8 @@ function drawPools(){
    const win=isWin(r.label);
    const band=(!RES&&mp!=="closed")?valueBand(r.ev):null;
    const mv  =(!RES&&mp!=="closed")?moveOf(m.k,r.label,r.imp):null;
-   t+=`<div class="mkrow${blocked?" barred":""}${RES?(win?" won":" lost"):""}">
+   t+=`<div class="mkrow${blocked?" barred":""}${RES?(win?" won":" lost"):""}"
+     data-o="${esc(r.label)}" data-imp="${r.imp||0}">
      ${face(r.label,r.player?r.player.team:null)}
      <div class="mkname">${win?'<span class="wintick">&#10004;</span> ':""}${esc(r.label)}${r.player?" "+teamTag(r.player.team)+roleTag(r.label):""}${r.player&&r.player.unknown?' <span class="tag nd">form assumed</span>':""}
        ${win?' <span class="tag winner">WINNER</span>':""}
@@ -2718,14 +2802,14 @@ function drawPools(){
   out+=`<details class="card mkcard${mp==="settled"?" issettled":""}" data-k="${esc(m.k)}"${isOpen?" open":""}
     style="--gc:${g.c}${mp==="closed"||mp==="off"?";opacity:.62":""}">
    <summary class="mksum">
-    <div class="mksumin"><h2>${icon(g.ic)}${esc(m.n)} ${chip}
+    <div class="mksumin"><h2>${iconFor(g,m)}${esc(m.n)} ${chip}
       ${m.type==="novelty"?'<span class="tag">novelty</span>':""}
       ${m.round?`<span class="tag">R${m.round}</span>`:'<span class="tag">whole trip</span>'}
       ${mine?`<span class="tag" style="border-color:var(--acc);color:var(--acc2)">${mine} on your slip</span>`:""}</h2>
      <p class="note">pool <b>£${money.toFixed(0)}</b> &middot; ${nRun} runner${nRun===1?"":"s"}
       &middot; ${mp==="settled"?(RES.void?"<b>void &mdash; nobody won it</b>":"won by <b>"+esc(WON.join(" and "))+"</b>")
         :mp==="off"?"<b>withdrawn</b>"
-        :mp==="closed"?"<b>shut</b>":`closes in <b>${untilStr(deadline(m))}</b>`}</p></div>
+        :mp==="closed"?"<b>shut</b>":`closes in <b data-cd="${deadline(m).getTime()}">${untilStr(deadline(m))}</b>`}</p></div>
     <span class="chev" aria-hidden="true">&#9662;</span></summary>
    ${RES?`<div class="resbanner${RES.void?" void":""}">
      <div class="reslab">${RES.void?"Void":"Result"}</div>
@@ -3024,10 +3108,10 @@ async function placeSlip(){
  try{
    await sbFetch("bets",{method:"POST",body:JSON.stringify(rows),prefer:"return=minimal"});
    const staked=rows.reduce((a,r)=>a+r.stake,0);
+   const lines=rows.length;
    S.slip=[];S.slipOpen=false;save(); await refresh(); drawAll();
+   betPlaced(staked,lines);
    payReminder(staked);
-   $("#poolWrap").insertAdjacentHTML("afterbegin",
-     `<div class="card" style="border-color:var(--acc)"><p class="ok" style="margin:0">Bets placed and recorded. They now show against your name below.</p></div>`);
  }catch(e){ if(goBtn) goBtn.disabled=false;
    const raw=String(e.message||e);
    const m2=raw.match(/You cannot back yourself|This market is about you\. You cannot bet on it either way\.|That market is for your own team only/);
@@ -3312,8 +3396,17 @@ function drawSince(){
  $("#sinceGo").addEventListener("click",()=>{el.innerHTML="";});
 }
 
+let LAST_SCORE=null;
 function drawScore(){
  const S1=scoreOf(),T=TARGET(),left=S1.scheduled-S1.played;
+ /* A result landing is the only thing on this board that everybody wants to see the instant it
+    happens, so the number gets a beat of movement when it changes and nothing else does. */
+ const key=S1.blue+"-"+S1.red;
+ const moved=LAST_SCORE!==null&&LAST_SCORE!==key;
+ LAST_SCORE=key;
+ if(moved&&!REDUCED) setTimeout(()=>{
+   document.querySelectorAll("#standWrap .scoreboard b, #standWrap .count").forEach(el=>{
+     el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse");});},30);
  /* Who is actually still alive. Says more than the raw score once it is late on Sunday. */
  let state;
  if(!S1.played) state="Not a ball struck yet.";
@@ -4176,7 +4269,7 @@ function drawStrip(){
  const next=allMarkets().filter(m=>mLive(m)).sort((a,b)=>deadline(a)-deadline(b))[0];
  if(next){
    const ms=deadline(next)-new Date(), soon=ms<6*36e5;
-   cells.push(`<div class="hs ${soon?"warn":""}"><u>Next to shut</u><b>${untilStr(deadline(next))}</b>
+   cells.push(`<div class="hs ${soon?"warn":""}"><u>Next to shut</u><b data-cd="${deadline(next).getTime()}">${untilStr(deadline(next))}</b>
      <i>${esc(next.n.length>22?next.n.slice(0,21)+"\u2026":next.n)}</i></div>`);
  } else {
    cells.push(`<div class="hs warn"><u>The book</u><b>SHUT</b><i>no further stakes</i></div>`);
@@ -4193,7 +4286,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-14.37</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-14.38</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -4225,6 +4318,195 @@ function drawAll(){
    cannot also carry a locked door with RED TEAM AREA on it — the second thing undoes the first,
    whatever is actually behind the door. Captain's material goes round on WhatsApp now, which is
    where it always belonged. */
+/* ===============================================================================================
+   THE LIVE BOARD
+
+   The board used to read the database once, at load, and never again. On an installed home-screen
+   app that meant a man could be looking at Tuesday's prices on Thursday — and a tote price is not
+   a price somebody set, it is a division that moves every time anybody bets. A betting board that
+   does not move is not a betting board.
+
+   So it polls. The rules it has to obey:
+     - Never redraw while somebody is typing. A refresh landing mid-keystroke tears the input out
+       from under the caret, and admin is full of inputs.
+     - Never redraw while a select is open, for the same reason.
+     - Stop entirely when the tab is hidden. A phone in a pocket must not be polling all night.
+     - Refresh IMMEDIATELY on coming back, because that is the moment people want fresh numbers.
+     - Back off when it fails, so a dead connection does not become a retry storm.
+   =============================================================================================== */
+/* ===============================================================================================
+   MOVEMENT
+
+   Six animations, and no more. Each one exists to answer a question the eye is already asking:
+   what just changed, how much, and did my tap work? Anything that does not answer one of those is
+   decoration, and decoration on a screen people open forty times in four days becomes irritation
+   by Friday lunchtime — which is why there are no page transitions and nothing fires on scroll.
+
+   All of it is off for anyone whose phone asks for reduced motion. That is not a nicety: motion
+   sickness is real and the setting exists to be honoured.
+   =============================================================================================== */
+const REDUCED=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* A number that rolls to its new value instead of jumping. Short — 550ms — because a figure you
+   have to WAIT to read is worse than one that simply changed. */
+function countTo(el,to,fmt,ms){
+ if(!el) return;
+ const from=+el.dataset.v||0;
+ if(REDUCED||from===to){ el.dataset.v=to; el.textContent=fmt(to); return; }
+ const t0=performance.now(), dur=ms||550;
+ el.dataset.v=to;
+ (function step(t){
+   const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3);      /* ease out cubic */
+   el.textContent=fmt(from+(to-from)*e);
+   if(k<1) requestAnimationFrame(step); else el.textContent=fmt(to);
+ })(t0);
+}
+/* Compare the prices before a refresh with the ones now on screen, and flash the difference.
+   Lengthened is green and rises, shortened is red and falls — the way every board in every
+   bookmaker's window has done it for fifty years, because everyone already reads it that way. */
+function flashChanges(before){
+ if(!before||REDUCED) return;
+ let n=0;
+ document.querySelectorAll("#poolWrap .mkrow").forEach(row=>{
+   const card=row.closest(".mkcard"); if(!card) return;
+   const nameEl=row.querySelector(".mkname"); if(!nameEl) return;
+   const label=(row.dataset.o||"");
+   const key=card.dataset.k+"|"+label;
+   const was=before[key]; if(!(was>0)) return;
+   const cell=row.querySelector('.mkfig[data-l="Pays now"]'); if(!cell) return;
+   const now=+row.dataset.imp; if(!(now>0)) return;
+   const d=(now-was)/was;
+   if(Math.abs(d)<0.02) return;                       /* rounding, not a move */
+   cell.classList.remove("flashup","flashdown");
+   void cell.offsetWidth;                             /* restart the animation */
+   cell.classList.add(d>0?"flashup":"flashdown");
+   n++;
+ });
+ /* The pot, rolled rather than jumped. */
+ const potEl=document.querySelector("#hStrip .hs.acc b");
+ if(potEl&&before.__pot!=null){
+   const now=(DB.totals||[]).reduce((a,r)=>a+(r.staked||0),0);
+   if(now!==before.__pot){ potEl.dataset.v=before.__pot; countTo(potEl,now,v=>"£"+Math.round(v)); }
+ }
+ if(n) toast(n+" price"+(n===1?"":"s")+" moved");
+}
+/* A short line that appears, is read, and goes. Not a dialog — it never blocks anything. */
+/* The tap worked. A tick that draws itself, for two seconds, over the whole screen — because the
+   one moment a man needs an unambiguous answer is when he has just parted with money. */
+function betPlaced(staked,lines){
+ const el=document.createElement("div");
+ el.className="betok";
+ el.innerHTML=`<div class="inner">
+   <svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="26"/>
+     <path d="M18 31l8.5 8.5L42 22"/></svg>
+   <b>£${staked} on</b>
+   <span>${lines} bet${lines===1?"":"s"} struck &mdash; they show against your name below</span></div>`;
+ document.body.appendChild(el);
+ setTimeout(()=>{el.style.transition="opacity .3s";el.style.opacity="0";},1500);
+ setTimeout(()=>el.remove(),1900);
+}
+let toastT=null;
+function toast(msg,kind){
+ let el=$("#toast");
+ if(!el){ el=document.createElement("div"); el.id="toast"; document.body.appendChild(el); }
+ el.className="show"+(kind?" "+kind:"");
+ el.textContent=msg;
+ clearTimeout(toastT);
+ toastT=setTimeout(()=>{el.className="";},3200);
+}
+const POLL_MS=45000, POLL_MAX=6*60000;
+let pollTimer=null, pollWait=POLL_MS, POLLING=false;
+/* True when a redraw would land on top of something the user is in the middle of. */
+function busyNow(){
+ const a=document.activeElement;
+ if(a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) return true;
+ if(document.querySelector("#payveil,#onbWrap .onb,#updveil")) return true;
+ return false;
+}
+async function pollOnce(){
+ if(document.hidden) return;
+ if(busyNow()){ return; }                      /* try again next tick, no harm done */
+ const before=snapPrices();
+ const okBefore=DB.online;
+ await refresh();
+ if(!DB.online){ pollWait=Math.min(POLL_MAX,pollWait*2); schedulePoll(); return; }
+ pollWait=POLL_MS;
+ /* A published price set carries the moment it was published. If that has moved, the organiser
+    has re-run the model and everybody is now looking at different numbers — say so. */
+ const pubNow=(DB.settings&&DB.settings.prices&&DB.settings.prices.at)||null;
+ const newPrices=PUB_AT&&pubNow&&pubNow!==PUB_AT;
+ PUB_AT=pubNow;
+ drawAll();
+ flashChanges(before);
+ if(newPrices) sayNewPrices();
+ else if(!okBefore&&DB.online) toast("Back online. The board is live again.");
+ schedulePoll();
+}
+function schedulePoll(){
+ clearTimeout(pollTimer);
+ if(document.hidden) return;
+ pollTimer=setTimeout(()=>{pollOnce();}, pollWait);
+}
+function startPolling(){
+ if(POLLING) return; POLLING=true;
+ schedulePoll();
+ document.addEventListener("visibilitychange",()=>{
+   if(document.hidden){ clearTimeout(pollTimer); }
+   else { pollWait=POLL_MS; pollOnce(); }        /* straight away, not in 45 seconds */
+ });
+}
+/* A NEW BUILD OF THE PAGE. This one blocks, deliberately. A card at the top of the screen gets
+   scrolled past, and somebody carries on betting on a board whose rules or markets have changed
+   under him. There is one button and no way round it. Prices do NOT come through here — they
+   arrive live and announce themselves quietly, because that happens several times an evening. */
+function blockForUpdate(reg){
+ if($("#updveil")) return;
+ const el=document.createElement("div");
+ el.id="updveil";
+ el.innerHTML=`<div id="updbox">
+   <div class="updtag">Chip &amp; Sip</div>
+   <h2>A new version of the board is ready</h2>
+   <p class="note">Markets, rules or the way something is worked out may have changed. You are
+   looking at the old one, so the board has stopped here rather than let you bet on it.</p>
+   <p class="note">Nothing you have already placed is affected &mdash; every bet lives in the
+   database, not on this phone.</p>
+   <button class="go" id="updGo">Refresh the board</button>
+ </div>`;
+ document.body.appendChild(el);
+ $("#updGo").addEventListener("click",()=>{
+   const b=$("#updGo"); b.disabled=true; b.textContent="Refreshing\u2026";
+   try{ if(reg&&reg.waiting) reg.waiting.postMessage("skipWaiting"); }catch(e){}
+   setTimeout(()=>location.reload(true),160);});
+}
+/* NEW PRICES. Not blocking. The numbers are already on screen by the time this runs — the poll
+   fetched them, drawAll redrew them and flashChanges flashed the ones that moved. This only
+   says out loud why the board just changed under you. */
+function sayNewPrices(){
+ toast("The organiser has re-published the prices \u2014 the board has updated");
+ const el=$("#installWrap");
+ if(!el||el.innerHTML) return;
+ el.innerHTML=`<div class="card install" style="border-left-color:var(--warn)">
+   <div class="row" style="margin:0;justify-content:space-between;align-items:flex-start">
+     <div><h2 style="margin:0">New prices are up</h2>
+       <p class="note" style="margin:2px 0 0">The organiser has re-run the model. Every figure on the
+       board is the new one &mdash; anything that moved flashed as it changed. Bets already placed are
+       untouched: a tote settles on the pool at the end, never on the price you saw.</p></div>
+     <button class="ghost" id="npX" style="padding:4px 9px">&#10005;</button>
+   </div></div>`;
+ const x=$("#npX"); if(x) x.addEventListener("click",()=>{el.innerHTML="";drawInstall();});
+ setTimeout(()=>{ if($("#npX")){ el.innerHTML=""; drawInstall(); } },20000);
+}
+let PUB_AT=null;
+/* A flat map of every price on screen, taken before a refresh so it can be compared after. */
+function snapPrices(){
+ const m={};
+ allMarkets().forEach(k=>{
+   const {money,w}=poolTotals(k.k); if(!(money>0)) return;
+   marketOutcomes(k).forEach(o=>{
+     const v=bet(k.k,o.label), wt=weighted(v);
+     if(wt>0) m[k.k+"|"+o.label]=money/wt;});});
+ m.__pot=(DB.totals||[]).reduce((a,r)=>a+(r.staked||0),0);
+ return m;
+}
 function tick(){const ms=TEE_OFF-new Date();
  const txt=ms<=0?"IT'S ON":`${Math.floor(ms/864e5)}d ${String(Math.floor(ms/36e5)%24).padStart(2,"0")}h ${String(Math.floor(ms/6e4)%60).padStart(2,"0")}m`;
  const b=$("#cd2");if(b)b.textContent=txt;}
@@ -4502,15 +4784,8 @@ if("serviceWorker" in navigator && location.protocol!=="file:"){
     reg.addEventListener("updatefound",()=>{
       const w=reg.installing; if(!w) return;
       w.addEventListener("statechange",()=>{
-        if(w.state==="installed"&&navigator.serviceWorker.controller){
-          const el=$("#installWrap");
-          if(el) el.innerHTML=`<div class="card install"><h2 style="margin:0">A new version of the board is ready</h2>
-            <p class="note" style="margin:2px 0 8px">Prices, markets or rules may have changed. Reload to pick it up.</p>
-            <div class="row" style="margin:0"><button class="go" id="swGo">Reload</button></div></div>`;
-          const b=$("#swGo"); if(b) b.addEventListener("click",()=>{
-            if(reg.waiting) reg.waiting.postMessage("skipWaiting");
-            setTimeout(()=>location.reload(),120);});
-        }});});
+        if(w.state==="installed"&&navigator.serviceWorker.controller) blockForUpdate(reg);
+        });});
   }).catch(()=>{});
  });
 }
@@ -4564,7 +4839,16 @@ if(location.search) history.replaceState(null,"",location.pathname);   /* then t
   if(!PUB && ADMIN_TOKEN) runSim(6000);
   drawAll();
 })();
-setInterval(async()=>{if($("#pools").classList.contains("on")){await refresh();drawPools();}},45000);
-setInterval(()=>{if($("#pools").classList.contains("on"))drawPools();},60000);
+/* This replaces the old pair of intervals. Those only ran while the Place a Bet tab happened to be
+   the visible one, redrew nothing but the market list, kept polling a phone that was face down in
+   a pocket, and said nothing at all when a number changed under you. */
+PUB_AT=(DB.settings&&DB.settings.prices&&DB.settings.prices.at)||null;
+startPolling();
+/* The countdowns tick every second while the tab is in front, so "shuts in 9m" is not a lie for
+   fifty-nine of those sixty seconds. It is one text node per card and costs nothing. */
+setInterval(()=>{ if(document.hidden) return;
+ document.querySelectorAll("[data-cd]").forEach(el=>{
+   const d=new Date(+el.dataset.cd); const t=untilStr(d);
+   if(el.textContent!==t) el.textContent=t; });},1000);
 </script>
 </body></html>
