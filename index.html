@@ -164,6 +164,18 @@ main > section{display:none}main > section.on{display:block}
   font-weight:700;cursor:pointer;border-radius:99px;white-space:nowrap}
 .subnav button.on{background:var(--acc);color:var(--on)}
 .admpane{display:none}.admpane.on{display:block}
+.switch{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.switch .st{font-size:13px;min-width:0;flex:1 1 240px}
+.switch .st b{display:block}
+.switch .st span{opacity:.7;font-size:12px}
+.switch .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.switch.busy{opacity:.75}
+.switch.on{border-color:var(--warn)}
+.switch .why{color:var(--warn);font-size:12px;flex-basis:100%}
+.switch .undo{background:none;border:none;color:var(--acc);text-decoration:underline;
+  cursor:pointer;font-size:12px;padding:0}
+
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
 html[data-theme="light"] .card{box-shadow:0 1px 2px rgba(19,32,24,.05),0 4px 14px rgba(19,32,24,.045)}
 html[data-theme="light"] .mkcard{box-shadow:0 1px 2px rgba(19,32,24,.05),0 6px 18px rgba(19,32,24,.05)}
@@ -1106,23 +1118,22 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <div class="card">
       <h2>Handicap declaration</h2>
       <p class="note">Bets taken before the first night are <b>ante-post</b>: struck while the handicaps are
-      still guesses. Flip this on once they are agreed in the bar, then enter the agreed marks above and
-      re-run — every price moves and the board reprices itself.</p>
+      still guesses. Press <b>Declare handicaps</b> once they are agreed in the bar, then enter the
+      agreed marks above and re-run &mdash; every price moves and the board reprices itself. Both
+      switches below ask you to confirm, and both can be put straight back.</p>
+      <div id="swDeclared" class="switch"></div>
+      <div id="swClosed" class="switch"></div>
       <div class="row">
-        <label class="small"><input type="checkbox" id="declared"> Handicaps declared — ante-post shut, open betting live</label>
         <label class="small">Ante-post share multiplier
           <input type="number" id="apBonus" min="1" max="3" step="0.05" value="1.25"></label>
-      </div>
-      <div class="row">
-        <label class="small"><input type="checkbox" id="closed"> Close the book now</label>
-        <label class="small"><input type="checkbox" id="override"> Override — let me edit both columns</label>
+        <label class="small"><input type="checkbox" id="override"> Override &mdash; let me edit both columns</label>
         <label class="small">Blind uncertainty
           <input type="number" id="blindScale" min="0" max="3" step="0.1" value="1"></label>
       </div>
       <p class="note"><b>Blind uncertainty</b> is how much the model widens its prices while handicaps are
       undeclared. Every simulation draws each player a slightly different handicap and form — about a shot
       either way for the men with a scoring record, considerably more for the two without. Favourites drift,
-      longshots come in, and nothing pretends to a precision it has not got. Tick <em>Handicaps declared</em>
+      longshots come in, and nothing pretends to a precision it has not got. Declare the handicaps
       and it switches off, so the board sharpens the moment you know something. Set it to 0 to disable.</p>
       <p class="note">The book shuts itself, market by market, 10 minutes before each round tees off — the last
       of them on Sunday morning, so the singles stay backable all week. You do not have to remember. Close it
@@ -2010,6 +2021,103 @@ const ageStr=ms=>{const m=Math.round(ms/6e4);
  return m<1?"a moment ago":m<60?m+" minute"+(m===1?"":"s")+" ago"
    :m<1440?Math.round(m/60)+" hour"+(Math.round(m/60)===1?"":"s")+" ago"
    :Math.round(m/1440)+" day"+(Math.round(m/1440)===1?"":"s")+" ago";};
+
+/* ---- the two phase switches ------------------------------------------------------------------
+   These were tickboxes. A tickbox flips the instant it is touched, so it announced a change that
+   had not happened yet, then sat silent through a network round trip AND a six-thousand-trip
+   re-simulation before anything else moved. Worse, a failed save left the box ticked: the screen
+   claimed ante-post was shut while twenty phones carried on taking ante-post bets.
+
+   So: nothing moves until the database says yes. One tap arms, a second commits, the button
+   narrates itself, and for half a minute afterwards there is an undo that genuinely reverses it
+   rather than relying on somebody remembering which way the box used to be. */
+const SWITCHES={
+ declared:{
+   el:"#swDeclared",
+   on:()=>!!S.declared,
+   title:v=>v?"Handicaps are declared":"Handicaps not declared yet",
+   sub:v=>v?"Ante-post is shut. Open betting is live and prices are sharp."
+           :"Ante-post is open. Every price is widened because the marks are still guesses.",
+   go:v=>v?"Reopen ante-post":"Declare handicaps",
+   /* ask() is passed the state being moved TO, not the state now. Getting that backwards put
+      "this reopens ante-post" on the button that shuts it. */
+   ask:v=>v?"Confirm — this shuts ante-post for all 20"
+           :"Confirm — this reopens ante-post for all 20",
+   apply:async v=>{ S.declared=v; await pushSettings({declared:v}); },
+   after:()=>{ runSim(+($("#nsim")||{}).value||6000); drawAll(); }
+ },
+ closed:{
+   el:"#swClosed",
+   on:()=>!!S.closed,
+   title:v=>v?"The book is closed":"The book is open",
+   sub:v=>v?"Nobody can place a bet. Markets that were already settled are unaffected."
+           :"Markets shut themselves 10 minutes before each round tees off. You do not have to do this by hand.",
+   go:v=>v?"Reopen the book":"Close the book now",
+   ask:v=>v?"Confirm — this stops all betting at once"
+           :"Confirm — betting reopens immediately",
+   apply:async v=>{ S.closed=v; await pushSettings({closed:v}); },
+   after:()=>{ drawPools(); }
+ }};
+const SWSTATE={};   /* per switch: armed, busy, msg, undo */
+function drawSwitches(){ Object.keys(SWITCHES).forEach(drawSwitch); }
+function drawSwitch(k){
+ const c=SWITCHES[k], w=$(c.el); if(!w) return;
+ const st=SWSTATE[k]||(SWSTATE[k]={});
+ const v=c.on(), next=!v;
+ w.className="switch"+(v?" on":"")+(st.busy?" busy":"");
+ w.dataset.swk=k;
+ if(st.busy){
+   w.innerHTML=`<div class="st"><b>${esc(c.title(v))}</b><span>${esc(st.busy)}</span></div>`;
+   return; }
+ const acts = st.armed
+   ? `<button class="go" data-sw="commit">${esc(c.ask(next))}</button>
+      <button class="ghost" data-sw="cancel">Cancel</button>`
+   : `<button class="ghost" data-sw="arm">${esc(c.go(v))}</button>`;
+ w.innerHTML=`<div class="st"><b>${esc(c.title(v))}</b><span>${esc(c.sub(v))}</span></div>
+   <div class="acts">${acts}${st.undo?`<button class="undo" data-sw="undo">undo</button>`:""}</div>
+   ${st.why?`<div class="why">${esc(st.why)}</div>`:""}`;
+}
+/* One delegated listener rather than rebinding on every redraw, which is how the old admin pane
+   ended up firing a handler three times for one click. */
+document.addEventListener("click",async ev=>{
+ const b=ev.target.closest("[data-sw]"); if(!b) return;
+ const w=b.closest(".switch"); if(!w) return;
+ const k=w.dataset.swk; if(!k||!SWITCHES[k]) return;
+ const c=SWITCHES[k], st=SWSTATE[k]||(SWSTATE[k]={});
+ const act=b.dataset.sw;
+ if(act==="cancel"){ st.armed=false; st.why=""; drawSwitch(k); return; }
+ if(act==="arm"){ st.armed=true; st.why=""; drawSwitch(k);
+   /* An armed button that is never confirmed should not stay armed for the rest of the trip. */
+   clearTimeout(st.armT); st.armT=setTimeout(()=>{ st.armed=false; drawSwitch(k); },12000);
+   return; }
+ if(act!=="commit"&&act!=="undo") return;
+ /* Undo and commit are the same operation: flip to whatever this is not. Undo simply skips the
+    arming step, because the user has already had their confirmation once. */
+ const target=!c.on();
+ const wasArmed=st.armed;
+ st.armed=false; clearTimeout(st.armT); st.why="";
+ st.busy="Saving…"; drawSwitch(k);
+ const prev=c.on();
+ try{
+   await c.apply(target);
+ }catch(x){
+   S[k]=prev;                       /* nothing moved, so say nothing moved */
+   /* Disarmed on purpose. After a failure nobody is sure what the database did, and a live
+      Confirm button one tap away is the wrong thing to leave lying about. */
+   st.busy=""; st.armed=false; void wasArmed;
+   st.why="Not saved: "+String((x&&x.message)||x).slice(0,120)+". Nothing changed on anyone's phone.";
+   drawSwitch(k); return; }
+ st.busy="Repricing…"; drawSwitch(k);
+ /* Yield once so the browser actually paints "Repricing" before the simulation blocks the thread. */
+ await new Promise(r=>setTimeout(r,16));
+ try{ c.after(); }catch(x){}
+ save();
+ /* No undo offered on an undo: one step back is a correction, two is a fidget. */
+ st.busy=""; st.undo=(act!=="undo"); drawSwitch(k);
+ clearTimeout(st.undoT);
+ if(st.undo) st.undoT=setTimeout(()=>{ st.undo=false; drawSwitch(k); },30000);
+});
+
 async function pushSettings(patch){
   const data={...DB.settings,...patch};
   await rpc("save_settings",{p_data:data,p_token:ADMIN_TOKEN});
@@ -2191,7 +2299,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="55f7b5ad";
-const DATA_V="2026-08-15.06"+"/"+MODEL_V;
+const DATA_V="2026-08-15.09"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -4694,8 +4802,9 @@ function drawAdmin(){
    : '<span class="warn">Not connected — admin will not work until it is.</span>';
  $("#payLink").value=S.payLink||"";$("#payLabel").value=S.payLabel||"";
  $("#minStake").value=S.minStake;$("#allow").value=String(S.allowance);
- $("#declared").checked=!!S.declared;$("#apBonus").value=S.apBonus;
- $("#closed").checked=!!S.closed;$("#override").checked=!!S.override;
+ $("#apBonus").value=S.apBonus;
+ $("#override").checked=!!S.override;
+ drawSwitches();
  $("#blindScale").value=S.blindScale==null?1:S.blindScale;
  drawLedger(); drawAccounts(); drawSettle();
 }
@@ -4758,7 +4867,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.06</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-15.09</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -5189,14 +5298,10 @@ $("#payLink").addEventListener("change",async e=>{S.payLink=e.target.value.trim(
    try{await pushSettings({payLink:S.payLink});}catch(x){}save();drawPools();});
 $("#payLabel").addEventListener("change",e=>{S.payLabel=e.target.value.trim();save();drawPools();});
 $("#minStake").addEventListener("change",e=>{S.minStake=Math.max(1,Math.round(+e.target.value||1));save();drawPools();});
-$("#declared").addEventListener("change",async e=>{S.declared=e.target.checked;
-   try{await pushSettings({declared:S.declared});}catch(x){alert("Could not save: "+x.message);}
-   runSim(+$("#nsim").value||6000);drawAll();drawAdmin();});
+
 $("#apBonus").addEventListener("change",async e=>{S.apBonus=Math.max(1,+e.target.value||1);
    try{await pushSettings({apBonus:S.apBonus});}catch(x){}drawPools();});
-$("#closed").addEventListener("change",async e=>{S.closed=e.target.checked;
-   try{await pushSettings({closed:S.closed});}catch(x){alert("Could not save: "+x.message);}
-   drawPools();});
+
 $("#override").addEventListener("change",e=>{S.override=e.target.checked;save();drawPools();});
 $("#blindScale").addEventListener("change",e=>{S.blindScale=Math.max(0,+e.target.value||0);save();
  runSim(+$("#nsim").value||6000);drawAll();});
