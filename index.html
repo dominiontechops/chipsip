@@ -1954,8 +1954,7 @@ async function refresh(){
     if(DB.settings.payLabel!=null)  S.payLabel=DB.settings.payLabel;
     if(DB.settings.payLabel!=null)  S.payLabel=DB.settings.payLabel;
     PUB = DB.settings.prices || null;
-    if(Array.isArray(DB.settings.hcp)) DB.settings.hcp.forEach(h=>{
-      const p=S.players.find(x=>x.name===h.n); if(p){p.hcp=h.h; if(h.f!=null)p.form=h.f;}});
+    applyPublishedHcp();
     /* Villa wifi and roaming data. Keep the last good read so the score and the pools still
        render on the tee. Betting is NOT cached-and-queued: a stake struck against a stale pool
        is a stake struck at the wrong odds, so it stays disabled until the connection is back. */
@@ -1974,12 +1973,39 @@ async function refresh(){
         S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
         if(DB.settings.apBonus!=null) S.apBonus=DB.settings.apBonus;
         if(DB.settings.payLink!=null) S.payLink=DB.settings.payLink;
-        if(Array.isArray(DB.settings.hcp)) DB.settings.hcp.forEach(h=>{
-          const p2=S.players.find(x=>x.name===h.n); if(p2){p2.hcp=h.h; if(h.f!=null)p2.form=h.f;}});
+        applyPublishedHcp();
       }
     }catch(e2){}
   }
 }
+/* The published handicap block, applied over the model shipped in this build.
+   Entries flagged `m` are organiser edits and always win — a handicap agreed in the bar is not
+   something a rebuild gets to overrule. Everything else defers to the build, so a refit reaches
+   every phone the moment it is deployed instead of being pinned to whatever was in the database.
+   Blocks published before the flag existed carry no `m`, so there is no way to tell a deliberate
+   figure from a copy of whatever build was current. Those keep their HANDICAPS — that is the
+   number somebody argues about in the bar and types in — and drop their FORM, which only ever
+   came from Squabbit and should always follow the latest read. Checked against the block live in
+   the database at the time of writing: every figure in it matched the shipped model exactly, so
+   this discards nothing anyone chose. Publishing once from this build replaces it with a flagged
+   block and the question stops arising. */
+function applyPublishedHcp(){
+ const rows=DB.settings&&DB.settings.hcp;
+ if(!Array.isArray(rows)) return;
+ const flagged=rows.some(h=>"m" in h);
+ rows.forEach(h=>{
+   const p=S.players.find(x=>x.name===h.n); if(!p) return;
+   if(!flagged){ if(h.h!=null) p.hcp=h.h; return; }
+   if(h.m){ p.hcp=h.h; if(h.f!=null) p.form=h.f; }
+ });
+}
+/* True when the live board was priced off different form figures than this build carries, which
+   is the organiser's cue that a re-run is owed. */
+const hcpStale=()=>{
+ const st=DB.settings||{};
+ if(!Array.isArray(st.hcp)||!st.hcp.length) return false;
+ return st.hcpModelV!==MODEL_V;   /* absent counts as stale: it predates the stamp */
+};
 const ageStr=ms=>{const m=Math.round(ms/6e4);
  return m<1?"a moment ago":m<60?m+" minute"+(m===1?"":"s")+" ago"
    :m<1440?Math.round(m/60)+" hour"+(Math.round(m/60)===1?"":"s")+" ago"
@@ -2159,7 +2185,13 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-15.03";   /* bump on every ship: stale saved state must not outlive the data */
+/* Saved state is keyed on the build string AND a fingerprint of the model itself. The build
+   string alone was not enough: ship twice under one label — once before a refit and once after —
+   and every phone sees a version it already has, keeps its stale roster, and re-runs the model on
+   last week's form while looking completely up to date. The fingerprint cannot be forgotten,
+   because the build script derives it from model.json rather than from me remembering. */
+const MODEL_V="55f7b5ad";
+const DATA_V="2026-08-15.06"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -4581,13 +4613,19 @@ function drawAdmin(){
      if(m.type==="novelty") return false;
      const os=marketOutcomes(m);
      return os.length&&os.every(o=>o.prob==null);});
-   w.innerHTML=unpriced.length
+   /* A refit shipped in a new build is invisible until somebody presses the button: the prices
+      everyone is betting into were fitted to the old form. Say so where the button is. */
+   const stale=hcpStale()?`<p class="note" style="color:var(--warn);margin:6px 0 4px">
+     <b>The live prices were fitted to older form figures.</b> This build carries a newer read of
+     Squabbit. Press <b>Apply, re-run and publish</b> to put it on everyone's phone &mdash; any
+     handicap you have typed in yourself is kept.</p>`:"";
+   w.innerHTML=stale+(unpriced.length
      ? `<p class="note" style="color:var(--warn);margin:6px 0 4px"><b>${unpriced.length} market${unpriced.length===1?" has":"s have"}
         no published price.</b> ${esc(unpriced.slice(0,4).map(m=>m.n).join(", "))}${unpriced.length>4?" and "+(unpriced.length-4)+" more":""}.
         Every phone shows those columns empty until a fresh set goes out.</p>
         <div class="row" style="margin:0"><button class="go" id="runPub">Re-run and publish now</button>
         <span class="small" id="runPubMsg"></span></div>`
-     : "";
+     : "");
    const b=$("#runPub");
    if(b) b.addEventListener("click",async()=>{
      b.disabled=true;
@@ -4720,7 +4758,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.03</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-15.06</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -5085,7 +5123,16 @@ $("#admRun").addEventListener("click",async e=>{
    runMsg(`Re-ran ${N.toLocaleString()} trips in ${ms}ms, locally only — you are not signed in as the organiser.`,"warn");
    return; }
  try{
-   await pushSettings({hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form})),blindScale:S.blindScale,
+   /* `m` marks an entry the organiser actually changed, as against one that simply matches the
+      figures shipped in the build. Without it the published block was a blanket override: every
+      phone took the saved form on load, a refit baked into a new release could never reach the
+      board, and re-publishing merely wrote the stale numbers back. Handicaps typed in the bar
+      must stick; untouched form must be free to move when the model is refitted. */
+   await pushSettings({hcpModelV:MODEL_V,
+     hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form,
+       m:!!(p.base&&(Math.abs(p.hcp-p.base.hcp)>0.001
+                  || (p.base.form!=null&&Math.abs(p.form-p.base.form)>0.001)))})),
+     blindScale:S.blindScale,
      prices:{odds:ODDS,team:TEAMP,extra:EXTRA,at:Date.now(),n:N,plan:SIMPLAN}});
    PUB=DB.settings.prices; drawAll();
    const moved=S.players.filter(p=>p.base&&Math.abs(p.hcp-p.base.hcp)>0.001).length;
