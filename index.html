@@ -2159,7 +2159,7 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-15.02";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-15.03";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3946,11 +3946,21 @@ function drawKpis(){
     <i style="width:${TP.Red*100}%;background:var(--red)"></i></div>
     <p class="note">Blue ${(TP.Blue*100).toFixed(1)}% &middot; Tie ${(TP.Tie*100).toFixed(1)}%
     &middot; Red ${(TP.Red*100).toFixed(1)}%
-    ${TP.margin!=null?`&middot; average margin ${TP.margin>=0?"+":""}${TP.margin.toFixed(1)} to Blue`:""}</p>
+    ${(()=>{
+      /* This read "average margin -1.0 to Blue", which is a minus sign doing the work of a word.
+         Nobody should have to know that the figure is Blue minus Red to read a scoreline. */
+      if(TP.margin==null) return "";
+      if(Math.abs(TP.margin)<0.05) return "&middot; dead level on average";
+      return `&middot; <b>${TP.margin>0?"Blue":"Red"} by ${Math.abs(TP.margin).toFixed(1)}</b> on average`;})()}</p>
     <p class="note"><b>${esc(H.holder)} are the holders</b>, so a ${(pointsOnOffer()/2)}&ndash;${(pointsOnOffer()/2)}
     finish leaves the trophy with them. Counting the tie, ${esc(H.holder)} keep it
     <b>${(keeps*100).toFixed(1)}%</b> of the time and ${H.holder==="Red"?"Blue":"Red"} take it
-    <b>${((1-keeps)*100).toFixed(1)}%</b> &mdash; which is not the same as who wins more matches.</p>`
+    <b>${((1-keeps)*100).toFixed(1)}%</b> &mdash; which is not the same as who wins more matches.
+    ${/* The challenger's two figures above are necessarily the same number, because a tie goes to
+          the holder and so the challenger has to win outright. It looks like a copy-paste slip
+          until somebody explains it, so it gets explained. */""}
+    ${esc(H.holder==="Red"?"Blue":"Red")} needs an outright win, which is why that figure and the
+    <b>${((H.holder==="Red"?TP.Blue:TP.Red)*100).toFixed(1)}%</b> above are the same number.</p>`
    : "";
 }
 function gFiltered(){
@@ -4710,7 +4720,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.02</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-15.03</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
