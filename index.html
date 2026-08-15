@@ -1800,6 +1800,9 @@ const MODEL=[
   "avg": 97
  }
 ];
+/* The day the Squabbit scoring record was last read, stamped by the build script. Distinct from
+   the build date: a rebuild that does not re-pull must not claim fresh form. */
+const SQUAB_PULLED="2026-08-15";
 const SB={url:"https://nqewsjczuqnkqehcayzq.supabase.co",
           key:"sb_publishable_jZ3Iw2rYsGgCdsBqKmJqBw_vO00J2DO"};
 const DB={bets:[],mine:[],totals:[],ledger:[],accounts:[],settings:{},roster:[],claimed:[],
@@ -2156,7 +2159,7 @@ const DEF_NOV=[
 ];
 
 let S=null;
-const DATA_V="2026-08-15.01";   /* bump on every ship: stale saved state must not outlive the data */
+const DATA_V="2026-08-15.02";   /* bump on every ship: stale saved state must not outlive the data */
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3863,9 +3866,21 @@ function trendCell(p){
  if(t>=1.5) return `<span class="neg">&#9650; slipping</span> <span class="small">+${t.toFixed(1)}</span>`;
  return `<span style="opacity:.6">&#9644; steady</span>`;
 }
+/* Whole CALENDAR days between a round and today, counted on the phone's own clock.
+   The old version subtracted timestamps and floored, so a round played at lunchtime yesterday
+   still read "today" until noon the following day — which is precisely the failure that makes a
+   stale pull look like fresh information. Midnight to midnight, no arithmetic on noon. */
+const dayGap=iso=>{
+ if(!iso) return null;
+ const [y,m,dd]=String(iso).split("-").map(Number);
+ if(!y||!m||!dd) return null;
+ const then=new Date(y,m-1,dd); then.setHours(0,0,0,0);
+ const now=new Date(); now.setHours(0,0,0,0);
+ return Math.round((now-then)/864e5);
+};
 const agoStr=d=>{
- if(!d) return "&mdash;";
- const n=Math.floor((Date.now()-new Date(d+"T12:00:00Z").getTime())/864e5);
+ const n=dayGap(d);
+ if(n==null) return "&mdash;";
  return n<=0?"today":n===1?"yesterday":n<14?n+" days":n<70?Math.round(n/7)+" wks":Math.round(n/30)+" mths";
 };
 function drawSquabAge(){
@@ -3875,16 +3890,24 @@ function drawSquabAge(){
  const latest=withDates.map(p=>p.last).sort().pop();
  const who=withDates.filter(p=>p.last===latest).map(p=>p.name);
  const d=new Date(latest+"T12:00:00Z");
- const days=Math.floor((Date.now()-d.getTime())/864e5);
+ const days=dayGap(latest);
  const when=days<=0?"today":days===1?"yesterday":days+" days ago";
  /* Anyone whose newest round predates the squad's newest by a fortnight is quietly out of date,
     and their price is being set by golf they played a month ago. */
  const stale=withDates.filter(p=>(new Date(latest)-new Date(p.last))/864e5>=21)
    .sort((a,b)=>a.last.localeCompare(b.last));
+ /* The date above is the newest round IN THE DATA. The data itself is only as new as the last
+    time somebody read Squabbit, and those are two different things: if nobody pulls for a week,
+    "latest round counted" quietly stops moving while still looking like a live figure. So the
+    read is stamped separately, and it complains once it is older than three days. */
+ const pull=dayGap(SQUAB_PULLED);
  el.innerHTML=`<b>Latest round counted:</b> ${d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}
    (${when}) &mdash; ${who.map(esc).join(", ")}. Every player's own last round is in the table below.
+   ${pull==null?"":`<br><span class="${pull>=3?"warn":""}">Squabbit last read:</span> ${
+     pull<=0?"today":pull===1?"yesterday":pull+" days ago"}${
+     pull>=3?" &mdash; anything played since then is not in these figures yet.":"."}`}
    ${stale.length?`<br><span class="warn">Running on old golf:</span> ${stale.map(p=>esc(p.name)+" ("+
-     Math.round((Date.now()-new Date(p.last+"T12:00:00Z"))/864e5)+" days)").join(", ")}.`:""}`;
+     dayGap(p.last)+" days)").join(", ")}.`:""}`;
 }
 function drawKpis(){
  const ps=S.players.filter(p=>p.in);
@@ -4687,7 +4710,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.01</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-15.02</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
