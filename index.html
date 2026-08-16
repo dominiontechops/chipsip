@@ -113,6 +113,13 @@ max-width:210px}
 .acctchip .dot.out{background:var(--warn)}
 .acctchip .stk{flex:0 0 auto;color:var(--dim);font-weight:500}
 #acctPanel:not(:empty){padding:12px 16px 0;max-width:1100px;margin:0 auto}
+.payfall{display:none}
+.payfall.on{display:flex;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);
+  align-items:center;justify-content:center;padding:18px}
+.payfall .pfbox{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:16px;max-width:420px;width:100%}
+.payfall .pflink{display:block;word-break:break-all;font-size:13px;color:var(--acc);
+  border:1px solid var(--line);border-radius:8px;padding:9px;margin:8px 0}
 .paychip{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:6px 13px;
 cursor:pointer;font-size:12px;font-weight:700;background:var(--acc);border:1px solid var(--acc);
 color:var(--on);text-decoration:none}
@@ -2169,13 +2176,39 @@ const SCHEDULE=[
    Stableford they are both nought and the hole is halved. That is the whole difference, and it
    quietly protects whoever has just made a mess of one, which is why the singles prices are a
    shade closer together than the same men would be under strokes. */
+/* Every figure here is read off the Squabbit scorecard for the tee we are actually playing, so the
+   model allocates shots on the real stroke indexes rather than a polite 1-to-18 guess. Marbella was
+   the one estimate left in the table (133/71.0); the card says 130/70.1 off the yellows, which is
+   most of a shot for everybody. Per-hole pars matter on the Sunday, where the hole is decided on
+   stableford points and a par-5 with a shot on it plays very differently to a par-3 without. */
 const DEF_COURSES=[
- {n:"Marbella Golf & Country Club",d:"Thu 24 Sep",par:72,slope:133,rating:71.0,fmt:"foursomes",dec:"strokes",est:true},
- {n:"Cabopino Golf Club",d:"Fri 25 Sep",par:71,slope:127,rating:67.9,fmt:"fourball",dec:"strokes",est:false},
+ {n:"Marbella Golf & Country Club",d:"Thu 24 Sep",par:72,slope:130,rating:70.1,fmt:"foursomes",dec:"strokes",est:false,
+  tee:"Yellow",
+  si:  [ 5, 7,17, 9,15, 1, 3,13,11,  8,10, 2,16, 6, 4,12,18,14],
+  pars:[ 4, 5, 3, 4, 4, 5, 4, 4, 3,  4, 3, 4, 5, 4, 4, 3, 5, 4]},
+ {n:"Cabopino Golf Club",d:"Fri 25 Sep",par:71,slope:127,rating:67.9,fmt:"fourball",dec:"strokes",est:false,
+  tee:"Men",
+  si:  [11,12,13, 9, 1,10,15, 6, 3,  7, 2, 5,18, 4,17,14,16, 8],
+  pars:[ 4, 4, 4, 4, 4, 4, 3, 4, 4,  4, 4, 5, 3, 5, 3, 4, 4, 4]},
  {n:"La Cala Golf, Asia",d:"Sat 26 Sep",par:72,slope:139,rating:69.1,fmt:"scramble",dec:"strokes",est:false,
-  si:[12,16,18,2,10,4,14,8,6,1,13,3,5,17,11,7,15,9]},
- {n:"Santa Maria Golf Club",d:"Sun 27 Sep",par:72,slope:137,rating:71.7,fmt:"singles",dec:"stableford",est:false}
+  tee:"Yellow",
+  si:  [12,16,18, 2,10, 4,14, 8, 6,  1,13, 3, 5,17,11, 7,15, 9],
+  pars:[ 4, 4, 3, 4, 5, 4, 3, 4, 5,  5, 3, 4, 4, 4, 4, 5, 3, 4]},
+ {n:"Santa Maria Golf Club",d:"Sun 27 Sep",par:72,slope:137,rating:71.7,fmt:"singles",dec:"stableford",est:false,
+  tee:"Yellow",
+  si:  [15,10, 2,12,11, 6, 8, 7, 1,  9,14,17, 3,13,18, 4,16, 5],
+  pars:[ 4, 5, 4, 4, 4, 4, 3, 5, 5,  4, 4, 3, 5, 4, 3, 4, 3, 4]}
 ];
+/* A transposed stroke index or a par that does not add up is silently wrong for the whole week, so
+   it is checked once at load and shouted about rather than discovered on a Sunday afternoon. */
+DEF_COURSES.forEach(c=>{
+ const si=c.si||[], pr=c.pars||[];
+ const siOk = si.length===18 && si.slice().sort((a,b)=>a-b).every((v,i)=>v===i+1);
+ const prOk = pr.length===18 && pr.reduce((a,b)=>a+b,0)===c.par;
+ if(!siOk||!prOk) console.warn("Course table is wrong for "+c.n+
+   (siOk?"":" — stroke indexes are not 1 to 18")+
+   (prOk?"":" — pars sum to "+pr.reduce((a,b)=>a+b,0)+", not "+c.par));
+});
 const FMT={foursomes:"Foursomes",fourball:"Fourball",scramble:"Scramble",singles:"Singles"};
 const DEC={strokes:"Net strokes",stableford:"Stableford points"};
 
@@ -2299,7 +2332,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="55f7b5ad";
-const DATA_V="2026-08-15.09"+"/"+MODEL_V;
+const DATA_V="2026-08-15.10"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3565,6 +3598,50 @@ function drawAcctChip(){
    }
  }
 }
+
+/* ---- getting to the payment page from an installed app ---------------------------------------
+   Ben tapped "Pay into the pot" in the installed app and nothing happened. No tab, no error, no
+   clue. The chip was a plain <a target="_blank">, and in a standalone PWA there is no tab to open
+   into: iOS ignores target="_blank" outright, and Android only sometimes hands it to the browser.
+   The button looked fine and did nothing, which is the worst way for a payment link to fail.
+
+   So the click is intercepted: try to open a window, and if the browser refuses, navigate this
+   one, which on an installed app breaks out to the real browser. If even that is blocked, the
+   link goes on screen with a copy button, because a man who wants to pay should never be stopped
+   by our plumbing. */
+function payFallback(url){
+ let v=$("#payFall");
+ if(!v){ v=document.createElement("div"); v.id="payFall"; document.body.appendChild(v); }
+ v.className="payfall";
+ v.innerHTML=`<div class="pfbox">
+   <h2>Open this to pay</h2>
+   <p class="note">Your phone would not open it for us. Tap the link, or copy it and paste it into
+   your browser.</p>
+   <a class="pflink" href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>
+   <div class="row"><button class="go" id="pfCopy">Copy the link</button>
+   <button class="ghost" id="pfClose">Close</button>
+   <span class="small" id="pfMsg"></span></div></div>`;
+ $("#pfClose").onclick=()=>{ v.className="payfall"; v.innerHTML=""; };
+ $("#pfCopy").onclick=async()=>{
+   try{ await navigator.clipboard.writeText(url); $("#pfMsg").textContent="Copied."; }
+   catch(e){ $("#pfMsg").textContent="Copy it by hand, sorry."; }};
+ v.classList.add("on");
+}
+function openPay(ev){
+ const url=S.payLink;
+ if(ev&&ev.preventDefault) ev.preventDefault();
+ if(!url) return;
+ let w=null;
+ try{ w=window.open(url,"_blank","noopener"); }catch(e){}
+ if(w){ try{ w.opener=null; }catch(e){} return; }
+ try{ location.href=url; return; }catch(e){}
+ payFallback(url);
+}
+document.addEventListener("click",e=>{
+ const a=e.target.closest("#payChip,#payGo");
+ if(a&&!a.classList.contains("pending")) openPay(e);
+});
+
 function drawAuth(){
  drawAcctChip();
  const el=$("#authWrap"); if(!el) return;
@@ -4867,7 +4944,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.09</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-15.10</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
