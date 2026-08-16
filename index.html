@@ -847,6 +847,10 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li><b>Every line on your slip is a separate bet.</b> No doubles, no trebles, no accumulators.</li>
       <li><b>Bet early and your stake counts 1.25×</b> when the pot divides &mdash; that is what you get for
         betting before the handicaps are known.</li>
+      <li><b>£10 is the most on any one line, and you can owe the pot at most £50 at a time.</b> The second
+        one is the one that bites: a stake cap on its own does nothing, because five tenners get to the same
+        place as one fifty. Nobody is playing on credit and nobody is chasing anybody round a golf course.
+        Settle up and the room reopens straight away.</li>
       <li>You cannot back yourself. Markets shut 10 minutes before the relevant tee shot. Pay into the pot
         with the button at the top.</li>
     </ul>
@@ -935,14 +939,15 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         is the only number that ever mattered.</li>
       <li><b>What ante-post actually buys you.</b> Since nobody can take a price, betting early would
         otherwise be a strictly worse bet: identical terms, less information. So an ante-post stake counts
-        <b>1.25× when the pool divides</b>. Stake £20 ante-post and £20 open on the same winner and you
-        the first counts as £25 against the second's £20. That is the whole compensation for betting blind, and
+        <b>1.25× when the pool divides</b>. Stake £10 ante-post and £10 open on the same winner and
+        the first counts as £12.50 against the second's £10. That is the whole compensation for betting blind, and
         it comes out of the other backers' share, not out of anybody's pocket — the pool is still divided
         whole.</li>
-      <li><b>Worked example.</b> £100 in the MVP pool, £40 of it ante-post on the winner, £20 open on the
-        winner, £40 on the losers. Winning shares are 40 × 1.25 = 50, plus 20, so 70 in total. The pool pays
-        £100 ÷ 70 = £1.4286 a share. The ante-post backers get £71.43 between them; the open backer gets
-        £28.57. Nothing is left over, because nothing is taken out.</li>
+      <li><b>Worked example.</b> £100 in the MVP pool, made up of lots of tenners and fivers. £40 of it went
+        on the winner ante-post, £20 on the winner once the marks were agreed, and £40 on men who did not
+        win. Winning shares are 40 × 1.25 = 50, plus 20, so 70 in total. The pool pays £100 ÷ 70 = £1.4286 a
+        share. The ante-post backers get £71.43 between them; the open backers get £28.57. Nothing is left
+        over, because nothing is taken out.</li>
       <li><b>Dead heat.</b> Pool splits equally between tied outcomes, then between backers within each.</li>
       <li><b>Nobody wins the market.</b> It can happen: The Blank pays the man who scores nothing and
         everybody scores something; Perfect Record pays a four-from-four and nobody manages it. There is no
@@ -2216,7 +2221,10 @@ const MARKETS=[
  {k:"mvp",n:"MVP",d:"Most points across the 4 sessions, maximum 4. Bragging rights until next September, and the "+"one market where the man who plays above himself for 4 days gets properly paid for it",type:"model",round:""},
  {k:"team",n:"Team Result",
   d:"Blue, Red, or the unbearable anticlimax of 12.5 apiece. Settles on THE SCORE, not on the trophy: "+
-    "12.5 each pays Tie, not Red, even though Red keep the thing. Back Tie if you fancy the draw",
+    "12.5 each pays Tie, not Red, even though Red keep the thing. Back Tie if you fancy the draw. "+
+    "<b>The points total is provisional</b> while the captains settle the side games and the social "+
+    "markets: if it moves, what counts as a draw moves with it, bets already struck stand, and the "+
+    "prices are re-run",
   type:"model",round:"",team:true},
  {k:"blueTop",n:"Blue Top Scorer",d:"Best of the Blues. 10 runners rather than 20, so the prices are half as long as MVP for a man "+"you probably rate anyway. Someone has to be",type:"model",round:"",only:"Blue"},
  {k:"redTop",n:"Red Top Scorer",d:"Best of the Reds. 10 runners, twice the chance, and you get to enjoy it in front of them. Enjoy it "+"while it lasts",type:"model",round:"",only:"Red"},
@@ -2258,6 +2266,11 @@ const MARKETS=[
      "It has never happened on this trip, which is why it pays what it pays"}
  );
 });
+/* DROPPED for 2026, and worth recording why so nobody helpfully puts them back:
+   Most Balls Lost, Most Three-Putts and Fewest Putts Overall all settle on a number somebody has to
+   key in. In practice one man per group enters the card, putts go in as a guess by the third hole,
+   and lost balls are not tracked at all. A market that settles on data nobody actually collects is
+   a market that settles on an argument. */
 const DEF_NOV=[
  {k:"nov_rob",n:"Rob's 30th",
   d:"Turns 30 on the coach, lands late on Wednesday night and tees off in a foursomes at 13:50. The coach "+
@@ -2270,8 +2283,14 @@ const DEF_NOV=[
      once when he hits it, and again when his partner has to play it from where it finished. */
   oprobs:{"Wins his Thursday match":0.26,"Halves it":0.15,"Loses it":0.50,"Does not make the tee at all":0.09},
   subject:"Rob Parfitt"},
+ {k:"nov_social",n:"Social MVP",
+  d:"Best company off the course. Not a golf market and not pretending to be one, so there is no "+
+    "model price here at all &mdash; what you see is purely how the money has landed. "+
+    "<b>Settled by a vote of all 20 on the last night</b>, one man one vote, and you cannot vote "+
+    "for yourself. A tie splits the pool between them. The organiser counts the votes and posts "+
+    "the tally, so it is a count rather than a verdict",
+  round:"",opts:[]},
  {k:"nov_water",n:"First in the Drink",d:"First ball wet. Provisional does not count, we all saw it",round:"",opts:[],pk:"water"},
- {k:"nov_balls",n:"Most Balls Lost",d:"Across the week. Sleeve-buyers need not apply",round:"",opts:[],pk:"balls"},
  {k:"nov_air",n:"First Air Shot",d:"A genuine swing and miss. Practice swings excepted, obviously",round:"",opts:[],pk:"air"},
  {k:"nov_cart",n:"First Buggy Incident",
   d:"Kerb, bunker, flowerbed or tree. The FIRST one only, adjudicated by the organiser, so the second and "+
@@ -2302,10 +2321,6 @@ const DEF_NOV=[
     "measure and it is meant to be. Brady is favourite on "+
     "reputation alone. Factor 50 is not a betting strategy",
   round:"",opts:[],pk:"sun",wts:{"Eamonn Brady":2.6}},
- {k:"nov_putt3",n:"Most Three-Putts",
-  d:"Across the 4 rounds, counted honestly by your own playing partners, who will enjoy it enormously. "+
-    "Priced off handicap: the short game is where the mark actually comes from",
-  round:"",opts:[],pk:"putt3"},
  {k:"nov_miss3",n:"First Missed Three-Footer — Singles",
   d:"Sunday only, and it has to be inside 3 feet and genuinely missed. Gimmes are not missed, they are "+
     "conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he is. Priced "+
@@ -2318,11 +2333,7 @@ const DEF_NOV=[
  {k:"nov_rob30",n:"Rob to Say He Is Still Drunk From Last Night",
   d:"Out loud, before he tees off on Thursday. It is his 30th the night before and the transfer leaves at "+
     "12:00, so the only real question is whether he says it or simply demonstrates it",
-  round:"1",opts:["Yes","No"],oprobs:{Yes:0.82,No:0.18},subject:"Rob Parfitt"},
- {k:"nov_putts",n:"Fewest Putts Overall",
-  d:"Total putts across the week, lowest wins. The one market on this page where being good at golf is "+
-    "an advantage, so the board is upside down and the low men are favourites for once",
-  round:"",opts:[],pk:"putts"}
+  round:"1",opts:["Yes","No"],oprobs:{Yes:0.82,No:0.18},subject:"Rob Parfitt"}
 ];
 
 let S=null;
@@ -2332,7 +2343,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="55f7b5ad";
-const DATA_V="2026-08-15.10"+"/"+MODEL_V;
+const DATA_V="2026-08-15.14"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -2420,9 +2431,20 @@ function face(name,team,cls){
    style="background-color:hsl(${h} 42% 38%);background-image:url('${FACE_DIR}${slug(name)}.jpg')"
    >${esc(initials(name))}</div>`;
 }
-/* Whole pounds people actually bet in. Never below the organiser's minimum. */
+/* Two limits, set here so the buttons, the copy, the slip and the error messages cannot drift
+   apart from one another.
+
+   MAX_STAKE keeps any single line small. MAX_UNPAID is the one that actually matters: a stake cap
+   alone does nothing, because five £10 bets reach the same place as one £50. Capping what a man
+   can owe at any moment means the fifth bet is refused as readily as the first, and nobody ends
+   the week arguing about a three-figure tab struck on a Friday night. Settle up and the room
+   reopens immediately. */
+const MAX_STAKE=10;
+const MAX_UNPAID=50;
+/* Whole pounds people actually bet in. Never below the organiser's minimum, never above the cap. */
 function quickStakes(){const m=Math.max(1,S.minStake||1);
- return [...new Set([m,Math.max(m,5),Math.max(m,10),Math.max(m,20)])].slice(0,4);}
+ return [...new Set([m,Math.max(m,5),Math.max(m,10)])].filter(v=>v<=MAX_STAKE).slice(0,4);}
+const clampStake=v=>Math.max(S.minStake||1,Math.min(MAX_STAKE,Math.round(+v||1)));
 const money0=v=>(v<0?"-£":"£")+(Math.round(Math.abs(v)*100)/100).toFixed(2).replace(/\.00$/,"");
 const resultOf=k=>(DB.results||[]).find(r=>r.market===k)||null;
 /* What this bet is worth. The figures come from my_bets(), which is computed in the database
@@ -2991,7 +3013,8 @@ const NOV_ICON={
  cart:"buggy",water:"water",clubs:"club",sun:"sun",burn:"sun",putt3:"putt",putts:"putt",
  miss3:"putt",air:"ball",balls:"ball",
  /* and by market key, for the hand-priced ones that have no pricing model at all */
- shout:"club",row:"row",heat:"row",josh:"mouth",cunt:"mouth",rob:"pint",rob30:"pint",drunk:"pint"};
+ shout:"club",row:"row",heat:"row",josh:"mouth",cunt:"mouth",rob:"pint",rob30:"pint",drunk:"pint",
+ social:"pint"};
 const iconFor=(g,m)=>{
  if(g.id!=="nov") return icon(g.ic);
  const k=(m&&m.k||"").replace(/^nov_/,"");
@@ -3063,6 +3086,12 @@ function drawPools(){
    each simulation, so favourites are longer and outsiders shorter than they will be once the marks are
    agreed. ${S.players.filter(p=>p.in&&p.unknown).length} players have no scoring record at all and are drawn wider still. Expect the board to move
    sharply once the marks are agreed — that is the point of betting now.</p>`:""}
+   ${ph==="antepost"?`<p class="note"><b>${pointsOnOffer()} points is not final yet.</b> It counts the
+   ${S.courses.length} rounds of golf and nothing else. Side games, mini-games and the social markets are still
+   being settled between the captains, and any of them that carries a point changes the total &mdash; which
+   changes what it takes to win the trophy and what a draw looks like. If it moves, <b>every bet already
+   struck stands</b> at the terms it was struck on, the prices are re-run, and the new total shows here and
+   in the header. Betting Team Result now is partly a bet on a scoreline nobody has finished writing.</p>`:""}
    <div class="phases">
      <div class="${ph==="antepost"?"on":""}"><b>1. Ante-post</b><span>now until the handicaps are agreed in the bar
        on the first night. Stakes count ${S.apBonus}× when the pool divides.</span></div>
@@ -3362,7 +3391,8 @@ function drawPools(){
  /* The Pay button is in the header, where it is reachable from every tab. All that is left
     here is the house rule and, if there is no link yet, a note saying so. */
  $("#payWrap").innerHTML=S.payLink
-  ? `<p class="note">Stakes in whole pounds, minimum £${S.minStake}. <b>Pay into the pot</b> is at the top of
+  ? `<p class="note">Stakes in whole pounds, £${S.minStake} to £${MAX_STAKE} a line, and you can owe the pot
+     at most £${MAX_UNPAID} at a time. <b>Pay into the pot</b> is at the top of
      the screen and shows what you owe.</p>`
   : `<p class="note">No payment link yet — the organiser will add one. Settle up with him directly in the meantime.</p>`;
 }
@@ -3414,7 +3444,7 @@ function drawSlip(){
      <div class="slipsel" style="display:flex;align-items:center;gap:9px">
        ${face(x.outcome,(S.players.find(p=>p.name===x.outcome)||{}).team,"sm")}
        <span>${esc(marketName(x.market))}<div class="small">${esc(x.outcome)}</div></span></div>
-     <div class="slipamtwrap">£<input type="number" min="${S.minStake||1}" step="1" inputmode="numeric"
+     <div class="slipamtwrap">£<input type="number" min="${S.minStake||1}" max="${MAX_STAKE}" step="1" inputmode="numeric"
         value="${x.stake}" class="slipamt" data-i="${i}"></div>
      <button class="ghost sliprm" data-i="${i}">&#10005;</button></div>`).join("")}
    </div>
@@ -3443,7 +3473,8 @@ function drawSlip(){
    </div>
    <div class="err" id="slipErr"></div><div class="ok" id="slipOk"></div>
    <p class="note slipnote"><b>Each line is a separate bet.</b> 3 selections is 3 singles, not a
-   treble &mdash; there are no accumulators on this board. Whole pounds, minimum £${S.minStake||1}. Bets are
+   treble &mdash; there are no accumulators on this board. Whole pounds, minimum £${S.minStake||1}, maximum
+   £${MAX_STAKE} a line. Bets are
    recorded against your account the moment you place them. Everyone sees the size of each pot; only you see
    what is yours.</p></div>`;
  if(old){old.outerHTML=sheetHtml; if(ov)ov.remove();}
@@ -3452,7 +3483,7 @@ function drawSlip(){
  $("#sbClose").addEventListener("click",close);
  $("#slipveil").addEventListener("click",close);
  document.querySelectorAll(".slipamt").forEach(x=>x.addEventListener("change",e=>{
-   S.slip[+e.target.dataset.i].stake=Math.max(S.minStake||1,Math.round(+e.target.value||1));save();drawSlip();}));
+   S.slip[+e.target.dataset.i].stake=clampStake(e.target.value);save();drawSlip();}));
  document.querySelectorAll(".sliprm").forEach(x=>x.addEventListener("click",e=>{
    S.slip.splice(+e.target.dataset.i,1);save();drawPools();}));
  if($("#slipGo")) $("#slipGo").addEventListener("click",placeSlip);
@@ -3543,6 +3574,22 @@ async function placeSlip(){
  const barred=S.slip.map(x=>({x,why:blockReason(allMarkets().find(m=>m.k===x.market)||{k:x.market},x.outcome)}))
    .filter(o=>o.why);
  if(barred.length){err.textContent=barred.map(o=>`${o.x.outcome}: ${o.why.toLowerCase()}`).join(" · ");return;}
+ /* Caught here so the message can be a useful one, and caught again in the database so it is
+    actually a rule rather than a suggestion. The whole slip is judged together: three £10 lines
+    that individually fit but jointly do not is exactly the case a per-bet check waves through. */
+ const over=S.slip.filter(x=>x.stake>MAX_STAKE);
+ if(over.length){
+   err.textContent=`£${MAX_STAKE} is the most on any one line. Bring `
+     +over.map(x=>x.outcome).join(", ")+" down and try again.";
+   return;}
+ const owed=myOwed(), adding=S.slip.reduce((a,x)=>a+x.stake,0);
+ if(owed+adding>MAX_UNPAID){
+   const room=Math.max(0,MAX_UNPAID-owed);
+   err.textContent=owed>=MAX_UNPAID
+     ? `You are at the £${MAX_UNPAID} limit with £${owed} outstanding. Pay into the pot and this goes straight through.`
+     : `That would put you £${owed+adding} down and the limit is £${MAX_UNPAID}. You have £${room} of room, `
+       +`or settle the £${owed} first and the whole lot fits.`;
+   return;}
  const rows=S.slip.map(x=>({bettor:AUTH.name,market:x.market,outcome:x.outcome,stake:x.stake,
    phase:mPhase(allMarkets().find(m=>m.k===x.market)||{})}));
  const goBtn=$("#slipGo")||$("#sbGo"); if(goBtn) goBtn.disabled=true;
@@ -3555,7 +3602,7 @@ async function placeSlip(){
    payReminder(staked);
  }catch(e){ if(goBtn) goBtn.disabled=false;
    const raw=String(e.message||e);
-   const m2=raw.match(/You cannot back yourself|This market is about you\. You cannot bet on it either way\.|That market is for your own team only/);
+   const m2=raw.match(/You cannot back yourself|This market is about you\. You cannot bet on it either way\.|That market is for your own team only|That market has been settled[^"]*|[^"]*outstanding[^"]*limit[^"]*|£10 is the most[^"]*/);
    err.textContent=m2?m2[0]:"Could not place them: "+raw.slice(0,140); }
 }
 /* What this person still owes the pot, from his own ledger row. Nobody else's figure is
@@ -3783,15 +3830,19 @@ const ONB=[
      +"outcome nobody else fancies and your share is bigger; back the popular one and it is smaller."]},
  {h:"How to have a bet",
   b:["Tap a market to open it, then tap a stake against your selection &mdash; <b>£1</b>, <b>£5</b>, "
-     +"<b>£10</b> or <b>£20</b>. Tap the same amount again to take it off.",
-     "Those four are shortcuts, not the only options. <b>Any whole number of pounds works</b> &mdash; open "
-     +"the slip and type it.",
+     +"or <b>£10</b>. Tap the same amount again to take it off.",
+     "Those are shortcuts, not the only options. <b>Any whole number of pounds up to £"+MAX_STAKE+" works</b> "
+     +"&mdash; open the slip and type it.",
+     "<b>You cannot owe the pot more than £"+MAX_UNPAID+" at once.</b> Nobody is playing on credit and nobody "
+     +"is chasing you round a golf course. Settle up and you can carry on.",
      "Your selections gather in the bar at the bottom. Press <b>Place</b> when you are happy.",
      "<b>Every line is its own bet.</b> 3 selections is 3 singles, not a treble.",
      "Then pay into the pot with the button in the header. It shows what you owe."]}];
 /* Bump this if the rules materially change and everyone should have to read and accept them
    again. Anyone whose stored acceptance is for an older version gets the card back. */
-const RULES_V=1;
+/* Bumped from 1: a £10 line cap and a £50 outstanding cap are terms, not tweaks, and 20 people
+   agreed to a version that had neither. Everyone reads them again. */
+const RULES_V=2;
 const rulesAccepted=()=>+S.rulesV>=RULES_V;
 function drawOnboarding(){
  const el=$("#onbWrap"); if(!el) return;
@@ -4901,7 +4952,10 @@ function pointsOnOffer(){
 function drawHeader(){
  const n=S.players.filter(p=>p.in).length;
  const ap=$("#apShow"); if(ap) ap.textContent=(S.apBonus||1.25).toFixed(2).replace(/0$/,"");
- $("#hdr").textContent=`Costa del Sol · 24–27 Sep 2026 · ${n} players · Ryder Cup · ${pointsOnOffer()} points`;
+ /* The points figure is on screen everywhere, so the fact that it is not settled belongs with it
+    rather than folded away in a panel nobody opens. */
+ $("#hdr").textContent=`Costa del Sol · 24–27 Sep 2026 · ${n} players · Ryder Cup · ${pointsOnOffer()} points`
+   +(phase()==="antepost"?" (provisional)":"");
  drawStrip();}
 /* The strip under the masthead. Four or five numbers, always on screen, whichever tab you are on —
    what every betting site puts across the top, because these are the figures people open the app
@@ -4944,7 +4998,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.10</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-15.14</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
