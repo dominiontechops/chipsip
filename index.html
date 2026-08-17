@@ -2329,6 +2329,19 @@ const DEF_NOV=[
     "for yourself. A tie splits the pool between them. The organiser counts the votes and posts "+
     "the tally, so it is a count rather than a verdict",
   round:"",opts:[]},
+ {k:"nov_back",n:"Biggest Comeback",
+  d:"The deepest hole anybody climbs out of all week. A side goes 4 down, drags it back and wins "+
+    "or halves the match: that is a 4 down comeback. Settles on the BIGGEST one of the week across "+
+    "all 25 matches, so it only takes one. A halve counts, because being 4 down and getting out with "+
+    "a half is a comeback in any clubhouse in the world. Priced off 20,000 simulated trips: 3 and 4 "+
+    "down are near enough even money, 5 down is the one worth a few quid, and 6 or more has happened "+
+    "once in living memory",
+  round:"",opts:["Nobody got past 2 down","3 down","4 down","5 down","6 or more"],
+  /* Measured, not guessed. Every match in 20,000 simulated weeks was played hole by hole and the
+     deepest deficit any side recovered from was recorded. Counting halves is what keeps this a
+     market rather than a lottery: on a strict win-only rule, "nobody" comes in at 18.5% and
+     7-or-more at 0.1%, which is a dead runner and a pool that fails to settle one week in five. */
+  oprobs:{"Nobody got past 2 down":0.049,"3 down":0.384,"4 down":0.409,"5 down":0.135,"6 or more":0.023}},
  {k:"nov_water",n:"First in the Drink",d:"First ball wet. Provisional does not count, we all saw it",round:"",opts:[],pk:"water"},
  {k:"nov_air",n:"First Air Shot",d:"A genuine swing and miss. Practice swings excepted, obviously",round:"",opts:[],pk:"air"},
  {k:"nov_cart",n:"First Buggy Incident",
@@ -2376,7 +2389,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-17.01"+"/"+MODEL_V;
+const DATA_V="2026-08-17.02"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3057,7 +3070,7 @@ const NOV_ICON={
  cart:"buggy",water:"water",clubs:"club",miss3:"putt",air:"ball",
  /* and by market key, for the hand-priced ones that have no pricing model at all */
  shout:"club",row:"row",heat:"row",josh:"mouth",cunt:"mouth",rob:"pint",rob30:"pint",drunk:"pint",
- social:"pint"};
+ social:"pint",back:"row"};
 const iconFor=(g,m)=>{
  if(g.id!=="nov") return icon(g.ic);
  const k=(m&&m.k||"").replace(/^nov_/,"");
@@ -5145,7 +5158,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-17.01</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-17.02</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
