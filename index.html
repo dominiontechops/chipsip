@@ -334,7 +334,11 @@ max-width:460px;width:100%;max-height:92vh;max-height:92dvh;display:flex;flex-di
 .onbdots i.on{background:var(--acc)}
 .since{border-left:3px solid var(--acc)}
 /* ---- one-tap staking ---------------------------------------------------------------------- */
-.quick{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+/* This column is sized to the widest set of stake chips it can be asked to hold. It was 150px
+   against a 158.5px requirement, so £10 dropped onto a second line and every runner row grew
+   from 79px to 128px on tablet and laptop. nowrap means a future change to the buttons shows up
+   as an obvious overflow rather than as silent double-height rows on twenty markets. */
+.quick{display:flex;gap:5px;flex-wrap:nowrap;justify-content:flex-end}
 .quick button{padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;border-radius:8px;
 min-width:42px}
 .quick button.q{background:var(--panel2)}
@@ -345,7 +349,7 @@ min-width:42px}
      every name onto two lines. The stakes drop to their own full-width row instead. */
   .mkrow{grid-template-columns:auto minmax(0,1fr);
     grid-template-areas:"pic name" "pic figs" "act act" "bar bar"}
-  .quick{justify-content:stretch;gap:6px}
+  .quick{justify-content:stretch;gap:6px;flex-wrap:wrap}
   .quick button{flex:1 1 0;min-width:0;padding:8px 4px}
   .mkact{margin-top:2px}
 }
@@ -489,7 +493,7 @@ html[data-theme="light"] .valtag.over2{color:#fff}
   .mkhead{display:grid}
   /* Seven columns, not six. The face is a grid item too, and leaving it out of the count pushed
      every figure one column left of its heading and bumped the stake buttons onto a second row. */
-  .mkhead,.mkrow{grid-template-columns:44px minmax(0,1fr) 78px 78px 74px 68px 150px;
+  .mkhead,.mkrow{grid-template-columns:44px minmax(0,1fr) 78px 78px 74px 68px 172px;
     grid-template-areas:none;align-items:center;gap:8px}
   .face{grid-area:auto;grid-column:1}
   .mkhead span{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding-bottom:6px}
@@ -614,7 +618,7 @@ padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px}
 .mksumin h2 .mico{color:var(--gc,var(--acc2))}
 
 /* ---- Slip as a persistent bar ---------------------------------------------------------- */
-#slipbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);
+#slipbar{margin:0 auto;max-width:1100px;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);
 border-top:1px solid var(--acc);box-shadow:0 -6px 18px rgba(0,0,0,.28);
 padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px}
 #slipbar .sbtxt{flex:1 1 auto;min-width:0;cursor:pointer}
@@ -622,7 +626,12 @@ padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;align-it
 #slipbar .sbtxt span{font-size:11.5px;color:var(--dim)}
 #slipbar button{white-space:nowrap}
 body.hasbar{padding-bottom:78px}
+/* The page sits in a 1100px column but the slip did not, so on a laptop the Place button landed
+   at x=136 while the stake box for that same line sat at x=1313 — a metre apart on a 27in screen
+   and reading as two unrelated things. Centred and capped to match main, with the padding put
+   back on the inside so it still reaches the screen edges on a phone. */
 #slipsheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:76vh;overflow-y:auto;
+margin:0 auto;max-width:1100px;
 background:var(--panel);border-top:1px solid var(--acc);border-radius:14px 14px 0 0;
 padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 #slipveil{position:fixed;inset:0;z-index:39;background:rgba(0,0,0,.45)}
@@ -1846,10 +1855,12 @@ function blockReason(m,label){
     reads as two rules, and someone will argue the difference at the bar.
     The team-result restriction was removed on purpose: twenty-five points across four days and
     ten a side, nobody throws that for a tenner, and the rule cost more in suspicion than it saved. */
- if((m.k==="blueTop"&&mt==="Blue")||(m.k==="redTop"&&mt==="Red")){
-   const r=DB.roster.find(x=>norm(x.name)===norm(label));
-   if(r&&r.team!==mt) return "That market is for your own team only";
- }
+ /* This asked whether a Blue player was backing a non-Blue runner in Blue Top Scorer, which
+    cannot happen because the market only ever lists Blue runners. The real rule is the other way
+    round: you may only play your OWN team's top-scorer market. Written as it was, the branch was
+    unreachable and the database rejected the whole slip instead, killing the good bets with it. */
+ if((m.k==="blueTop"&&mt==="Red")||(m.k==="redTop"&&mt==="Blue"))
+   return "That market is for your own team only";
  return null;}
 /* Held in memory only, never written to disk. For the organiser it holds a SENTINEL rather than
    the real passphrase: the database recognises him from his signed-in session via is_owner(), so
@@ -2018,6 +2029,7 @@ function applyPublishedHcp(){
  const flagged=rows.some(h=>"m" in h);
  rows.forEach(h=>{
    const p=S.players.find(x=>x.name===h.n); if(!p) return;
+   if(p.edited) return;                 /* typed in on this phone and not yet published */
    if(!flagged){ if(h.h!=null) p.hcp=h.h; return; }
    if(h.m){ p.hcp=h.h; if(h.f!=null) p.form=h.f; }
  });
@@ -2343,7 +2355,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="55f7b5ad";
-const DATA_V="2026-08-15.14"+"/"+MODEL_V;
+const DATA_V="2026-08-15.17"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -2857,6 +2869,17 @@ function noveltyProbs(m){
  Object.keys(W).forEach(n=>W[n]=W[n]/tot*wins);
  return W;
 }
+/* Market outcomes, plus any outcome that has real money on it and is no longer being listed.
+   The extra ones carry prob:null so they are priced by the pool alone, which is the honest
+   answer once the model has stopped modelling them. */
+function withStakedOutcomes(m){
+ const outs=marketOutcomes(m);
+ const have=new Set(outs.map(o=>o.label));
+ const extra=(DB.totals||[]).filter(r=>r.market===m.k&&(r.staked||0)>0&&!have.has(r.outcome));
+ if(!extra.length) return outs;
+ return outs.concat(extra.map(r=>({label:r.outcome,prob:null,
+   player:S.players.find(p=>p.name===r.outcome)||null, gone:true})));
+}
 function marketOutcomes(m){
  if(m.type==="novelty"){
    /* oprobs is for markets whose outcomes are not people — Yes/No, or Rob's four ways. Hand-set,
@@ -3157,7 +3180,13 @@ function drawPools(){
   if(mk&&m.k!==mk)return; if(ty&&m.type!==ty)return;
   if(rd&&(m.round||"")!==rd)return;
   if(st&&mPhase(m)!==st)return;
-  let rows=marketOutcomes(m).filter(o=>passFilter(o,m));
+  /* Anything with money on it is a runner in this market whether the roster still lists him or
+     not. Un-ticking a man in Admin used to delete him from every outcome list, which took his
+     backers' rows off the card while their stakes stayed in the pool total — the header said
+     £120 and the visible rows added to £80 — and left the settle box with no way to name the man
+     who had actually won it. He plays no part in the SIMULATION either way; he simply stays on
+     the board, because his money is on the board. */
+  let rows=withStakedOutcomes(m).filter(o=>passFilter(o,m));
   if(!rows.length)return;
   const mp=mPhase(m), mLockA=mp!=="antepost"&&!S.override, mLockO=mp!=="open"&&!S.override;
   const {money,w}=poolTotals(m.k);
@@ -3878,16 +3907,24 @@ function drawOnboarding(){
 function snapshot(){
  const sc=scoreOf();
  const mine={}, sole={};
+ /* DB.detail is one row PER BET, so a man with £10 ante-post and £10 open on the same runner
+    has two rows. Assigning kept only the last one, which understated his position and, worse,
+    made the sole-backer test fail — the one thing that stops the board telling him his money has
+    grown when the growth is entirely his own stake. Sum the weights, then divide once. */
+ const acc={};
  (DB.detail||[]).forEach(b=>{
-   mine[b.market+"|"+b.outcome]=Math.round((+b.pool||0)*(+b.my_weight||0)/Math.max(1e-9,+b.outcome_weight||0)*100)/100;
- });
+   const k=b.market+"|"+b.outcome;
+   const a=acc[k]||(acc[k]={pool:0,mine:0,out:0});
+   a.pool=+b.pool||0; a.out=+b.outcome_weight||0; a.mine+=(+b.my_weight||0);});
+ Object.keys(acc).forEach(k=>{const a=acc[k];
+   mine[k]=Math.round(a.pool*a.mine/Math.max(1e-9,a.out)*100)/100;});
  /* Whether he is the only money on that outcome. If he is, a tote pays him the whole pool, so
     every pound anybody puts anywhere in that market lifts his figure pound for pound — including
     his own next bet. Without this the card says "your bet is worth £8 more" about £8 he put in
-    himself, which reads like the board is inventing money. */
- allMarkets().forEach(m=>{
-   (DB.detail||[]).filter(b=>b.market===m.k).forEach(b=>{
-     sole[b.market+"|"+b.outcome]=(+b.my_weight||0)>=(+b.outcome_weight||0)-1e-9;});});
+    himself, which reads like the board is inventing money. Summed for the same reason as above:
+    two bets on one runner made a sole backer look like one of a crowd. */
+ Object.keys(acc).forEach(k=>{const a=acc[k];
+   sole[k]=a.mine>=a.out-1e-9;});
  return {at:Date.now(), blue:sc.blue, red:sc.red, played:sc.played,
    pot:(DB.totals||[]).reduce((a,r)=>a+(r.staked||0),0),
    /* his own stakes, so the pot movement can say how much of it was him */
@@ -4322,7 +4359,10 @@ function drawSched(){
  $("#crsInfo").innerHTML=c;
  const now=new Date();const nxt=SCHEDULE.map((s,i)=>s).find(s=>true);
  $("#nextUp").innerHTML=(TEE_OFF-now>0)
-  ? `<p class="note">First tee shot in <b id="cd2"></b>.</p>` : "";
+  ? `<p class="note">First tee shot in <b class="cdown">&mdash;</b>.</p>` : "";
+ /* Written on every redraw as well as on the 30-second interval, or the panel shows a
+    dash until the next tick happens to land. */
+ tick();
 }
 function drawAccounts(){
  const el=$("#acctTbl"); if(!el) return;
@@ -4418,7 +4458,7 @@ function drawSettle(){
  if(rm&&!rm.options.length) rm.innerHTML=allMarkets().map(m=>`<option value="${esc(m.k)}">${esc(m.n)}</option>`).join("");
  let h="";
  allMarkets().forEach(m=>{
-  const R=resultOf(m.k), outs=marketOutcomes(m).map(o=>o.label);
+  const R=resultOf(m.k), outs=withStakedOutcomes(m).map(o=>o.label);
   const {money}=poolTotals(m.k);
   const sel=R?(R.outcomes||[]):[];
   const off=isOff(m.k);
@@ -4795,8 +4835,11 @@ function drawLedger(){
  document.querySelectorAll(".payoff").forEach(el=>el.addEventListener("click",async e=>{
   const w=e.target.dataset.w;
   const box=[...document.querySelectorAll(".payamt")].find(x=>x.dataset.w===w);
-  const a=Math.max(1,Math.round(+(box&&box.value)||0));
-  if(!a){alert("Put an amount in first.");return;}
+  /* Math.max(1,...) made the guard below unreachable, so clearing the box and pressing Record
+     posted a payment of £1 and said nothing. Read it, judge it, and only then clamp it. */
+  const raw=(box&&String(box.value||"").trim())||"";
+  const a=Math.round(+raw);
+  if(!raw||!isFinite(a)||a<1){ e.target.blur(); alert("Put an amount in first."); return; }
   e.target.disabled=true;
   try{ await rpc("record_payment",{p_bettor:w,p_amount:a,p_note:"marked in admin",p_token:ADMIN_TOKEN});
     await refresh(); drawLedger(); }
@@ -4886,8 +4929,14 @@ function drawAdmin(){
     a tick lets the event finish before the table is replaced. */
  const bind=(c,f)=>document.querySelectorAll("."+c).forEach(el=>el.addEventListener("change",e=>{
   f(S.players[+e.target.dataset.i],e.target);save();setTimeout(drawAdmin,0);}));
- bind("ain",(p,e)=>p.in=e.checked);bind("ahcp",(p,e)=>p.hcp=+e.value);
- bind("aform",(p,e)=>p.form=+e.value);bind("asd",(p,e)=>p.sd=Math.max(1.5,+e.value));
+ /* Anything the organiser types by hand is marked, and the poll leaves marked players alone.
+    Without this, applyPublishedHcp ran on every 45-second refresh and quietly put the published
+    figure back — so a handicap agreed in the bar survived exactly as long as it took the next
+    poll to land, and the screen's promise that "any handicap you have typed in yourself is kept"
+    was false. Cleared when it is published, because at that point it IS the published figure. */
+ bind("ain",(p,e)=>p.in=e.checked);
+ bind("ahcp",(p,e)=>{p.hcp=+e.value;p.edited=true;});
+ bind("aform",(p,e)=>{p.form=+e.value;p.edited=true;});bind("asd",(p,e)=>p.sd=Math.max(1.5,+e.value));
  bind("ateam",(p,e)=>p.team=e.value);
  document.querySelectorAll(".adel").forEach(el=>el.addEventListener("click",e=>{
   S.players.splice(+e.target.dataset.i,1);save();drawAdmin();}));
@@ -4996,9 +5045,9 @@ function drawStrip(){
  }
  /* Countdown to the first ball, until it has been struck. */
  const to=TEE_OFF-new Date();
- if(to>0) cells.push(`<div class="hs"><u>First tee</u><b id="cd2">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
+ if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.14</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-15.17</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -5134,10 +5183,77 @@ function busyNow(){
  if(document.querySelector("#payveil,#onbWrap .onb,#updveil")) return true;
  return false;
 }
+/* A fingerprint of everything a redraw would change SHAPE for, as against everything that only
+   changes a number. Results, pairings, the roster, the phase, a withdrawn market, a fresh price
+   set: all of those add, remove or reorder things on screen and genuinely need the page rebuilt.
+   Money landing in a pool does not. */
+function shapeOf(){
+ const st=DB.settings||{};
+ return JSON.stringify([
+   (DB.results||[]).map(r=>[r.market,r.void,(r.outcomes||[]).join("/")]),
+   (DB.matches||[]).map(m=>[m.session,m.slot,(m.blue||[]).join("/"),(m.red||[]).join("/"),m.result,m.margin]),
+   (DB.roster||[]).map(r=>[r.name,r.team,r.playing,r.role]),
+   (DB.claimed||[]),
+   [!!st.declared,!!st.closed,(st.suspended||[]).join("/"),st.hcpModelV||"",
+    (st.prices&&st.prices.at)||0,st.payLink||"",st.apBonus,st.blindScale],
+   DB.stand?[DB.stand.blue,DB.stand.red,DB.stand.played,DB.stand.scheduled]:null,
+   /* a market gaining or losing a runner is a shape change; a runner gaining money is not */
+   (DB.totals||[]).map(r=>r.market+"|"+r.outcome).sort()
+ ]);
+}
+/* Update the figures on the cards that are already on screen, in place, touching nothing else.
+   drawAll() rebuilds every panel from innerHTML, which on a phone reads as the whole screen
+   blinking every 45 seconds — the board looked like it was reloading rather than living. The
+   numbers that actually move on a poll are four per row plus the pot, so those are written
+   straight into their existing elements and the changed prices are flashed. No reflow, no
+   scroll jump, no <details> snapping shut, no images refetched. */
+function patchPools(){
+ document.querySelectorAll("#poolWrap .mkcard").forEach(card=>{
+  const k=card.dataset.k; if(!k) return;
+  const m=allMarkets().find(x=>x.k===k); if(!m) return;
+  if(resultOf(k)) return;                       /* settled cards are static until a redraw */
+  const {money}=poolTotals(k);
+  const mp=mPhase(m), live=mLive(m);
+  const outs=marketOutcomes(m);
+  card.querySelectorAll(".mkrow").forEach(row=>{
+   const label=row.dataset.o; if(label==null) return;
+   const o=outs.find(x=>x.label===label); if(!o) return;
+   const v=bet(k,label), wt=weighted(v), c=cash(v);
+   const imp=wt>0?money/wt:0;
+   const ev=(c>0&&o.prob>0)?o.prob*imp-1:null;
+   const set=(sel,txt)=>{const el=row.querySelector(sel); if(el&&el.innerHTML!==txt) el.innerHTML=txt;};
+   set('.mkfig[data-l="Money on"]', c?"£"+c:"&mdash;");
+   set('.mkfig[data-l="Pays now"]', imp?fmtDec(imp):"&mdash;");
+   const evEl=row.querySelector('.mkfig[data-l="Value"]');
+   if(evEl){
+     evEl.className="mkfig "+(ev===null?"":ev>0.05?"pos":ev<-0.05?"neg":"")+" ";
+     evEl.setAttribute("data-l","Value");
+     const t=ev===null?"&mdash;":(ev>0?"+":"")+(ev*100).toFixed(0)+"%";
+     if(evEl.innerHTML!==t) evEl.innerHTML=t;
+   }
+   row.dataset.imp=imp||0;
+   /* "a £10 bet now would collect" moves with the pool, so it moves here too. */
+   const coll=[...row.querySelectorAll(".mkname .small")]
+     .find(el=>/would collect/.test(el.textContent||""));
+   if(coll){
+     if(!live||!(money>0)){ coll.remove(); }
+     else{
+       const f=mp==="antepost"?(S.apBonus||1):1, stk=10, np=money+stk, nw=wt+stk*f;
+       if(nw>0){ const take=np*(stk*f)/nw;
+         const t=`a £${stk} bet now would collect <b>${money0(take)}</b> if it lands`;
+         if(coll.innerHTML!==t) coll.innerHTML=t; }
+     }
+   }
+  });
+ });
+ drawStrip();                                    /* the pot, which rolls rather than jumps */
+ drawSince();
+}
 async function pollOnce(){
  if(document.hidden) return;
  if(busyNow()){ return; }                      /* try again next tick, no harm done */
  const before=snapPrices();
+ const shapeBefore=shapeOf();
  const okBefore=DB.online;
  await refresh();
  if(!DB.online){ pollWait=Math.min(POLL_MAX,pollWait*2); schedulePoll(); return; }
@@ -5147,8 +5263,13 @@ async function pollOnce(){
  const pubNow=(DB.settings&&DB.settings.prices&&DB.settings.prices.at)||null;
  const newPrices=PUB_AT&&pubNow&&pubNow!==PUB_AT;
  PUB_AT=pubNow;
- drawAll();
- flashChanges(before);
+ const after=snapPrices();
+ const shapeChanged=shapeOf()!==shapeBefore;
+ const moneyChanged=JSON.stringify(before)!==JSON.stringify(after);
+ if(shapeChanged) drawAll();                   /* something appeared, vanished or settled */
+ else if(moneyChanged) patchPools();           /* just numbers: write them in, do not rebuild */
+ /* and if neither changed, the correct amount of work is none at all */
+ if(shapeChanged||moneyChanged) flashChanges(before);
  if(newPrices) sayNewPrices();
  else if(!okBefore&&DB.online) toast("Back online. The board is live again.");
  schedulePoll();
@@ -5221,7 +5342,10 @@ function snapPrices(){
 }
 function tick(){const ms=TEE_OFF-new Date();
  const txt=ms<=0?"IT'S ON":`${Math.floor(ms/864e5)}d ${String(Math.floor(ms/36e5)%24).padStart(2,"0")}h ${String(Math.floor(ms/6e4)%60).padStart(2,"0")}m`;
- const b=$("#cd2");if(b)b.textContent=txt;}
+ /* There are two of these on the page — the header strip and the Schedule tab — and they both
+    used the same id. querySelector only ever found the first, so whichever one rendered second
+    sat empty and the Schedule tab read "First tee shot in ." Write to every one of them. */
+ document.querySelectorAll(".cdown").forEach(b=>{b.textContent=txt;});}
 
 $("#mSave").addEventListener("click",saveCard);
 $("#repGo").addEventListener("click",()=>{
@@ -5374,6 +5498,7 @@ $("#admRun").addEventListener("click",async e=>{
                   || (p.base.form!=null&&Math.abs(p.form-p.base.form)>0.001)))})),
      blindScale:S.blindScale,
      prices:{odds:ODDS,team:TEAMP,extra:EXTRA,at:Date.now(),n:N,plan:SIMPLAN}});
+   S.players.forEach(p=>{ delete p.edited; });   /* now published, so no longer a local edit */
    PUB=DB.settings.prices; drawAll();
    const moved=S.players.filter(p=>p.base&&Math.abs(p.hcp-p.base.hcp)>0.001).length;
    /* A mark that disagrees violently with the man's own scoring is nearly always a slip of the
