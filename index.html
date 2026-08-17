@@ -881,9 +881,11 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         is yours in it, and only the organiser sees the ledger. That is enforced by the database rather than
         by the page, so it holds however clever anyone gets with a browser.</li>
       <li><b>You cannot back yourself</b>, in any market, for or against. Not because anyone is a wrong 'un,
-        but because a man with money on his own bad day is a different golfer. A team top-scorer market only ever lists
-        that team's own players, so there is no way to back the other lot into it, and the Yes/No markets
-        named after one man are shut to that man both ways. All of it is enforced by the
+        but because a man with money on his own bad day is a different golfer. The Yes/No markets
+        named after one man are shut to that man both ways. <b>Both top-scorer markets are open to everybody</b>:
+        a Red man backing a Blue to top the Blues is not in that race and cannot affect it, and the awkward
+        case &mdash; a man betting in his own team's market &mdash; is already covered by not being able to
+        back himself. All of it is enforced by the
         database rather than the page, so it cannot be got round with developer tools.</li>
       <li><b>You CAN back the other team to win overall.</b> 25 points, 4 days, 10 a side —
         nobody is throwing that for a tenner, and forbidding it bought nothing but suspicion. Back Red, back
@@ -1860,12 +1862,11 @@ function blockReason(m,label){
     reads as two rules, and someone will argue the difference at the bar.
     The team-result restriction was removed on purpose: twenty-five points across four days and
     ten a side, nobody throws that for a tenner, and the rule cost more in suspicion than it saved. */
- /* This asked whether a Blue player was backing a non-Blue runner in Blue Top Scorer, which
-    cannot happen because the market only ever lists Blue runners. The real rule is the other way
-    round: you may only play your OWN team's top-scorer market. Written as it was, the branch was
-    unreachable and the database rejected the whole slip instead, killing the good bets with it. */
- if((m.k==="blueTop"&&mt==="Red")||(m.k==="redTop"&&mt==="Blue"))
-   return "That market is for your own team only";
+ /* The team top-scorer markets used to be closed to the other side, and that was backwards.
+    There is no integrity reason a Red man should not back a Blue to top the Blues: he is not in
+    that race and cannot affect who wins it. The conflicted case is the opposite one — a Blue man
+    betting in Blue Top Scorer is betting on a contest he is running in — and that is already
+    handled by the rule that nobody can back himself. Both markets are open to all 20. */
  return null;}
 /* Held in memory only, never written to disk. For the organiser it holds a SENTINEL rather than
    the real passphrase: the database recognises him from his signed-in session via is_owner(), so
@@ -2284,7 +2285,14 @@ const MARKETS=[
      "It has never happened on this trip, which is why it pays what it pays"}
  );
 });
-/* DROPPED for 2026, and worth recording why so nobody helpfully puts them back:
+/* DROPPED for 2026, and worth recording why so nobody helpfully puts them back.
+
+   FIRST TO GET SUNBURNT was pulled early on using the WITHDRAW switch rather than being deleted
+   here — reversible, and it kept the money on it safe. It then came back, because withdrawal lives
+   in a `suspended` list in the settings row and that list is not there any more. Nothing on any
+   screen said so. It is deleted properly this time: withdrawal is for something you might reinstate
+   during the week, not for a market you have decided against.
+
    Most Balls Lost, Most Three-Putts and Fewest Putts Overall all settle on a number somebody has to
    key in. In practice one man per group enters the card, putts go in as a guess by the third hole,
    and lost balls are not tracked at all. A market that settles on data nobody actually collects is
@@ -2333,12 +2341,6 @@ const DEF_NOV=[
      The spread is deliberately tight. Everyone in this group is capable of a heated word after
      four days and a birthday, so the tail is 9/1, not 33/1. */
   wts:{"Eamonn Brady":2.1,"Josh Menzies":2.1,"Ben West":1.45,"Gabe Hills":1.45}},
- {k:"nov_burn",n:"First to Get Sunburnt",
-  d:"Visible, undeniable, and pointed at by at least 2 people. Priced on rounds played, on the theory "+
-    "that the man who logs the most golf is the man who has spent the most hours standing in it. It is a daft "+
-    "measure and it is meant to be. Brady is favourite on "+
-    "reputation alone. Factor 50 is not a betting strategy",
-  round:"",opts:[],pk:"sun",wts:{"Eamonn Brady":2.6}},
  {k:"nov_miss3",n:"First Missed Three-Footer — Singles",
   d:"Sunday only, and it has to be inside 3 feet and genuinely missed. Gimmes are not missed, they are "+
     "conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he is. Priced "+
@@ -2361,7 +2363,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="55f7b5ad";
-const DATA_V="2026-08-15.19"+"/"+MODEL_V;
+const DATA_V="2026-08-15.22"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3039,7 +3041,7 @@ const ICONS={
    uses, which happens to be exactly the right key for this. */
 const NOV_ICON={
  /* by pricing model */
- cart:"buggy",water:"water",clubs:"club",sun:"sun",burn:"sun",miss3:"putt",air:"ball",
+ cart:"buggy",water:"water",clubs:"club",miss3:"putt",air:"ball",
  /* and by market key, for the hand-priced ones that have no pricing model at all */
  shout:"club",row:"row",heat:"row",josh:"mouth",cunt:"mouth",rob:"pint",rob30:"pint",drunk:"pint",
  social:"pint"};
@@ -3624,9 +3626,9 @@ async function placeSlip(){
  if(owed+adding>MAX_UNPAID){
    const room=Math.max(0,MAX_UNPAID-owed);
    err.textContent=owed>=MAX_UNPAID
-     ? `You are at the £${MAX_UNPAID} limit with £${owed} outstanding. Pay into the pot and this goes straight through.`
+     ? `You owe £${owed} and the limit is £${MAX_UNPAID}. Pay into the pot and clear your balance to place more bets.`
      : `That would put you £${owed+adding} down and the limit is £${MAX_UNPAID}. You have £${room} of room, `
-       +`or settle the £${owed} first and the whole lot fits.`;
+       +`or pay into the pot and clear your balance to place more bets.`;
    return;}
  const rows=S.slip.map(x=>({bettor:AUTH.name,market:x.market,outcome:x.outcome,stake:x.stake,
    phase:mPhase(allMarkets().find(m=>m.k===x.market)||{})}));
@@ -3640,7 +3642,9 @@ async function placeSlip(){
    payReminder(staked);
  }catch(e){ if(goBtn) goBtn.disabled=false;
    const raw=String(e.message||e);
-   const m2=raw.match(/You cannot back yourself|This market is about you\. You cannot bet on it either way\.|That market is for your own team only|That market has been settled[^"]*|[^"]*outstanding[^"]*limit[^"]*|£10 is the most[^"]*/);
+   /* The database says these in plain English already, so pass them through rather than burying
+      them inside "Could not place them: ...". */
+   const m2=raw.match(/You cannot back yourself[^"]*|This market is about you[^"]*|That market has been settled[^"]*|That market has been withdrawn[^"]*|You would owe[^"]*|£10 is the most[^"]*|A bet has to be[^"]*/);
    err.textContent=m2?m2[0]:"Could not place them: "+raw.slice(0,140); }
 }
 /* What this person still owes the pot, from his own ledger row. Nobody else's figure is
@@ -4904,11 +4908,25 @@ function drawAdmin(){
      return os.length&&os.every(o=>o.prob==null);});
    /* A refit shipped in a new build is invisible until somebody presses the button: the prices
       everyone is betting into were fitted to the old form. Say so where the button is. */
+   /* A market can leave the board two ways: withdrawn, which is reversible and visible, or deleted
+      from the build, which is neither. Delete one with money on it and the pool simply stops being
+      drawn — no card, no runners, no way to settle it, and the cash sits in the ledger with nothing
+      to explain it. That is exactly how First to Get Sunburnt came back from being withdrawn with
+      nobody noticing. So the board checks its own pools against its own market list and says so. */
+   const known=new Set(allMarkets().map(m=>m.k));
+   const orphan={};
+   (DB.totals||[]).forEach(r=>{ if(!known.has(r.market)) orphan[r.market]=(orphan[r.market]||0)+(r.staked||0); });
+   const okeys=Object.keys(orphan).filter(k=>orphan[k]>0);
+   const orphanMsg=okeys.length?`<p class="note" style="color:var(--warn);margin:6px 0 4px">
+     <b>There is money on ${okeys.length} market${okeys.length===1?"":"s"} this build does not have.</b>
+     ${okeys.map(k=>esc(k)+" £"+orphan[k]).join(", ")}. Nobody can see ${okeys.length===1?"it":"them"} or
+     be paid on ${okeys.length===1?"it":"them"}. Either put the market back in the build, or void the
+     bets so the money goes home.</p>`:"";
    const stale=hcpStale()?`<p class="note" style="color:var(--warn);margin:6px 0 4px">
      <b>The live prices were fitted to older form figures.</b> This build carries a newer read of
      Squabbit. Press <b>Apply, re-run and publish</b> to put it on everyone's phone &mdash; any
      handicap you have typed in yourself is kept.</p>`:"";
-   w.innerHTML=stale+(unpriced.length
+   w.innerHTML=orphanMsg+stale+(unpriced.length
      ? `<p class="note" style="color:var(--warn);margin:6px 0 4px"><b>${unpriced.length} market${unpriced.length===1?" has":"s have"}
         no published price.</b> ${esc(unpriced.slice(0,4).map(m=>m.n).join(", "))}${unpriced.length>4?" and "+(unpriced.length-4)+" more":""}.
         Every phone shows those columns empty until a fresh set goes out.</p>
@@ -5056,7 +5074,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.19</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-15.22</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
