@@ -2335,13 +2335,13 @@ const DEF_NOV=[
     "all 25 matches, so it only takes one. A halve counts, because being 4 down and getting out with "+
     "a half is a comeback in any clubhouse in the world. Priced off 20,000 simulated trips: 3 and 4 "+
     "down are near enough even money, 5 down is the one worth a few quid, and 6 or more has happened "+
-    "once in living memory",
-  round:"",opts:["Nobody got past 2 down","3 down","4 down","5 down","6 or more"],
+    "once in living memory. The first rung, 2 down or less, means nobody all week got more than 2 down and came back, the quiet trip nobody wants to watch",
+  round:"",keepOrder:true,opts:["2 down or less","3 down","4 down","5 down","6 or more"],
   /* Measured, not guessed. Every match in 20,000 simulated weeks was played hole by hole and the
      deepest deficit any side recovered from was recorded. Counting halves is what keeps this a
      market rather than a lottery: on a strict win-only rule, "nobody" comes in at 18.5% and
      7-or-more at 0.1%, which is a dead runner and a pool that fails to settle one week in five. */
-  oprobs:{"Nobody got past 2 down":0.049,"3 down":0.384,"4 down":0.409,"5 down":0.135,"6 or more":0.023}},
+  oprobs:{"2 down or less":0.049,"3 down":0.384,"4 down":0.409,"5 down":0.135,"6 or more":0.023}},
  {k:"nov_water",n:"First in the Drink",d:"First ball wet. Provisional does not count, we all saw it",round:"",opts:[],pk:"water"},
  {k:"nov_air",n:"First Air Shot",d:"A genuine swing and miss. Practice swings excepted, obviously",round:"",opts:[],pk:"air"},
  {k:"nov_cart",n:"First Buggy Incident",
@@ -2389,7 +2389,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-17.02"+"/"+MODEL_V;
+const DATA_V="2026-08-17.03"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3227,9 +3227,14 @@ function drawPools(){
     const wt=weighted(v), imp=wt>0?money/wt:0;
     return{...o,a:v.a||0,o:v.o||0,cash:cash(v),wt,imp,
       ev:(cash(v)>0&&o.prob>0)?o.prob*imp-1:null};})
-   .sort((x,y)=> m.dyn==="match"
-     ? (parseInt(x.label.replace(/\D+/g,""),10)-parseInt(y.label.replace(/\D+/g,""),10))
-     : ((y.prob||0)-(x.prob||0)||x.label.localeCompare(y.label)));
+   /* Favourite first is right for a field of runners, and wrong for a scale. Sorting 2/3/4/5/6
+      by price scattered "2 down or less" into the middle of the ladder, which reads as a mistake
+      even though the number was correct. A market can say its outcomes are a sequence. */
+   .sort((x,y)=> m.keepOrder
+     ? ((m.opts||[]).indexOf(x.label)-(m.opts||[]).indexOf(y.label))
+     : m.dyn==="match"
+       ? (parseInt(x.label.replace(/\D+/g,""),10)-parseInt(y.label.replace(/\D+/g,""),10))
+       : ((y.prob||0)-(x.prob||0)||x.label.localeCompare(y.label)));
   /* Once a market is settled the interesting question is no longer "who is favourite" but
      "who won it". The winners go to the top of the list, whatever the model thought of them. */
   const RES=resultOf(m.k), WON=RES&&!RES.void?(RES.outcomes||[]):[];
@@ -5158,7 +5163,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-17.02</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-17.03</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
