@@ -120,6 +120,8 @@ max-width:210px}
   padding:16px;max-width:420px;width:100%}
 .payfall .pflink{display:block;word-break:break-all;font-size:13px;color:var(--acc);
   border:1px solid var(--line);border-radius:8px;padding:9px;margin:8px 0}
+.tmove{font-size:11px;vertical-align:middle;margin-left:2px}
+.tmove.up{color:var(--acc2)}.tmove.dn{color:var(--red2)}.tmove.flat{opacity:.45}
 .paychip{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:6px 13px;
 cursor:pointer;font-size:12px;font-weight:700;background:var(--acc);border:1px solid var(--acc);
 color:var(--on);text-decoration:none}
@@ -1237,8 +1239,8 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <div class="card">
       <h2>Backups</h2>
       <p class="note">The whole book &mdash; every stake, payment, payout, result, the roster, the card and
-      the settings &mdash; is snapshotted <b>every night at half past two</b>, automatically, by the database
-      itself. Nothing has to be running and nobody has to remember. The last forty are kept.</p>
+      the settings &mdash; is snapshotted <b>every night at <span id="bkTime">02:30</span></b>, automatically, by the
+      database itself. Nothing has to be running and nobody has to remember. The last forty are kept.</p>
       <p class="note">This is insurance against the mistake that actually happens: a market settled on the
       wrong man, or a roster edit that takes a name off mid-week. <b>Take one now</b> before anything you
       are nervous about. <b>Download</b> puts a copy on your phone, which is the only version that survives
@@ -1304,352 +1306,487 @@ const MODEL=[
   "name": "Luke Usher",
   "hcp": 13.8,
   "n": 32,
-  "form": 16.49,
-  "sd": 4.49,
-  "gap": 2.69,
+  "form": 16.48,
+  "sd": 4.51,
+  "gap": 2.68,
   "probs": [
    0.0,
-   0.0156,
-   0.3239,
-   0.4833,
-   0.1472,
-   0.03
+   0.0171,
+   0.3194,
+   0.4753,
+   0.1559,
+   0.0323
   ],
   "dropped": 0,
   "lowSample": false,
-  "last": "2026-08-12",
-  "trend": 1.1,
   "rawGap": 1.69,
   "rawForm": 15.49,
   "w": 0.727,
   "team": "Blue",
   "role": null,
-  "unknown": false,
-  "avg": 87
+  "avg": 88,
+  "last": "2026-08-12",
+  "trend": 0.7,
+  "unknown": false
+ },
+ {
+  "name": "Eamonn Brady",
+  "hcp": 16.4,
+  "n": 90,
+  "form": 19.88,
+  "sd": 4.97,
+  "gap": 3.48,
+  "probs": [
+   0.0,
+   0.0319,
+   0.2489,
+   0.4053,
+   0.2251,
+   0.0888
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 3.23,
+  "rawForm": 19.63,
+  "w": 0.882,
+  "team": "Red",
+  "role": "VC",
+  "avg": 92,
+  "last": "2026-08-15",
+  "trend": 0.3,
+  "unknown": false
  },
  {
   "name": "Dom Mills",
   "hcp": 26.2,
   "n": 22,
-  "form": 29.81,
-  "sd": 5.55,
-  "gap": 3.61,
+  "form": 29.8,
+  "sd": 5.57,
+  "gap": 3.6,
   "probs": [
    0.0,
-   0.0178,
-   0.1694,
-   0.3594,
-   0.2989,
+   0.0177,
+   0.1696,
+   0.3595,
+   0.2987,
    0.1544
   ],
   "dropped": 2,
   "lowSample": false,
-  "last": "2026-07-24",
-  "trend": -0.1,
   "rawGap": 2.66,
   "rawForm": 28.86,
   "w": 0.647,
   "team": "Blue",
   "role": "C",
-  "unknown": false,
-  "avg": 99
- },
- {
-  "name": "Matt Holland",
-  "hcp": 22.4,
-  "n": 7,
-  "form": 27.04,
-  "sd": 6.02,
-  "gap": 4.64,
-  "probs": [
-   0.0,
-   0.025,
-   0.1767,
-   0.3867,
-   0.2939,
-   0.1178
-  ],
-  "dropped": 1,
-  "lowSample": true,
-  "last": "2026-05-30",
-  "trend": null,
-  "rawGap": 3.42,
-  "rawForm": 25.82,
-  "w": 0.368,
-  "team": "Blue",
-  "role": null,
-  "unknown": false,
-  "avg": 94
- },
- {
-  "name": "Matt Petty",
-  "hcp": 15.1,
-  "n": 11,
-  "form": 19.99,
-  "sd": 5.11,
-  "gap": 4.89,
-  "probs": [
-   0.0,
-   0.0355,
-   0.3132,
-   0.3381,
-   0.2121,
-   0.1011
-  ],
-  "dropped": 0,
-  "lowSample": false,
-  "last": "2026-08-01",
-  "trend": null,
-  "rawGap": 4.39,
-  "rawForm": 19.49,
-  "w": 0.478,
-  "team": "Blue",
-  "role": null,
-  "unknown": false,
-  "avg": 91
- },
- {
-  "name": "Tom Bucknall",
-  "hcp": 25.3,
-  "n": 15,
-  "form": 30.29,
-  "sd": 4.92,
-  "gap": 4.99,
-  "probs": [
-   0.0,
-   0.015,
-   0.1194,
-   0.3692,
-   0.332,
-   0.1644
-  ],
-  "dropped": 1,
-  "lowSample": false,
-  "last": "2026-07-11",
-  "trend": 3.6,
-  "rawGap": 4.71,
-  "rawForm": 30.01,
-  "w": 0.556,
-  "team": "Blue",
-  "role": null,
-  "unknown": false,
-  "avg": 100
- },
- {
-  "name": "Ben West",
-  "hcp": 19.6,
-  "n": 88,
-  "form": 24.7,
-  "sd": 6.05,
-  "gap": 5.1,
-  "probs": [
-   0.0006,
-   0.0278,
-   0.2078,
-   0.3528,
-   0.2339,
-   0.1772
-  ],
-  "dropped": 4,
-  "lowSample": false,
-  "last": "2026-08-08",
-  "trend": 2.6,
-  "rawGap": 5.07,
-  "rawForm": 24.67,
-  "w": 0.88,
-  "team": "Blue",
-  "role": "VC",
-  "unknown": false,
-  "avg": 98
- },
- {
-  "name": "Mark Sturgess",
-  "hcp": 19.9,
-  "n": 15,
-  "form": 25.41,
-  "sd": 5.72,
-  "gap": 5.51,
-  "probs": [
-   0.0,
-   0.0183,
-   0.0894,
-   0.4498,
-   0.3531,
-   0.0894
-  ],
-  "dropped": 1,
-  "lowSample": false,
+  "avg": 102,
   "last": "2026-07-24",
-  "trend": -3.1,
-  "rawGap": 5.63,
-  "rawForm": 25.53,
-  "w": 0.556,
-  "team": "Blue",
-  "role": null,
-  "unknown": false,
-  "avg": 98
- },
- {
-  "name": "Alex Mulvin",
-  "hcp": 13.2,
-  "n": 55,
-  "form": 18.87,
-  "sd": 5.43,
-  "gap": 5.67,
-  "probs": [
-   0.0,
-   0.0172,
-   0.2589,
-   0.4856,
-   0.1789,
-   0.0594
-  ],
-  "dropped": 0,
-  "lowSample": false,
-  "last": "2026-08-08",
-  "trend": -0.5,
-  "rawGap": 5.74,
-  "rawForm": 18.94,
-  "w": 0.821,
-  "team": "Blue",
-  "role": "VC",
-  "unknown": false,
-  "avg": 90
- },
- {
-  "name": "Josh Menzies",
-  "hcp": 13.7,
-  "n": 25,
-  "form": 19.5,
-  "sd": 6.28,
-  "gap": 5.8,
-  "probs": [
-   0.0,
-   0.0539,
-   0.3022,
-   0.3711,
-   0.1811,
-   0.0917
-  ],
-  "dropped": 1,
-  "lowSample": false,
-  "last": "2026-08-14",
-  "trend": -0.8,
-  "rawGap": 6.02,
-  "rawForm": 19.72,
-  "w": 0.676,
-  "team": "Blue",
-  "role": null,
-  "unknown": false,
-  "avg": 90
- },
- {
-  "name": "Rob Parfitt",
-  "hcp": 21.5,
-  "n": 24,
-  "form": 28.65,
-  "sd": 5.71,
-  "gap": 7.15,
-  "probs": [
-   0.0,
-   0.0228,
-   0.1534,
-   0.3341,
-   0.3091,
-   0.1807
-  ],
-  "dropped": 2,
-  "lowSample": false,
-  "last": "2026-08-02",
-  "trend": -4.4,
-  "rawGap": 8.05,
-  "rawForm": 29.55,
-  "w": 0.667,
-  "team": "Blue",
-  "role": null,
-  "unknown": false,
-  "avg": 101
+  "trend": 1.7,
+  "unknown": false
  },
  {
   "name": "Luke Holland",
   "hcp": 13.4,
   "n": 41,
-  "form": 16.93,
-  "sd": 5.21,
-  "gap": 3.53,
+  "form": 17.07,
+  "sd": 5.34,
+  "gap": 3.67,
   "probs": [
    0.0,
-   0.0394,
-   0.3428,
-   0.3606,
-   0.1917,
-   0.0656
+   0.0395,
+   0.3429,
+   0.3605,
+   0.1918,
+   0.0653
   ],
   "dropped": 0,
   "lowSample": false,
-  "last": "2026-08-08",
-  "trend": -4.3,
-  "rawGap": 3.0,
-  "rawForm": 16.4,
+  "rawGap": 3.19,
+  "rawForm": 16.59,
   "w": 0.774,
   "team": "Red",
   "role": "VC",
-  "unknown": false,
-  "avg": 88
+  "avg": 89,
+  "last": "2026-08-08",
+  "trend": -0.9,
+  "unknown": false
  },
  {
-  "name": "Eamonn Brady",
-  "hcp": 16.4,
-  "n": 89,
-  "form": 20.23,
-  "sd": 5.07,
-  "gap": 3.83,
+  "name": "Matt Holland",
+  "hcp": 22.4,
+  "n": 7,
+  "form": 27.02,
+  "sd": 6.06,
+  "gap": 4.62,
   "probs": [
    0.0,
-   0.0317,
-   0.2483,
-   0.4083,
-   0.2222,
-   0.0894
+   0.0252,
+   0.1765,
+   0.3866,
+   0.2941,
+   0.1176
   ],
-  "dropped": 3,
+  "dropped": 1,
+  "lowSample": true,
+  "rawGap": 3.42,
+  "rawForm": 25.82,
+  "w": 0.368,
+  "team": "Blue",
+  "role": null,
+  "avg": 99,
+  "last": "2026-05-30",
+  "trend": 0.0,
+  "unknown": false
+ },
+ {
+  "name": "Matt Petty",
+  "hcp": 15.1,
+  "n": 11,
+  "form": 19.98,
+  "sd": 5.14,
+  "gap": 4.88,
+  "probs": [
+   0.0,
+   0.0354,
+   0.3131,
+   0.3384,
+   0.2121,
+   0.101
+  ],
+  "dropped": 0,
   "lowSample": false,
-  "last": "2026-08-08",
-  "trend": 2.6,
-  "rawGap": 3.63,
-  "rawForm": 20.03,
+  "rawGap": 4.39,
+  "rawForm": 19.49,
+  "w": 0.478,
+  "team": "Blue",
+  "role": null,
+  "avg": 92,
+  "last": "2026-08-01",
+  "trend": 0.2,
+  "unknown": false
+ },
+ {
+  "name": "Tom Bucknall",
+  "hcp": 25.3,
+  "n": 15,
+  "form": 30.28,
+  "sd": 4.95,
+  "gap": 4.98,
+  "probs": [
+   0.0,
+   0.0154,
+   0.1158,
+   0.3668,
+   0.3398,
+   0.1622
+  ],
+  "dropped": 1,
+  "lowSample": false,
+  "rawGap": 4.71,
+  "rawForm": 30.01,
+  "w": 0.556,
+  "team": "Blue",
+  "role": null,
+  "avg": 102,
+  "last": "2026-07-11",
+  "trend": 0.2,
+  "unknown": false
+ },
+ {
+  "name": "Ben West",
+  "hcp": 19.6,
+  "n": 89,
+  "form": 24.66,
+  "sd": 4.9,
+  "gap": 5.06,
+  "probs": [
+   0.0006,
+   0.0278,
+   0.208,
+   0.354,
+   0.2326,
+   0.177
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 5.02,
+  "rawForm": 24.62,
   "w": 0.881,
-  "team": "Red",
+  "team": "Blue",
   "role": "VC",
-  "unknown": false,
-  "avg": 92
+  "avg": 97,
+  "last": "2026-08-16",
+  "trend": 0.1,
+  "unknown": false
  },
  {
   "name": "Gabe Hills",
   "hcp": 17.5,
   "n": 18,
-  "form": 22.61,
-  "sd": 4.68,
-  "gap": 5.11,
+  "form": 22.6,
+  "sd": 4.71,
+  "gap": 5.1,
   "probs": [
    0.0,
-   0.0189,
-   0.2576,
-   0.3881,
+   0.0186,
+   0.2578,
+   0.3882,
    0.2143,
-   0.121
+   0.1211
   ],
   "dropped": 1,
   "lowSample": false,
-  "last": "2025-12-22",
-  "trend": 4.1,
   "rawGap": 4.95,
   "rawForm": 22.45,
   "w": 0.6,
   "team": "Red",
   "role": null,
-  "unknown": false,
-  "avg": 93
+  "avg": 95,
+  "last": "2025-12-22",
+  "trend": 0.6,
+  "unknown": false
+ },
+ {
+  "name": "Mark Sturgess",
+  "hcp": 19.9,
+  "n": 15,
+  "form": 25.39,
+  "sd": 5.75,
+  "gap": 5.49,
+  "probs": [
+   0.0,
+   0.0186,
+   0.0892,
+   0.4498,
+   0.3532,
+   0.0892
+  ],
+  "dropped": 1,
+  "lowSample": false,
+  "rawGap": 5.63,
+  "rawForm": 25.53,
+  "w": 0.556,
+  "team": "Blue",
+  "role": null,
+  "avg": 97,
+  "last": "2026-07-24",
+  "trend": -1.3,
+  "unknown": false
+ },
+ {
+  "name": "Jay France",
+  "hcp": 9.5,
+  "n": 25,
+  "form": 15.11,
+  "sd": 5.89,
+  "gap": 5.61,
+  "probs": [
+   0.0,
+   0.0644,
+   0.377,
+   0.3563,
+   0.154,
+   0.0483
+  ],
+  "dropped": 1,
+  "lowSample": false,
+  "rawGap": 5.74,
+  "rawForm": 15.24,
+  "w": 0.676,
+  "team": "Red",
+  "role": null,
+  "avg": 87,
+  "last": "2026-07-24",
+  "trend": 2.7,
+  "unknown": false
+ },
+ {
+  "name": "Chris Best",
+  "hcp": 24.0,
+  "n": 7,
+  "form": 29.61,
+  "sd": 4.73,
+  "gap": 5.61,
+  "probs": [
+   0.0,
+   0.0,
+   0.1795,
+   0.3162,
+   0.265,
+   0.2393
+  ],
+  "dropped": 1,
+  "lowSample": true,
+  "rawGap": 6.09,
+  "rawForm": 30.09,
+  "w": 0.368,
+  "team": "Red",
+  "role": null,
+  "avg": 102,
+  "last": "2026-07-24",
+  "trend": -0.0,
+  "unknown": false
+ },
+ {
+  "name": "Josh Menzies",
+  "hcp": 13.7,
+  "n": 25,
+  "form": 19.49,
+  "sd": 6.31,
+  "gap": 5.79,
+  "probs": [
+   0.0,
+   0.0548,
+   0.3082,
+   0.363,
+   0.1826,
+   0.0913
+  ],
+  "dropped": 1,
+  "lowSample": false,
+  "rawGap": 6.02,
+  "rawForm": 19.72,
+  "w": 0.676,
+  "team": "Blue",
+  "role": null,
+  "avg": 91,
+  "last": "2026-08-14",
+  "trend": 0.9,
+  "unknown": false
+ },
+ {
+  "name": "Alex Mulvin",
+  "hcp": 13.2,
+  "n": 55,
+  "form": 19.1,
+  "sd": 6.06,
+  "gap": 5.9,
+  "probs": [
+   0.0,
+   0.0173,
+   0.2612,
+   0.4837,
+   0.1776,
+   0.0602
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 6.03,
+  "rawForm": 19.23,
+  "w": 0.821,
+  "team": "Blue",
+  "role": "VC",
+  "avg": 91,
+  "last": "2026-08-08",
+  "trend": 1.1,
+  "unknown": false
+ },
+ {
+  "name": "Jack Mulroy",
+  "hcp": 21.2,
+  "n": 83,
+  "form": 27.71,
+  "sd": 7.0,
+  "gap": 6.51,
+  "probs": [
+   0.0007,
+   0.0151,
+   0.1694,
+   0.3525,
+   0.2647,
+   0.1975
+  ],
+  "dropped": 0,
+  "lowSample": false,
+  "rawGap": 6.68,
+  "rawForm": 27.88,
+  "w": 0.874,
+  "team": "Red",
+  "role": "C",
+  "avg": 100,
+  "last": "2026-08-15",
+  "trend": -1.1,
+  "unknown": false
+ },
+ {
+  "name": "Dong Ming Lau",
+  "hcp": 18.1,
+  "n": 40,
+  "form": 24.86,
+  "sd": 5.66,
+  "gap": 6.76,
+  "probs": [
+   0.0028,
+   0.0254,
+   0.244,
+   0.3611,
+   0.2172,
+   0.1495
+  ],
+  "dropped": 2,
+  "lowSample": false,
+  "rawGap": 7.19,
+  "rawForm": 25.29,
+  "w": 0.769,
+  "team": "Red",
+  "role": null,
+  "avg": 97,
+  "last": "2026-08-16",
+  "trend": 2.6,
+  "unknown": false
+ },
+ {
+  "name": "Rob Parfitt",
+  "hcp": 21.5,
+  "n": 24,
+  "form": 28.64,
+  "sd": 5.74,
+  "gap": 7.14,
+  "probs": [
+   0.0,
+   0.0246,
+   0.1474,
+   0.3243,
+   0.3145,
+   0.1892
+  ],
+  "dropped": 2,
+  "lowSample": false,
+  "rawGap": 8.05,
+  "rawForm": 29.55,
+  "w": 0.667,
+  "team": "Blue",
+  "role": null,
+  "avg": 101,
+  "last": "2026-08-02",
+  "trend": -2.2,
+  "unknown": false
+ },
+ {
+  "name": "Dave Huddleston",
+  "hcp": 19.4,
+  "n": 8,
+  "form": 26.56,
+  "sd": 6.76,
+  "gap": 7.16,
+  "probs": [
+   0.0,
+   0.0076,
+   0.197,
+   0.4015,
+   0.197,
+   0.197
+  ],
+  "dropped": 1,
+  "lowSample": true,
+  "rawGap": 9.91,
+  "rawForm": 29.31,
+  "w": 0.4,
+  "team": "Red",
+  "role": null,
+  "avg": 99,
+  "last": "2026-07-11",
+  "trend": -0.0,
+  "unknown": false
  },
  {
   "name": "Theo Smith-Harris",
@@ -1673,7 +1810,7 @@ const MODEL=[
   "team": "Red",
   "w": 0,
   "role": null,
-  "avg": null,
+  "avg": 92,
   "trend": null,
   "last": null
  },
@@ -1699,149 +1836,14 @@ const MODEL=[
   "team": "Red",
   "w": 0,
   "role": null,
-  "avg": null,
+  "avg": 89,
   "trend": null,
   "last": null
- },
- {
-  "name": "Jay France",
-  "hcp": 9.5,
-  "n": 25,
-  "form": 15.11,
-  "sd": 5.86,
-  "gap": 5.61,
-  "probs": [
-   0.0,
-   0.0633,
-   0.3715,
-   0.3648,
-   0.1532,
-   0.0472
-  ],
-  "dropped": 1,
-  "lowSample": false,
-  "last": "2026-07-24",
-  "trend": 2.4,
-  "rawGap": 5.74,
-  "rawForm": 15.24,
-  "w": 0.676,
-  "team": "Red",
-  "role": null,
-  "unknown": false,
-  "avg": 85
- },
- {
-  "name": "Chris Best",
-  "hcp": 24.0,
-  "n": 7,
-  "form": 29.62,
-  "sd": 4.69,
-  "gap": 5.62,
-  "probs": [
-   0.0,
-   0.0,
-   0.1794,
-   0.3161,
-   0.265,
-   0.2394
-  ],
-  "dropped": 1,
-  "lowSample": true,
-  "last": "2026-07-24",
-  "trend": null,
-  "rawGap": 6.09,
-  "rawForm": 30.09,
-  "w": 0.368,
-  "team": "Red",
-  "role": null,
-  "unknown": false,
-  "avg": 95
- },
- {
-  "name": "Dong Ming Lau",
-  "hcp": 17.8,
-  "n": 38,
-  "form": 24.44,
-  "sd": 5.55,
-  "gap": 6.64,
-  "probs": [
-   0.0028,
-   0.025,
-   0.2433,
-   0.3667,
-   0.2156,
-   0.1467
-  ],
-  "dropped": 2,
-  "lowSample": false,
-  "last": "2026-08-09",
-  "trend": 2.9,
-  "rawGap": 7.05,
-  "rawForm": 24.85,
-  "w": 0.76,
-  "team": "Red",
-  "role": null,
-  "unknown": false,
-  "avg": 95
- },
- {
-  "name": "Jack Mulroy",
-  "hcp": 20.8,
-  "n": 82,
-  "form": 27.82,
-  "sd": 5.59,
-  "gap": 7.02,
-  "probs": [
-   0.0006,
-   0.015,
-   0.1733,
-   0.3517,
-   0.2611,
-   0.1983
-  ],
-  "dropped": 2,
-  "lowSample": false,
-  "last": "2026-08-14",
-  "trend": -1.8,
-  "rawGap": 7.27,
-  "rawForm": 28.07,
-  "w": 0.872,
-  "team": "Red",
-  "role": "C",
-  "unknown": false,
-  "avg": 101
- },
- {
-  "name": "Dave Huddleston",
-  "hcp": 19.4,
-  "n": 8,
-  "form": 26.57,
-  "sd": 6.72,
-  "gap": 7.17,
-  "probs": [
-   0.0,
-   0.0072,
-   0.1917,
-   0.3972,
-   0.2056,
-   0.1983
-  ],
-  "dropped": 1,
-  "lowSample": true,
-  "last": "2026-07-11",
-  "trend": null,
-  "rawGap": 9.91,
-  "rawForm": 29.31,
-  "w": 0.4,
-  "team": "Red",
-  "role": null,
-  "unknown": false,
-  "avg": 97
  }
 ];
 /* The day the Squabbit scoring record was last read, stamped by the build script. Distinct from
    the build date: a rebuild that does not re-pull must not claim fresh form. */
-const SQUAB_PULLED="2026-08-15";
+const SQUAB_PULLED="2026-08-17";
 const SB={url:"https://nqewsjczuqnkqehcayzq.supabase.co",
           key:"sb_publishable_jZ3Iw2rYsGgCdsBqKmJqBw_vO00J2DO"};
 const DB={bets:[],mine:[],totals:[],ledger:[],accounts:[],settings:{},roster:[],claimed:[],
@@ -2048,6 +2050,17 @@ const hcpStale=()=>{
  if(!Array.isArray(st.hcp)||!st.hcp.length) return false;
  return st.hcpModelV!==MODEL_V;   /* absent counts as stale: it predates the stamp */
 };
+/* The nightly backup is a pg_cron job at 02:30 UTC. Written as "half past two" it was both a
+   word where a number belongs and an hour out for anyone reading it in the UK in summer, where
+   02:30 UTC is 03:30. Compute it in whatever clock the phone is on, so it is right in August, right
+   in Spain, and right after the clocks change, without anybody having to remember. */
+function bkLocal(){
+ const d=new Date(); d.setUTCHours(2,30,0,0);
+ const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+ const z=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
+ const utc="02:30 UTC";
+ return t==="02:30" ? utc : `${t} (${utc})`;
+}
 const ageStr=ms=>{const m=Math.round(ms/6e4);
  return m<1?"a moment ago":m<60?m+" minute"+(m===1?"":"s")+" ago"
    :m<1440?Math.round(m/60)+" hour"+(Math.round(m/60)===1?"":"s")+" ago"
@@ -2362,8 +2375,8 @@ let S=null;
    and every phone sees a version it already has, keeps its stale roster, and re-runs the model on
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
-const MODEL_V="55f7b5ad";
-const DATA_V="2026-08-15.22"+"/"+MODEL_V;
+const MODEL_V="31d55907";
+const DATA_V="2026-08-17.01"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -4175,14 +4188,18 @@ async function saveCard(){
 /* Which way a man is going. Negative is better golf: the last 10 rounds against the 10 before
    them, on the same cleaned list the model is fitted to. Under a shot and a half either way is
    noise on samples this size, so it says so rather than inventing a story. */
+/* Trend is his last 10 rounds measured against his whole record, in shots per 18. Negative is
+   better. The bands were set for an earlier, noisier way of computing it and put nearly everybody
+   in "steady" once the figure settled down; these are set to what the squad's spread actually is,
+   which runs about -2 to +3. The basis is printed on the page so the number can be argued with. */
 function trendCell(p){
  if(p.unknown) return '<span style="opacity:.5">no record</span>';
  if(p.trend==null) return '<span style="opacity:.5">too few rounds</span>';
- const t=p.trend;
- if(t<=-3) return `<b class="pos">&#9660; flying</b> <span class="small">${t.toFixed(1)} shots better</span>`;
- if(t<=-1.5)return `<span class="pos">&#9660; improving</span> <span class="small">${t.toFixed(1)}</span>`;
- if(t>=3)   return `<b class="neg">&#9650; struggling</b> <span class="small">+${t.toFixed(1)} shots worse</span>`;
- if(t>=1.5) return `<span class="neg">&#9650; slipping</span> <span class="small">+${t.toFixed(1)}</span>`;
+ const t=p.trend, s1=Math.abs(t).toFixed(1);
+ if(t<=-2)  return `<b class="pos">&#9660; flying</b> <span class="small">${s1} shots better</span>`;
+ if(t<=-0.8)return `<span class="pos">&#9660; improving</span> <span class="small">${s1} better</span>`;
+ if(t>=2)   return `<b class="neg">&#9650; struggling</b> <span class="small">${s1} worse</span>`;
+ if(t>=0.8) return `<span class="neg">&#9650; slipping</span> <span class="small">${s1} worse</span>`;
  return `<span style="opacity:.6">&#9644; steady</span>`;
 }
 /* Whole CALENDAR days between a round and today, counted on the phone's own clock.
@@ -4221,12 +4238,36 @@ function drawSquabAge(){
     read is stamped separately, and it complains once it is older than three days. */
  const pull=dayGap(SQUAB_PULLED);
  el.innerHTML=`<b>Latest round counted:</b> ${d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}
-   (${when}) &mdash; ${who.map(esc).join(", ")}. Every player's own last round is in the table below.
+   (${when}) &mdash; ${who.map(esc).join(", ")}. Every player's own last round is in the table below, and
+   <b>Trending</b> compares his last 10 rounds with his whole record, in shots per 18.
    ${pull==null?"":`<br><span class="${pull>=3?"warn":""}">Squabbit last read:</span> ${
      pull<=0?"today":pull===1?"yesterday":pull+" days ago"}${
      pull>=3?" &mdash; anything played since then is not in these figures yet.":"."}`}
    ${stale.length?`<br><span class="warn">Running on old golf:</span> ${stale.map(p=>esc(p.name)+" ("+
      dayGap(p.last)+" days)").join(", ")}.`:""}`;
+}
+/* Remembers the trophy percentage from the previous published price set and reports the move.
+   Nothing is shown until a second set has been published, because an arrow with nothing to point
+   away from is decoration. */
+const TROPHY_KEY="chipsip_trophy";
+function trophyMove(keeps){
+ const at=(PUB&&PUB.at)||null;
+ if(at==null||!isFinite(keeps)) return "";
+ let prev=null;
+ try{ prev=JSON.parse(localStorage.getItem(TROPHY_KEY)||"null"); }catch(e){}
+ if(!prev||prev.at!==at){
+   /* a new set: the one we were holding becomes the thing to compare against */
+   const was=prev?prev.keeps:null;
+   try{ localStorage.setItem(TROPHY_KEY,JSON.stringify({at,keeps,was})); }catch(e){}
+   prev={at,keeps,was};
+ }
+ const was=prev.was;
+ if(was==null) return "";
+ const d=(keeps-was)*100;
+ if(Math.abs(d)<0.5) return ` <span class="tmove flat" title="Unchanged since the last set of prices">&#9644;</span>`;
+ return d>0
+   ? ` <span class="tmove up" title="Up ${d.toFixed(1)} points since the last set of prices">&#9650;</span>`
+   : ` <span class="tmove dn" title="Down ${Math.abs(d).toFixed(1)} points since the last set of prices">&#9660;</span>`;
 }
 function drawKpis(){
  const ps=S.players.filter(p=>p.in);
@@ -4243,9 +4284,14 @@ function drawKpis(){
     const TPx=teamSrc(); if(!TPx) return `<div><span>Trophy</span><b>—</b></div>`;
     const H=TARGET(), keeps=H.holder==="Red"?TPx.Red+TPx.Tie:TPx.Blue+TPx.Tie;
     const other=H.holder==="Red"?"Blue":"Red";
+    /* Which way the trophy is drifting. The comparison is against the LAST PUBLISHED set, not
+       against the last redraw, so the arrow means "the model has changed its mind since the
+       organiser last re-ran it" rather than flickering on every poll. Stored per price set, so a
+       phone that has only ever seen one set shows nothing rather than inventing a direction. */
+    const arrow=trophyMove(keeps);
     return keeps>=0.5
-      ? `<div><span>${H.holder} to keep it</span><b>${pct(keeps)}</b></div>`
-      : `<div><span>${other} to take it</span><b>${pct(1-keeps)}</b></div>`;})()}
+      ? `<div><span>${H.holder} to keep it</span><b>${pct(keeps)}${arrow}</b></div>`
+      : `<div><span>${other} to take it</span><b>${pct(1-keeps)}${arrow}</b></div>`;})()}
   <div><span>Best value</span><b style="font-size:14px">${esc(val?val.name:"—")}</b></div>
   <div><span>Most volatile</span><b style="font-size:14px">${esc(vol?vol.name:"—")}</b></div>
   <div><span>Form assumed</span><b class="${nd?"warn":""}">${nd}</b></div>`;
@@ -4429,22 +4475,32 @@ function buildReport(withPools){
  const claimed=new Set((DB.claims||[]).map(c=>norm(c.bettor)));
  const chase=owing.filter(r=>!claimed.has(norm(r.bettor)));
  const said =owing.filter(r=> claimed.has(norm(r.bettor)));
+ /* A bare list of names and numbers reads like a debt collector's letter and gets ignored. What
+    a man actually needs is his own figure, the fact that it is one tap, and how close he is to the
+    limit that will stop him betting. The total goes LAST, because leading with it makes it a
+    lecture. Chase and claimed stay apart: one number covering both accuses men who have paid. */
  if(chase.length){
-   L.push("*STILL TO PAY*");
-   chase.forEach(r=>L.push(`${r.bettor} — £${r.balance}`));
-   /* Chase total and claimed total are kept apart on purpose. One number covering both reads
-      as an accusation against the men who have already sent it. */
-   L.push(`That is £${chase.reduce((a,r)=>a+r.balance,0)} between ${chase.length} of you.`);
+   const tot=chase.reduce((a,r)=>a+r.balance,0);
+   L.push(`*STILL TO PAY* — £${tot} between ${chase.length}`);
+   chase.forEach(r=>{
+     const near=r.balance>=MAX_UNPAID
+       ? "  (at the £"+MAX_UNPAID+" limit, cannot bet until it is cleared)"
+       : r.balance>=MAX_UNPAID-10 ? "  (£"+(MAX_UNPAID-r.balance)+" from the limit)" : "";
+     L.push(`${r.bettor}  £${r.balance}${near}`);});
+   L.push("");
+   L.push(`Nobody is chasing anybody round a golf course — it is one tap on the link below, and the`);
+   L.push(`board ticks you off as soon as it lands. Betting stops at £${MAX_UNPAID} outstanding.`);
  }else if(owing.length){
-   L.push("*STILL TO PAY* — nobody, everyone has either paid or says they have. Remarkable.");
+   L.push("*STILL TO PAY* — nobody. Everyone has either paid or says they have. Remarkable.");
  }else{
-   L.push("*STILL TO PAY* — nobody. All square.");
+   L.push("*STILL TO PAY* — nobody, all square. Enjoy it.");
  }
  if(said.length){
    L.push("");
-   L.push(`Says he has paid, I will check: ${said.map(r=>r.bettor).join(", ")} (£${said.reduce((a,r)=>a+r.balance,0)}).`);
+   L.push(`Already sent it, waiting on me to tick it off: ${said.map(r=>r.bettor).join(", ")}`
+     +` (£${said.reduce((a,r)=>a+r.balance,0)}). No action needed from you lot.`);
  }
- if(S.payLink){ L.push(""); L.push("Pay here: "+S.payLink); }
+ if(S.payLink){ L.push(""); L.push("Pay in here: "+S.payLink); }
  if(withPools){
    const big=allMarkets().map(m=>({m,p:poolTotals(m.k).money}))
      .filter(x=>x.p>0).sort((a,b)=>b.p-a.p).slice(0,5);
@@ -4587,6 +4643,16 @@ function drawRecon(){
  /* Money still riding on markets nobody has called yet. It is the bulk of what you are holding
     for most of the week and leaving it out was what made the reconciliation cry wolf. */
  const running=allMarkets().filter(m=>!resultOf(m.k)).reduce((a,m)=>a+poolTotals(m.k).money,0);
+ /* Money on a market this build no longer carries. It is real, it is in the ledger, and it used to
+    be counted on one side of the reconciliation and not the other — so deleting a market with a
+    bet on it made the whole page cry wolf and blame the settlement. It gets its own line: the
+    arithmetic balances and the truth is still on screen. Nobody can win it and nobody can be paid
+    it until the bets are voided or the market comes back. */
+ const known=new Set(allMarkets().map(m=>m.k));
+ const strandedBy={};
+ (DB.totals||[]).forEach(r=>{ if(!known.has(r.market)) strandedBy[r.market]=(strandedBy[r.market]||0)+(r.staked||0); });
+ const stranded=Object.values(strandedBy).reduce((a,v)=>a+v,0);
+ const strandedKeys=Object.keys(strandedBy).filter(k=>strandedBy[k]>0);
  const inHand  = paidIn - paidOut;
  /* Two different questions, and they get two different lines.
     NOW: what should be sitting in Starling this minute. Paid in less paid out. Checkable.
@@ -4595,7 +4661,7 @@ function drawRecon(){
     the money that won with nobody on it. If those two do not match, the arithmetic is wrong
     somewhere and it is worth knowing now rather than at midnight on the Sunday. */
  const atEnd = Math.round((staked - collected)*100)/100;
- const should= Math.round((running + unclaimed)*100)/100;
+ const should= Math.round((running + unclaimed + stranded)*100)/100;
  const drift = Math.round((atEnd - should)*100)/100;
  w.innerHTML=`<div class="paytotals">
    <div class="paytot big clear"><span>Should be in the account now</span><b>${money0(inHand)}</b></div>
@@ -4624,8 +4690,12 @@ function drawRecon(){
      <td class="small">Still in play. It leaves the account as each market is settled and paid.</td></tr>
    <tr><td>Unclaimed &mdash; the 2027 pot</td><td class="num">${money0(unclaimed)}</td>
      <td class="small">Won by outcomes nobody backed. Stays put and rolls into next year.</td></tr>
+   ${stranded>0?`<tr><td class="warn">Stranded on a market no longer on the board</td>
+     <td class="num neg">${money0(stranded)}</td>
+     <td class="small">${strandedKeys.map(esc).join(", ")}. Nobody can win this or be paid it. Void those
+     bets and the money goes back to whoever struck them.</td></tr>`:""}
    <tr><td><b>Left when everyone has paid up</b></td><td class="num"><b>${money0(atEnd)}</b></td>
-     <td class="small">Stakes less winnings. Should equal the 2 lines above it.</td></tr>
+     <td class="small">Stakes less winnings. Should equal the ${stranded>0?3:2} lines above it.</td></tr>
  </table></div>
  ${Math.abs(drift)>0.02
    ? `<p class="note" style="color:var(--warn)"><b>${money0(Math.abs(drift))} does not add up.</b>
@@ -4719,8 +4789,9 @@ function drawAlerts(fresh){
 function drawBackups(){
  const t=$("#bkTbl"); if(!t) return;
  if(!ADMIN_TOKEN){ t.innerHTML=""; return; }
+ const bt=$("#bkTime"); if(bt) bt.textContent=bkLocal();
  const B=DB.backups||[];
- if(!B.length){ t.innerHTML=`<tr><td class="small">No snapshot yet. The first one is taken tonight at 02:30,
+ if(!B.length){ t.innerHTML=`<tr><td class="small">No snapshot yet. The first one is taken tonight at ${bkLocal()},
    or press the button to take one now.</td></tr>`; return; }
  t.innerHTML=`<tr><th>Taken</th><th>Why</th><th class="num">Bets</th><th class="num">Staked</th><th class="num">Size</th><th></th></tr>`
   +B.map(b=>{const d=new Date(b.taken_at);
@@ -5074,7 +5145,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-15.22</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-17.01</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
