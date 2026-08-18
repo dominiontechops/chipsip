@@ -269,6 +269,11 @@ button.go{background:var(--acc);border-color:var(--acc);color:var(--on);font-wei
 button.ghost{cursor:pointer}button.ghost:hover{border-color:var(--acc)}
 .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:10px 0}
 #clrCard{border-color:var(--red);border-left:5px solid var(--red)}
+.clrrow{display:flex;gap:12px;align-items:baseline;justify-content:space-between;
+  padding:6px 0;border-bottom:1px solid var(--line2)}
+.clrrow span{min-width:0}
+.clrrow b{flex:0 0 auto;white-space:nowrap;font-family:var(--mono);font-size:13px}
+.clrhd{margin:12px 0 2px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim)}
 #clrCard h2{color:var(--red2)}
 .novrow{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}
 .novrow:last-child{border-bottom:0}
@@ -2013,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.08",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.09",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2122,12 +2127,25 @@ async function loadMyName(){
    AUTH.name=null; authSave(); return "empty";
  }catch(e){ return "fail"; }
 }
+/* PostgREST hands back a JSON envelope, and printing it raw put things like
+   {"code":"21000","details":null,"hint":null,"message":"DELETE requires a WHERE clause"} on screen
+   in front of the organiser. The message is the only part anybody can act on; the code is kept on
+   the end for me. Falls back to the raw body whenever it is not the envelope. */
+function errText(body,status){
+ const raw=String(body||"").slice(0,400);
+ try{
+   const j=JSON.parse(raw);
+   const msg=j.message||j.error_description||j.error||j.msg;
+   if(!msg) return raw||("HTTP "+status);
+   return msg+(j.hint?" — "+j.hint:"")+(j.code?" ("+j.code+")":"");
+ }catch(e){ return raw||("HTTP "+status); }
+}
 async function sbFetch(path,opts={}){
   if(AUTH.tok && AUTH.exp && Date.now()>AUTH.exp-60000) await authRefresh();
   const r=await fetch(SB.url+"/rest/v1/"+path,{...opts,headers:{
     apikey:SB.key,Authorization:"Bearer "+(AUTH.tok||SB.key),"Content-Type":"application/json",
     Prefer:opts.prefer||"return=representation"}});
-  if(!r.ok) throw new Error((await r.text()).slice(0,300));
+  if(!r.ok) throw new Error(errText(await r.text(), r.status));
   const txt=await r.text(); return txt?JSON.parse(txt):null;
 }
 const rpc=(fn,args)=>sbFetch("rpc/"+fn,{method:"POST",body:JSON.stringify(args)});
@@ -2617,7 +2635,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.08"+"/"+MODEL_V;
+const DATA_V="2026-08-18.09"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -5747,7 +5765,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.08</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.09</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -6392,29 +6410,31 @@ const ec=$("#errClear"); if(ec) ec.addEventListener("click",async e=>{
 function drawClearPreview(v){
  const w=$("#clrWrap"); if(!w) return;
  if(!v){ w.innerHTML=""; return; }
- const row=(what,amount,cls)=>`<tr><td>${what}</td><td class="num ${cls||""}">${amount}</td></tr>`;
+ /* Not a table in a .wrap: on a phone that scrolls sideways and the figures — the entire point
+    of the panel — sat off the right edge where nobody would find them. */
+ const row=(what,amount,cls)=>`<div class="clrrow"><span>${what}</span>
+   <b class="${cls||""}">${amount}</b></div>`;
  const nothing = !(v.bets||v.voided||v.payments||v.payouts||v.claims||v.results||v.errors
                  ||v.match_results||v.match_pairs);
- w.innerHTML=`<div class="wrap"><table>
-   <tr><th>Goes</th><th class="num">&nbsp;</th></tr>
-   ${row("Bets on the board",`${v.bets} &middot; £${v.staked}`,"neg")}
-   ${v.voided?row("Bets already voided",`${v.voided} &middot; £${v.voided_stake}`):""}
-   ${row("Payments recorded",`${v.payments} &middot; £${v.paid}`,"neg")}
+ w.innerHTML=`
+   <div class="clrhd">Goes</div>
+   ${row("Bets on the board",`${v.bets} &middot; £${v.staked}`,v.bets?"neg":"")}
+   ${v.voided?row("Bets already voided",`${v.voided} &middot; £${v.voided_stake}`,"neg"):""}
+   ${row("Payments recorded",`${v.payments} &middot; £${v.paid}`,v.payments?"neg":"")}
    ${v.payouts?row("Payouts handed over",`${v.payouts} &middot; £${v.paid_out}`,"neg"):""}
-   ${row("&ldquo;I have sent it&rdquo; notes",v.claims)}
+   ${row("&ldquo;I have sent it&rdquo; notes",v.claims,v.claims?"neg":"")}
    ${row("Settled markets",v.results,v.results?"neg":"")}
-   ${row("Results on the card",v.match_results)}
-   ${row("Pairings on the card",v.match_pairs)}
-   ${v.errors?row("Errors phones reported",v.errors):""}
-   <tr><th>Stays</th><th class="num">&nbsp;</th></tr>
-   ${row("Players, teams and captains",`${v.keep_players}${v.keep_bench?" (+"+v.keep_bench+" not playing)":""}`,"pos")}
+   ${row("Results on the card",v.match_results,v.match_results?"neg":"")}
+   ${row("Pairings on the card",v.match_pairs,v.match_pairs?"neg":"")}
+   ${v.errors?row("Errors phones reported",v.errors,"neg"):""}
+   <div class="clrhd">Stays</div>
+   ${row("Players, teams and captains",`${v.keep_players}${v.keep_bench?" +"+v.keep_bench+" not playing":""}`,"pos")}
    ${row("Men who have claimed their name",v.keep_claims,"pos")}
    ${row("Admins",v.keep_admins,"pos")}
    ${row("Match slots waiting for the draw",v.keep_slots,"pos")}
    ${row("Declared handicaps",v.keep_hcp?"kept":"none published",v.keep_hcp?"pos":"")}
    ${row("Published model prices",v.keep_prices?"kept":"none published",v.keep_prices?"pos":"")}
    ${row("Payment link",v.keep_paylink?"kept":"not set",v.keep_paylink?"pos":"")}
- </table></div>
  ${nothing?`<p class="note pos">There is nothing to clear. The book is already empty.</p>`:""}`;
 }
 const clrShow=$("#clrShow"); if(clrShow) clrShow.addEventListener("click",async()=>{
