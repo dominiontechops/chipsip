@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.18",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.20",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2108,10 +2108,20 @@ async function sendMagicLink(email,claim){
     browser from the one you started in, where localStorage is empty. */
  const url=location.origin+location.pathname+(claim?"?claim="+encodeURIComponent(claim):"");
  const back=encodeURIComponent(url);
+ /* create_user only on the Create account path, and that path cannot be reached without picking a
+    name off the list. Sign in used to create the account too, so a man who typed his email into
+    the wrong box got a live account with no name attached to it — and the only way out was the
+    organiser deleting it by hand. Now an unknown email on the sign-in box is told to go and
+    create one, which is the truth. */
  const r=await fetch(SB.url+"/auth/v1/otp?redirect_to="+back,{method:"POST",
    headers:{apikey:SB.key,"Content-Type":"application/json"},
-   body:JSON.stringify({email,create_user:true})});
- if(!r.ok) throw new Error((await r.text()).slice(0,200));
+   body:JSON.stringify({email,create_user:!!claim})});
+ if(!r.ok){
+   const t=(await r.text()).slice(0,300);
+   if(/signup|not.*allowed|otp_disabled|user.*not.*found/i.test(t))
+     throw new Error("No account on that email yet. Go back and press Create account, and pick your name off the list.");
+   throw new Error(t);
+ }
  AUTH.email=email; authSave(); return true;
 }
 /* Returns "ok" | "empty" | "fail". The distinction matters: only "empty" — the server answering
@@ -2282,12 +2292,15 @@ function applyPublishedHcp(){
  const flagged=rows.some(h=>"m" in h);
  rows.forEach(h=>{
    const p=S.players.find(x=>x.name===h.n); if(!p) return;
-   /* The scoring record itself is not an opinion and is never a local edit, so it comes across
-      whatever this phone has typed in: a published refit is a newer read of the same rounds. */
+   /* Below the guard, not above it. The comment that used to sit here claimed the scoring record
+      "is never a local edit" — but Spread is an editable box in Admin, so an organiser could type
+      7.8 into it, watch the book move, and have the next poll silently put it back to 4.9 without
+      a word. Anything typed on this phone now survives until it is published, exactly like a
+      handicap. */
+   if(p.edited) return;                 /* typed in on this phone and not yet published */
    if(h.s!=null) p.sd=h.s;
    if(h.t!==undefined) p.trend=(h.t==null?null:h.t);
    if(h.r!=null) p.n=h.r;
-   if(p.edited) return;                 /* typed in on this phone and not yet published */
    if(!flagged){ if(h.h!=null) p.hcp=h.h; return; }
    if(h.m){ p.hcp=h.h; if(h.f!=null) p.form=h.f; }
  });
@@ -2511,16 +2524,43 @@ const MARKETS=[
     "The points total is provisional while the captains settle the side games and the social "+
     "markets: if it moves, what counts as a draw moves with it, bets already placed stand, and the "+
     "prices are re-run",
+  /* !! STANDING NOTE — READ BEFORE CHANGING THE POINTS TOTAL !!
+     This description hard-codes the draw at 12.5 apiece and the holder rule that goes with it.
+     The moment the points on offer move off 25 — side games switched on, a format changed, a
+     session added — this copy is WRONG and has to be rewritten by hand. Nothing computes it.
+     Grep for "12.5" before you publish a new total: it appears here and in the Rules tab. */
   type:"model",round:"",team:true},
- {k:"blueTop",n:"Blue Top Scorer",d:"Best of the Blues. 10 runners rather than 20, so the prices are half as long as MVP for a man "+"you probably rate anyway. Someone has to be",type:"model",round:"",only:"Blue"},
- {k:"redTop",n:"Red Top Scorer",d:"Best of the Reds. 10 runners, twice the chance, and you get to enjoy it in front of them. Enjoy it "+"while it lasts",type:"model",round:"",only:"Red"},
- {k:"perfect",n:"Perfect Record",d:"4 from 4, no halves, nothing dropped. It has never been done on this trip, which is exactly "+"why the prices are long enough to be worth a fiver. Insufferable for a decade if it lands",type:"model",round:""},
+ {k:"blueTop",n:"Blue Top Scorer",
+  d:"Best of the Blues. 10 runners rather than 20, so the prices are half as long as MVP for a man "+
+    "you probably rate anyway. Somebody has to be",
+  type:"model",round:"",only:"Blue"},
+ {k:"redTop",n:"Red Top Scorer",
+  /* Word for word the same as Blue Top Scorer, on purpose. The old copy was written from a Blue
+     seat — "you get to enjoy it in front of them" — and half the board is Red. */
+  d:"Best of the Reds. 10 runners rather than 20, so the prices are half as long as MVP for a man "+
+    "you probably rate anyway. Somebody has to be",
+  type:"model",round:"",only:"Red"},
+ {k:"perfect",n:"Perfect Record",
+  /* The old copy said "it has never been done on this trip". Nothing on this board can support
+     that: Squabbit records rounds, not matchplay results, so there is no source here for who won
+     what in 2024 or 2025. Claim removed rather than dressed up. */
+  d:"4 from 4, no halves, nothing dropped. 4 partners, 4 formats and 4 days of not having a bad "+
+    "one, which is why the prices are long enough to be worth a fiver. Insufferable for a decade "+
+    "if it lands",
+  type:"model",round:""},
  {k:"blank",n:"The Blank",
   d:"4 matches, nil points, 1 very quiet flight home. Somebody usually gets close, and the man you "+
     "pick is rarely the one you would guess on Wednesday. Beware the tall streaky ones: a man who "+
     "hits 3 unplayable shots and 1 you talk about all week can still come home with nothing",
   type:"model",round:""},
- {k:"singles",n:"Sunday Singles",d:"Wins his singles at Santa Maria. Nowhere to hide and no partner to blame, and the only market still "+"open on Sunday morning — so it is the one that gets sharper the moment the draw goes up",type:"model",round:"4"},
+ {k:"singles",n:"Sunday Singles",
+  d:"Wins his singles at Santa Maria. Nowhere to hide and no partner to blame, and the only market "+
+    "still open on Sunday morning, so it is the one that gets sharper the moment the draw goes up. "+
+    "Around 10 men win a singles match, so around 10 men win this: the pool splits between all of "+
+    "them and every price here is a fraction of what the same chance would pay in a one-winner "+
+    "market. This book adds to a long way over 100% on purpose — that is what a multi-winner pool "+
+    "pays, and it is not a margin",
+  type:"model",round:"4"},
  /* ---- the whole trip, added 2026 ---------------------------------------------------------- */
  {k:"spoon",n:"Wooden Spoon",d:"Fewest points across the 4 sessions. The mirror of MVP and, on past form, the more popular "+
    "market of the two. A halved match still counts as half, so the only way to win this is to lose nearly everything",type:"model",round:""},
@@ -2552,8 +2592,8 @@ const MARKETS=[
    d:"Which match is won by the widest margin. 5&4 beats 3&2 beats 1 up. A halved match has no margin "+
      "and cannot win it. Ties share the pool"},
   {k:"swp"+R,n:"Clean Sweep "+R,type:"model",round:R,team:true,dyn:"sweep",
-   d:"Does either side take every single match on "+dayOnly+"? All of them, no halves, no exceptions. "+
-     "It has never happened on this trip, which is why it pays what it pays"}
+   d:"Does either side take every single match on "+dayOnly+"? All of them, no halves, no "+
+     "exceptions. One halved match anywhere and it is gone, which is why it pays what it pays"}
  );
 });
 /* DROPPED for 2026, and worth recording why so nobody helpfully puts them back.
@@ -2570,10 +2610,11 @@ const MARKETS=[
    a market that settles on an argument. */
 const DEF_NOV=[
  {k:"nov_rob",n:"Rob's 30th",
-  d:"Turns 30 on the coach, lands late on Wednesday night and tees off in a foursomes at 13:50. The coach "+
-    "leaves for the course at noon, which gives him about 12 hours to become a different man. He is 21.5 off the stick and will be playing "+
-    "alternate shot, so his partner is also on this bet whether he likes it or not. Rob cannot back it — "+
-    "he has too much say in the outcome, and not in a good way",
+  d:"He turns 30 on the Wednesday, the day we fly, and he is the one driving to the airport — so "+
+    "he spends his own 30th birthday stone cold sober behind a wheel, which is a bet in itself. "+
+    "Then he tees off in a foursomes at 13:50 on Thursday. He is 21.5 off the stick and playing "+
+    "alternate shot, so his partner is on this bet too whether he likes it or not. Rob cannot back "+
+    "it — he has too much say in the outcome, and not in a good way",
   round:"1",opts:["Wins his Thursday match","Halves it","Loses it","Does not make the tee at all"],
   /* Hand-set. There is no model for a man's thirtieth birthday, and if there were it would not
      be flattering. Losing is favourite because alternate shot punishes a bad morning twice over:
@@ -2586,7 +2627,7 @@ const DEF_NOV=[
     "night, one man one vote, and you cannot vote for yourself. A tie splits the pool between them. "+
     "The tally is posted in full afterwards, so it is a count rather than a verdict. The prices "+
     "here are only a starting shape and the room will move them soon enough — 4 days is a long "+
-    "time, and every year somebody arrives at 33/1 and leaves as the story of the trip",
+    "time, and every year somebody arrives an outsider and leaves as the story of the trip",
   round:"",opts:[],
   wts:{"Alex Mulvin":4.6,"Rob Parfitt":3.4,"Theo Smith-Harris":2.4,"Ben West":1.9,
    "Josh Menzies":1.6,"Josh Evans":1.55,"Luke Usher":1.35,"Gabe Hills":1.3,"Matt Petty":1.3,
@@ -2610,10 +2651,10 @@ const DEF_NOV=[
   oprobs:{"2 down or less":0.049,"3 down":0.384,"4 down":0.409,"5 down":0.135,"6 or more":0.023}},
  {k:"nov_home",n:"First to Mention His Home Club",
   d:"Unprompted, out loud, in earshot of at least 2 witnesses, from wheels down in Malaga to the "+
-    "last putt on Sunday. Chris Best is 4/1 and would be shorter if the photographs counted. Theo "+
-    "is 10/1 on his first trip and has four days of introductions to get through, Mark Sturgess is "+
-    "14/1 for the same reason, and Ben West is 20/1 because he would rather tell you the number "+
-    "than the name. Somebody always does it before the bags are off the carousel",
+    "last putt on Sunday. Chris Best heads it and would be shorter still if the photographs "+
+    "counted. Theo is next on his first trip with 4 days of introductions to get through, Mark "+
+    "Sturgess is there for the same reason, and Ben West is a price because he would rather tell "+
+    "you the number than the name. Somebody always does it before the bags are off the carousel",
   round:"",opts:[],
   wts:{"Chris Best":6.0,"Theo Smith-Harris":2.6,"Mark Sturgess":1.9,"Gabe Hills":1.8,
    "Eamonn Brady":1.5,"Ben West":1.4,"Josh Menzies":1.2,"Tom Bucknall":1.15,"Matt Petty":0.8,
@@ -2621,24 +2662,23 @@ const DEF_NOV=[
 
  {k:"nov_stat",n:"Ben West to Quote a Squabbit Stat",
   d:"An actual number, read off Squabbit, said out loud, any time between the airport and the "+
-    "flight home. 2 witnesses and it is settled. The No is 6/1 and is the only bet on this board "+
-    "that requires a man to change the habit of a lifetime",
+    "flight home. 2 witnesses and it is settled. The No is the only bet on this board that "+
+    "requires a man to change the habit of a lifetime",
   round:"",opts:["Yes","No"],oprobs:{"Yes":0.86,"No":0.14},subject:"Ben West"},
 
  {k:"nov_shorts",n:"Dong to Play a Round in Shorts",
   d:"On the course, on the tee, in shorts. Round the pool does not count and neither does the walk "+
     "to breakfast — he has to play golf in them, and 1 of the 4 rounds is enough. It is the Costa "+
     "del Sol in September and the man has never knowingly been seen on a golf course in anything "+
-    "but long trousers, which is why the No is 1/7 and the Yes pays 15/2. Somebody will spend the "+
-    "whole week working on him",
+    "but long trousers. Somebody will spend the whole week working on him",
   round:"",opts:["Yes","No"],oprobs:{"Yes":0.12,"No":0.88},subject:"Dong Ming Lau"},
 
  {k:"nov_last",n:"Last Man Standing",
   d:"Last to bed wins the night. Whoever does it on the most nights of the 4 takes the pool, and a "+
     "tie splits it — a count rather than a verdict, settled by whoever is still awake to see it. "+
-    "Alex Mulvin is 5/1 and knows every barman on that coast, Rob Parfitt is 15/2 with a birthday "+
-    "to defend, and Theo is 11/1 on volume alone. At the other end, Matt Petty is 80/1 and Dong "+
-    "Ming Lau is 100/1, and neither of those prices is an insult",
+    "Alex Mulvin heads it and knows every barman on that coast, Rob Parfitt is next with a "+
+    "birthday to defend, and Theo is there on volume alone. At the other end sit Matt Petty and "+
+    "Dong Ming Lau, and neither of those prices is an insult",
   round:"",opts:[],
   wts:{"Alex Mulvin":4.5,"Rob Parfitt":3.2,"Theo Smith-Harris":2.3,"Josh Evans":1.9,
    "Josh Menzies":1.5,"Ben West":1.3,"Eamonn Brady":1.3,"Gabe Hills":1.25,"Tom Bucknall":1.1,
@@ -2664,62 +2704,69 @@ const DEF_NOV=[
   d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it. "+
     "Josh Menzies heads it because there is no shot on earth he loves more than a 4 iron he has no "+
     "business taking. Chris Best is next in, with clubs that have never seen a hazard at "+
-    "Windlesham. Jay France goes off at 10/1 from a 9.5 mark, which is what a summer out injured "+
-    "does to a man's judgement, and Tom Bucknall is 12/1 because 25 shots have to go somewhere",
+    "Windlesham. Jay France is in off a 9.5 mark, which is what a summer out injured does to a "+
+    "man's judgement, and Tom Bucknall is there because 25 shots have to go somewhere",
   round:"",opts:[],pk:"water",
   wts:{"Josh Menzies":6.45,"Chris Best":1.81,"Jay France":7.09,"Tom Bucknall":1.04}},
  {k:"nov_air",n:"First Air Shot",
-  d:"A genuine swing and miss. Practice swings excepted, obviously. Ben West is favourite for one "+
-    "reason: he rebuilt the swing last year and has been showing everybody the numbers ever since, "+
-    "and the ball has yet to read them. Rob Parfitt has the calves of an Olympic sprinter and not "+
-    "one ounce of it has ever reached the bottom of a golf ball. Northern Dave is 12/1, Jack "+
-    "Mulroy 14/1, and fresh air is not a bad shot, it is theatre — whoever provides it will still "+
-    "be hearing about it in 2030",
+  d:"A genuine swing and miss. Practice swings excepted, obviously. Jack Mulroy is favourite and "+
+    "has been taking lessons, which is the single most dangerous state a golfer can be in — "+
+    "halfway between the swing he had and the one he is paying for. He also carries the widest "+
+    "scoring spread in the field, which is the polite way of saying nobody has any idea what is "+
+    "coming. Matt Holland is next on a backswing nobody has ever been able to explain, with "+
+    "Northern Dave just behind him on the same reading. Ben West is out of it — he rebuilt his "+
+    "swing a while back and it has long since bedded in, which is exactly the sort of thing that "+
+    "stops being funny. Fresh air is not a bad shot, it is theatre, and whoever provides it will "+
+    "still be hearing about it in 2030",
   round:"",opts:[],pk:"air",
-  wts:{"Ben West":3.06,"Matt Holland":1.5,"Rob Parfitt":1.5,"Dave Huddleston":1.54,"Dom Mills":0.57}},
+  wts:{"Jack Mulroy":1.85,"Matt Holland":1.32,"Tom Bucknall":0.83,"Dave Huddleston":1.35,
+   "Ben West":0.79,"Dom Mills":0.47}},
+
  {k:"nov_cart",n:"First Buggy Incident",
-  d:"Kerb, bunker, flowerbed or tree. The FIRST one only, so the second and third do not count "+
-    "however spectacular they are, and the buggy does not have to survive for it to count. Josh "+
-    "Menzies has previous and heads the market on it. Tom Bucknall is 10/1, a Major in the British "+
-    "Army trusted with a great deal more than a golf buggy and about to prove it. Dong Ming Lau is "+
-    "14/1 as the only man who will be stone cold sober at the wheel all week, which has never once "+
-    "helped anybody reverse. Gabe Hills is 16/1. 1 winner out of 20 means the outsiders are long — "+
-    "that is arithmetic, not a comment on anybody's driving",
+  d:"Any incident at all. Kerb, bunker, flowerbed, tree, ditch, another buggy, a parked car, a "+
+    "bin, a bush, or something nobody has thought of yet — if the buggy comes off worst, or the "+
+    "thing it hit does, it counts. The FIRST one only, so the second and third do not count "+
+    "however spectacular they are, and the buggy does not have to survive. Josh Menzies has "+
+    "previous and heads the market on it. Tom Bucknall is next, a Major in the British Army "+
+    "trusted with a great deal more than a golf buggy and about to prove it. Dong Ming Lau is "+
+    "there as the only man who will be stone cold sober at the wheel all week, which has never "+
+    "once helped anybody reverse. 1 winner out of 20 means the outsiders are long — that is "+
+    "arithmetic, not a comment on anybody's driving",
   round:"",opts:[],pk:"cart",
-  /* Hand-set on previous form off the tee box rather than on it. Josh's is history; the other four
-     are a hunch, said out loud in the description so nobody mistakes it for data. The rest come
-     from the formula, so there is a pecking order rather than a wall of identical prices. */
+  /* Handicap is turned almost all the way down here — 0.28 against 0.85 on the air shot — because
+     a buggy finds a flowerbed on account of the man driving it, not the man's golf. What is left
+     is barely a tilt: it keeps the 20 from sitting on one identical price, and the hand weights
+     do the rest. */
   wts:{"Josh Menzies":4.4,"Tom Bucknall":1.85,"Dong Ming Lau":1.85,"Rob Parfitt":1.75,"Gabe Hills":1.7}},
  {k:"nov_shout",n:"First to Blame His Clubs",
   d:"Out loud, in earshot of at least 2 witnesses. Chris Best heads it because a man who talks "+
     "that fondly about his golf expects rather more from it than it has ever given him. Luke Usher "+
-    "is 17/2 off 13.8, because a low mark makes a bad shot somebody else's fault, Josh Menzies is "+
-    "in the same bracket with a shorter fuse, and Eamonn Brady is 12/1 because he tends to blame "+
-    "the card instead",
+    "is short for his mark, because a low handicap makes a bad shot somebody else's fault, Josh "+
+    "Menzies is in the same bracket with a shorter fuse, and Eamonn Brady is only a price because "+
+    "he tends to blame the card instead",
   round:"",opts:[],pk:"clubs",
   wts:{"Chris Best":2.55,"Luke Usher":4.95,"Josh Menzies":3.56,"Eamonn Brady":2.59}},
  {k:"nov_row",n:"Most Likely to Have a Heated Discussion",
-  d:"Voices up, clubs down, somebody walking to the next tee on his own. Josh Menzies and Eamonn "+
-    "Brady renewing last year's hostilities is the obvious way in, and Eamonn's card will be doing "+
-    "half the work. The Holland brothers at 9/2 apiece are the value: Matt has had 30 years to "+
-    "learn exactly which button to press and Luke has never once failed to press back. Matt Petty "+
-    "is the outsider of the field on the grounds that nobody present has ever heard him raise his "+
-    "voice. Two men usually qualify, so the pool splits between them and every price here is "+
-    "roughly half what it would be in a one-winner market. This book adds to more than 100% on "+
-    "purpose — that is what a multi-winner pool pays, and it is not a margin",
+  d:"Voices up, clubs down, somebody walking to the next tee on his own. Settled the same way as "+
+    "Social MVP: a vote of all 20 on the last night, one man one vote, you cannot vote for "+
+    "yourself, and the top 2 share the pool. A count rather than a verdict, and nobody has to "+
+    "adjudicate a market he is priced up in. Josh Menzies and Eamonn Brady renewing last year's "+
+    "hostilities is the obvious way in, and Eamonn's card will be doing half the work. The Holland "+
+    "brothers are the value: Matt has had 30 years to learn exactly which button to press and Luke "+
+    "has never once failed to press back. Matt Petty is the outsider of the field on the grounds "+
+    "that nobody present has ever heard him raise his voice. 2 men usually qualify, so the pool "+
+    "splits between them and every price here is roughly half what it would be in a one-winner "+
+    "market. This book adds to more than 100% on purpose — that is what a multi-winner pool pays, "+
+    "and it is not a margin",
   round:"",winners:2.2,opts:[],
-  /* Hand-set from previous form off the course: last year's fallout, the two brothers who cannot
-     be in the same fourball without one of them starting it, and the two who cannot leave it
-     alone. The tail is deliberately short — anybody can have a row after four days and a
-     birthday — except the man who demonstrably cannot. */
   wts:{"Josh Menzies":2.35,"Eamonn Brady":2.25,"Luke Holland":2.05,"Matt Holland":1.9,
    "Ben West":1.3,"Gabe Hills":1.3,"Mark Sturgess":0.6,"Dong Ming Lau":0.5,"Matt Petty":0.45}},
  {k:"nov_miss3",n:"First Missed Three-Footer — Singles",
   d:"Sunday only, and it has to be inside 3 feet and genuinely missed. Gimmes are not missed, they "+
     "are conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he "+
     "is. Jay France and Dong Ming Lau head it on current form, one just back from injury and the "+
-    "other doing the whole week stone cold sober. Luke Usher is 10/1 with a newborn at home, so by "+
-    "Sunday he is on four hours a night, and Dom Mills is 12/1 from a great height. The short ones "+
+    "other going the wrong way for a while now. Luke Usher is in with a newborn at home, so by "+
+    "Sunday he is on 4 hours a night, and Dom Mills is there from a great height. The short ones "+
     "are where the week is won and lost",
   round:"4",opts:[],pk:"miss3",
   wts:{"Jay France":13.67,"Dong Ming Lau":3.48,"Luke Usher":5.53,"Dom Mills":0.81}},
@@ -2728,8 +2775,8 @@ const DEF_NOV=[
     "placed on Thursday. Odds-on for a reason and the market is not apologising for it",
   round:"1",opts:["Yes","No"],oprobs:{Yes:0.88,No:0.12},subject:"Josh Menzies"},
  {k:"nov_rob30",n:"Rob to Say He Is Still Drunk From Last Night",
-  d:"Out loud, before he tees off on Thursday. It is his 30th the night before and the transfer leaves at "+
-    "12:00, so the only real question is whether he says it or simply demonstrates it",
+  d:"Out loud, before he tees off on Thursday. His 30th was the day before, and the transfer "+
+    "leaves at 12:00, so the only real question is whether he says it or simply demonstrates it",
   round:"1",opts:["Yes","No"],oprobs:{Yes:0.82,No:0.18},subject:"Rob Parfitt"}
 ];
 
@@ -2740,7 +2787,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.18"+"/"+MODEL_V;
+const DATA_V="2026-08-18.20"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -2872,6 +2919,21 @@ function myResult(k){
    ${ret>0?`collected <b>${money0(ret)}</b>`:"collected <b>nothing</b>"} &mdash;
    <b>${net>0?"up "+money0(net):net<0?"down "+money0(-net):"square"}</b> on it.</div>`;
 }
+/* HOW MANY OUTCOMES WIN. Nearly every market has exactly one, and for years the whole page
+   assumed it. Two do not. Sunday Singles is won by every man who wins his singles — about 10 of
+   the 20 — and a row takes two men. Settlement has always known this: the database divides the
+   pool by the number of winning outcomes before splitting each share. The FORWARD-LOOKING figures
+   on this page did not, so Sunday Singles was telling a man his £10 would collect £105 when the
+   truth was nearer £10, and tagging all 20 runners as value at +1000%.
+   Novelty markets carry it explicitly. For a model market the published book says it: a book that
+   adds to 908% is a market with about 9 winners in it. Never less than 1. */
+function winnersOf(m){
+ if(!m) return 1;
+ if(m.winners>0) return m.winners;
+ const rows=marketOutcomes(m);
+ const book=rows.reduce((a,r)=>a+(r.prob>0?r.prob:0),0);
+ return book>1.05?book:1;
+}
 function myLine(k,o){
  const rows=(DB.detail||[]).filter(b=>b.market===k&&b.outcome===o);
  if(!rows.length) return "";
@@ -2888,7 +2950,8 @@ function myLine(k,o){
  if(!(ow>0)||!(pool>0)) return `<div class="mypay">£${stake} on</div>`;
  /* Your share can never be larger than the pool itself. If a read ever comes back with a weight
     that is bigger than its own outcome's total, the arithmetic would print a fantasy — cap it. */
- const proj=Math.min(pool, pool*myW/ow);
+ const W=winnersOf(allMarkets().find(x=>x.k===k));
+ const proj=Math.min(pool, pool/W*myW/ow);
  /* Two thin-market cases that make an honest number look like a lie.
     A tote pays the winning outcome the WHOLE pool, so if you are the only backer of an
     outcome your projection is the entire pool — correct, and it reads as a mistake.
@@ -2903,7 +2966,7 @@ function myLine(k,o){
     honest caveat into a wall of the same paragraph seven times over. */
  if(soleMarket) return `<div class="mypay">£${stake} on &mdash; <b>your own money</b>, see above</div>`;
  if(soleOutcome) return `<div class="mypay">£${stake} on &mdash; only backer, so it takes the
-   <b>whole ${money0(proj)} pool</b> if it lands</div>`;
+   <b>${W>1.05?"whole "+money0(proj)+" share":"whole "+money0(proj)+" pool"}</b> if it lands</div>`;
  return `<div class="mypay">£${stake} on &mdash; worth about <b>${money0(proj)}</b> if it lands
    <span title="Your share moves every time somebody else backs this outcome">(as the pool stands)</span></div>`;
 }
@@ -3397,9 +3460,10 @@ function moveSnapshot(){
  const p={};
  allMarkets().forEach(m=>{
    const {money,w}=poolTotals(m.k); if(!(money>0)||!(w>0)) return;
+   const WN=winnersOf(m);
    marketOutcomes(m).forEach(o=>{
      const v=bet(m.k,o.label), wt=weighted(v);
-     if(wt>0) p[m.k+"|"+o.label]=Math.round(money/wt*1000)/1000;
+     if(wt>0) p[m.k+"|"+o.label]=Math.round(money/WN/wt*1000)/1000;
    });});
  return {at:Date.now(), p};
 }
@@ -3615,8 +3679,12 @@ function drawPools(){
   if(!rows.length)return;
   const mp=mPhase(m), mLockA=mp!=="antepost"&&!S.override, mLockO=mp!=="open"&&!S.override;
   const {money,w}=poolTotals(m.k);
+  const WINN=winnersOf(m);
   rows=rows.map(o=>{const v=bet(m.k,o.label);
-    const wt=weighted(v), imp=wt>0?money/wt:0;
+    /* Divided by the number of winners: in a market where 10 men win, the pool that backs one
+       of them is a tenth of the whole. Without this the price read 10x too big and the value
+       column tagged every single runner as a screaming buy. */
+    const wt=weighted(v), imp=wt>0?money/WINN/wt:0;
     return{...o,a:v.a||0,o:v.o||0,cash:cash(v),wt,imp,
       ev:(cash(v)>0&&o.prob>0)?o.prob*imp-1:null};})
    /* Favourite first is right for a field of runners, and wrong for a scale. Sorting 2/3/4/5/6
@@ -3687,11 +3755,12 @@ function drawPools(){
             newPool = pool + stake.  newWeight = weight on that outcome + stake x phase multiplier. */
          const f=mp==="antepost"?(S.apBonus||1):1;
          const st=10, np=money+st, nw=r.wt+st*f;
+         const WN=winnersOf(m);
          if(!(nw>0)) return "";
          /* With nothing in the pot yet a £10 bet collects its own £10 back, which is true and
             completely useless. Say nothing until there is a pool to have a share of. */
          if(!(money>0)) return "";
-         const take=np*(st*f)/nw;
+         const take=np/WN*(st*f)/nw;
          return `<div class="small" style="opacity:.78">a £${st} bet now would collect
            <b>${money0(take)}</b> if it lands</div>`;})():""}
        ${RES&&win&&!RES.void?`<div class="small" style="color:var(--acc2)">${r.cash
@@ -4282,6 +4351,9 @@ function drawAuth(){
      S.pendingName=n; save(); }
    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){er.textContent="That does not look like an email.";return;}
    $("#authGo").disabled=true;
+   /* The name is what turns on account creation, so a blank one here would silently put the man
+      back on the old broken path. Guarded above, and again here. */
+   if(isNew && !$("#newName").value){ er.textContent="Pick your name off the list first."; $("#authGo").disabled=false; return; }
    try{ await sendMagicLink(em, isNew?$("#newName").value:"");
      $("#authOk").innerHTML=`Link sent to <b>${esc(em)}</b>. Open it on this phone and you will land back here
        signed in. Check the junk folder before blaming the organiser.`;
@@ -4877,7 +4949,8 @@ function drawMine(){
  const bestBy={};
  live.forEach(b=>{
    const pool=+b.pool||0, ow=+b.outcome_weight||0, mw=+b.my_weight||0;
-   const share=(ow>0&&pool>0)?Math.min(pool,pool*mw/ow):0;
+   const WN=winnersOf(allMarkets().find(x=>x.k===b.market));
+   const share=(ow>0&&pool>0)?Math.min(pool,pool/WN*mw/ow):0;
    const m=bestBy[b.market]||(bestBy[b.market]={});
    m[b.outcome]=(m[b.outcome]||0)+share;});
  const proj=Object.values(bestBy).reduce((a,m)=>a+Math.max(0,...Object.values(m)),0);
@@ -4888,7 +4961,8 @@ function drawMine(){
  const line=b=>{
    const m=allMarkets().find(x=>x.k===b.market)||{n:b.market};
    const pool=+b.pool||0, ow=+b.outcome_weight||0, mw=+b.my_weight||0;
-   const share=(ow>0&&pool>0)?Math.min(pool,pool*mw/ow):0;
+   const WN=winnersOf(m);
+   const share=(ow>0&&pool>0)?Math.min(pool,pool/WN*mw/ow):0;
    const ret=+b.ret||0;
    const tag=b.phase==="antepost"?'<span class="tag low">ante-post</span>':"";
    const right=b.settled
@@ -5746,7 +5820,7 @@ function drawAdmin(){
     was false. Cleared when it is published, because at that point it IS the published figure. */
  bind("ain",(p,e)=>p.in=e.checked);
  bind("ahcp",(p,e)=>{p.hcp=+e.value;p.edited=true;});
- bind("aform",(p,e)=>{p.form=+e.value;p.edited=true;});bind("asd",(p,e)=>p.sd=Math.max(1.5,+e.value));
+ bind("aform",(p,e)=>{p.form=+e.value;p.edited=true;});bind("asd",(p,e)=>{p.sd=Math.max(1.5,+e.value);p.edited=true;});
  bind("ateam",(p,e)=>p.team=e.value);
  document.querySelectorAll(".adel").forEach(el=>el.addEventListener("click",e=>{
   S.players.splice(+e.target.dataset.i,1);save();drawAdmin();}));
@@ -5885,7 +5959,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.18</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.20</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -6056,6 +6130,7 @@ function patchPools(){
   const m=allMarkets().find(x=>x.k===k); if(!m) return;
   if(resultOf(k)) return;                       /* settled cards are static until a redraw */
   const {money}=poolTotals(k);
+  const WINN=winnersOf(m);
   const mp=mPhase(m), live=mLive(m);
    /* withStakedOutcomes, not marketOutcomes — the same list the card was drawn from. A runner
      carrying money who has since been taken off the roster still gets a row in the markup, and
@@ -6066,7 +6141,7 @@ function patchPools(){
    const label=row.dataset.o; if(label==null) return;
    const o=outs.find(x=>x.label===label)||{label:label,prob:null};
    const v=bet(k,label), wt=weighted(v), c=cash(v);
-   const imp=wt>0?money/wt:0;
+   const imp=wt>0?money/WINN/wt:0;
    const ev=(c>0&&o.prob>0)?o.prob*imp-1:null;
    const set=(sel,txt)=>{const el=row.querySelector(sel); if(el&&el.innerHTML!==txt) el.innerHTML=txt;};
    set('.mkfig[data-l="Money on"]', c?"£"+c:"&mdash;");
@@ -6104,7 +6179,8 @@ function patchPools(){
      if(!live||!(money>0)){ coll.remove(); }
      else{
        const f=mp==="antepost"?(S.apBonus||1):1, stk=10, np=money+stk, nw=wt+stk*f;
-       if(nw>0){ const take=np*(stk*f)/nw;
+       const WN=winnersOf(m);
+       if(nw>0){ const take=np/WN*(stk*f)/nw;
          const t=`a £${stk} bet now would collect <b>${money0(take)}</b> if it lands`;
          if(coll.innerHTML!==t) coll.innerHTML=t; }
      }
@@ -6215,9 +6291,10 @@ function snapPrices(){
  const m={};
  allMarkets().forEach(k=>{
    const {money,w}=poolTotals(k.k); if(!(money>0)) return;
+   const WN=winnersOf(k);
    marketOutcomes(k).forEach(o=>{
      const v=bet(k.k,o.label), wt=weighted(v);
-     if(wt>0) m[k.k+"|"+o.label]=money/wt;});});
+     if(wt>0) m[k.k+"|"+o.label]=money/WN/wt;});});
  m.__pot=(DB.totals||[]).reduce((a,r)=>a+(r.staked||0),0);
  return m;
 }
