@@ -820,12 +820,12 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     outcome is worth, because not enough people have backed it yet. That is the one to look for.</p>
     <p class="note">None of it is a promise. Every figure moves each time anybody bets, and what you
     actually collect is worked out from the pot at the moment the market shuts &mdash; not the number that
-    was on screen when you struck the bet.</p>
+    was on screen when you placed the bet.</p>
     <p class="note"><b>Why the sums look odd on a small pot.</b> <em>Pays now</em> is the market's price:
     the pot divided by the money already on that outcome. It is <b>not</b> what your next bet gets, because
     your own stake joins the pot <em>and</em> joins that outcome, which moves the price it is getting. On a
     thin market that is a big difference &mdash; so under each name there is a line saying what a £10 bet
-    struck this minute would actually collect, once there is money in that market. <b>That is the honest
+    placed this minute would actually collect, once there is money in that market. <b>That is the honest
     number</b>; the price above it is the
     market, not your ticket.</p>
     <p class="note">And while betting is <b>ante-post</b>, every pound you stake counts as
@@ -998,7 +998,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li>Stakes are settled as you go. The ledger shows what you owe and the organiser marks it off when you
         pay. <b>Nobody flies home owing.</b></li>
       <li><b>Ante-post</b> runs from now until the handicaps are declared on the first night. You are betting
-        against a model built on last season's numbers and some assumptions, so stakes struck in this window
+        against a model built on last season's numbers and some assumptions, so stakes placed in this window
         count for a larger share of the pool when it divides. Betting blind should pay something.</li>
       <li>Ante-post prices are deliberately <b>flatter</b> than the ones you will see later. The model
         re-draws every handicap and every form figure on each simulation to reflect that none of it is
@@ -1021,7 +1021,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         you are betting on, and none of it goes to the organiser.</li>
       <li>Prices are informational. Your return depends on the pool, not the model.</li>
       <li><b>Singles only.</b> No doubles, no trebles, no accumulators. Not out of meanness — a multiple
-        needs the prices fixed at the moment you strike it, and fixing prices is exactly the thing that
+        needs the prices fixed at the moment you place it, and fixing prices is exactly the thing that
         makes a man a bookmaker. Every bet on this board is 1 selection into 1 pool. 20 singles are
         allowed and encouraged; a treble is not.</li>
     </ul>
@@ -1070,7 +1070,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li><b>Nobody won it: money back.</b> If the market simply has no winner &mdash; everybody scored, nobody
         went four-from-four &mdash; <b>every stake is refunded in full</b>. That needs no decision from
         anybody; the board does it. A refund is your own money back, so it comes back at face value:
-        £10 struck ante-post is £10 returned, not £12.50. The 1.25 is a share of a pool, and there is
+        £10 placed ante-post is £10 returned, not £12.50. The 1.25 is a share of a pool, and there is
         no pool to have a share of.</li>
       <li><b>Somebody won it and nobody backed him: the 2027 pot.</b> Rarer, and the only case where money is
         left over. A winner exists but not a penny was on him, so there is nobody to pay. That money rolls into
@@ -1179,14 +1179,14 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <div class="admpane" data-a="money">
     <div class="card">
 <h2>Ledger</h2>
-      <p class="note">Every bet anyone has struck, on any phone. This view is yours alone &mdash; punters can
+      <p class="note">Every bet anyone has placed, on any phone. This view is yours alone &mdash; punters can
       only see their own bets and the size of each pot. Tap the button to record someone as settled up.</p>
       <div class="wrap"><table id="ledgTbl"></table></div>
     </div>
 
     <div class="card">
 <h2>Every bet</h2>
-      <p class="note">Void anything struck in error. Voided bets leave the pools and the ledger immediately
+      <p class="note">Void anything placed by mistake. Voided bets leave the pools and the ledger immediately
       but stay in the database, so there is always a record of what happened &mdash; and they are listed
       below, where you can put one back if you voided the wrong line. A market that has already been
       settled has to be unsettled first, in both directions: the pool was worked out on those bets.</p>
@@ -1195,7 +1195,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 
     <div class="card">
       <h2>Voided <span class="small" id="voidCount"></span></h2>
-      <p class="note">Struck and then taken off. None of this money is in a pool or on anybody's balance.
+      <p class="note">Placed and then taken off. None of this money is in a pool or on anybody's balance.
       If a man paid before you voided his bets he is now in credit, and the ledger above says so.</p>
       <div class="wrap"><table id="voidTbl"></table></div>
     </div>
@@ -1253,7 +1253,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <div class="admpane" data-a="setup">
     <div class="card">
       <h2>Handicap declaration</h2>
-      <p class="note">Bets taken before the first night are <b>ante-post</b>: struck while the handicaps are
+      <p class="note">Bets taken before the first night are <b>ante-post</b>: placed while the handicaps are
       still guesses. Type the agreed marks into the Roster on the <b>Squad</b> tab and press
       <b>Apply, re-run and publish</b>, then come back here and press <b>Declare handicaps</b> &mdash; every price moves and the board reprices itself. Both
       switches below ask you to confirm, and both can be put straight back.</p>
@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.09",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.10",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2242,8 +2242,8 @@ async function refresh(){
     }
     applyPublishedHcp();
     /* Villa wifi and roaming data. Keep the last good read so the score and the pools still
-       render on the tee. Betting is NOT cached-and-queued: a stake struck against a stale pool
-       is a stake struck on a market that may already have shut, so it stays disabled until the
+       render on the tee. Betting is NOT cached-and-queued: a stake placed against a stale pool
+       is a stake placed on a market that may already have shut, so it stays disabled until the
        connection is back. */
     try{ localStorage.setItem("chipsip_cache", JSON.stringify({at:Date.now(),
       settings:DB.settings, totals:DB.totals, roster:DB.roster, claimed:DB.claimed,
@@ -2499,7 +2499,7 @@ const MARKETS=[
   d:"Blue, Red, or the unbearable anticlimax of 12.5 apiece. Settles on THE SCORE, not on the trophy: "+
     "12.5 each pays Tie, not Red, even though Red keep the thing. Back Tie if you fancy the draw. "+
     "The points total is provisional while the captains settle the side games and the social "+
-    "markets: if it moves, what counts as a draw moves with it, bets already struck stand, and the "+
+    "markets: if it moves, what counts as a draw moves with it, bets already placed stand, and the "+
     "prices are re-run",
   type:"model",round:"",team:true},
  {k:"blueTop",n:"Blue Top Scorer",d:"Best of the Blues. 10 runners rather than 20, so the prices are half as long as MVP for a man "+"you probably rate anyway. Someone has to be",type:"model",round:"",only:"Blue"},
@@ -2519,7 +2519,7 @@ const MARKETS=[
    so none of it lands on the organiser to adjudicate on the Sunday night.
 
    The outcome labels for the match markets are deliberately "Match 1", not the two men's names.
-   A bet stores the outcome it was struck on as TEXT, so a label that changed when the draw went
+   A bet stores the outcome it was placed on as TEXT, so a label that changed when the draw went
    up would orphan every bet placed before it. The names are shown underneath instead, and appear
    the moment the pairing is entered. */
 [1,2,3,4].forEach(r=>{
@@ -2620,7 +2620,7 @@ const DEF_NOV=[
   round:"4",opts:[],pk:"miss3"},
  {k:"nov_josh",n:"Josh Menzies to Call Someone a C**t Before the First Tee",
   d:"Any target, any tone, affectionate counts. Window opens on landing and shuts when the first ball is "+
-    "struck on Thursday. Odds-on for a reason and the market is not apologising for it",
+    "placed on Thursday. Odds-on for a reason and the market is not apologising for it",
   round:"1",opts:["Yes","No"],oprobs:{Yes:0.88,No:0.12},subject:"Josh Menzies"},
  {k:"nov_rob30",n:"Rob to Say He Is Still Drunk From Last Night",
   d:"Out loud, before he tees off on Thursday. It is his 30th the night before and the transfer leaves at "+
@@ -2635,7 +2635,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.09"+"/"+MODEL_V;
+const DATA_V="2026-08-18.10"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -2686,7 +2686,7 @@ function load(){
 }
 function save(){try{localStorage.setItem("chipsip26v2",JSON.stringify(S));}catch(e){}}
 const allMarkets=()=>MARKETS.concat((S.novelty||[]).map(m=>({...m,type:"novelty"})));
-/* Every stake is a row in the database, tagged with who struck it and in which phase.
+/* Every stake is a row in the database, tagged with who placed it and in which phase.
    Nothing here is local any more: the same book is in front of everyone. */
 function bet(k,o){const r=DB.totals.find(x=>x.market===k&&x.outcome===o);
  return r?{a:r.ap_staked||0,o:r.open_staked||0}:{a:0,o:0};}
@@ -2740,7 +2740,7 @@ function face(name,team,cls){
    MAX_STAKE keeps any single line small. MAX_UNPAID is the one that actually matters: a stake cap
    alone does nothing, because five £10 bets reach the same place as one £50. Capping what a man
    can owe at any moment means the fifth bet is refused as readily as the first, and nobody ends
-   the week arguing about a three-figure tab struck on a Friday night. Settle up and the room
+   the week arguing about a three-figure tab run up on a Friday night. Settle up and the room
    reopens immediately. */
 const MAX_STAKE=10;
 const MAX_UNPAID=50;
@@ -3417,7 +3417,7 @@ function drawPools(){
    ${S.courses.length} rounds of golf and nothing else. Side games, mini-games and the social markets are still
    being settled between the captains, and any of them that carries a point changes the total &mdash; which
    changes what it takes to win the trophy and what a draw looks like. If it moves, <b>every bet already
-   struck stands</b> at the terms it was struck on, the prices are re-run, and the new total shows here and
+   placed stands</b> on the terms it was placed at, the prices are re-run, and the new total shows here and
    in the header. Betting Team Result now is partly a bet on a scoreline nobody has finished writing.</p>`:""}
    <div class="phases">
      <div class="${ph==="antepost"?"on":""}"><b>1. Ante-post</b><span>now until the handicaps are agreed in the bar
@@ -3559,7 +3559,7 @@ function drawPools(){
        ${r.sub?`<div class="small${r.pending?" pend":""}">${esc(r.sub)}</div>`:""}
        ${who.length?`<div class="small">${esc(who.join(", "))}</div>`:""}${myLine(m.k,r.label)}
        ${mLive(m)?(()=>{
-         /* What a bet struck RIGHT NOW would actually collect. The old line multiplied the stake by
+         /* What a bet placed RIGHT NOW would actually collect. The old line multiplied the stake by
             the headline price, which is what a bookmaker does — but a tote has no bookmaker. Your
             own money joins the pool AND joins the outcome, so it moves the price it is getting.
             In a thin market that difference is enormous: this line once told a man his £10 would
@@ -3745,7 +3745,7 @@ function drawPools(){
     the one claim this whole board rests on is that nothing here is fiddled. */
  const si=$("#simInfo");
  if(si) si.innerHTML = PUB
-  ? `Every model price on this page comes from <b>${(PUB.n||0).toLocaleString()} simulated trips</b>. The
+  ? `Every model price on this page comes from <b>${(PUB.n||0).toLocaleString("en-GB")} simulated trips</b>. The
      whole Ryder Cup is played out hole by hole each time — foursomes, fourball, scramble and singles — off
      each man's declared handicap and his actual scoring record from Squabbit, ${
      (S.players.filter(p=>p.in&&!p.unknown).length)} of the ${S.players.filter(p=>p.in).length} having one
@@ -3753,7 +3753,7 @@ function drawPools(){
      exist; any match the captains have entered is played exactly as it stands.
      <b>Nobody's hand is on the scale.</b> The organiser cannot nudge a price: the model does not know who
      is popular, who is captain, who has money on what, or which team anyone is on. It is the same
-     arithmetic applied to 20 men, run ${(PUB.n||0).toLocaleString()} times, and it is published once
+     arithmetic applied to 20 men, run ${(PUB.n||0).toLocaleString("en-GB")} times, and it is published once
      so every phone shows the identical number. Being the favourite here is a statement about your scoring
      record and nothing else &mdash; and it still does not decide what you get paid. The pool does that.`
   : `The organiser has not published a set of model prices yet. Pools and stakes are live and you can bet
@@ -3940,8 +3940,8 @@ async function placeSlip(){
      +". Take them off the slip and try again.";
    return;}
  /* Each stake is tagged with ITS OWN market's phase, not the book's. Once Thursday's ball is
-    struck the whole-trip markets are gone but Sunday's are not, and a stake struck on Friday must
-    settle on the terms of the market it was struck into. */
+    placed the whole-trip markets are gone but Sunday's are not, and a stake placed on Friday must
+    settle on the terms of the market it was placed into. */
  const barred=S.slip.map(x=>({x,why:blockReason(allMarkets().find(m=>m.k===x.market)||{k:x.market},x.outcome)}))
    .filter(o=>o.why);
  if(barred.length){err.textContent=barred.map(o=>`${o.x.outcome}: ${o.why.toLowerCase()}`).join(" · ");return;}
@@ -4880,7 +4880,7 @@ function drawOdds(){
          +`, so those are priced off the real pairings and the other ${q.total-q.fixed} are still averaged. `;})()}
       The published prices, identical on every phone. Set by the organiser
       ${PUB.at?new Date(PUB.at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"earlier"}
-      off ${(PUB.n||0).toLocaleString()} simulated trips. You cannot reroll them until you get a better one,
+      off ${(PUB.n||0).toLocaleString("en-GB")} simulated trips. You cannot reroll them until you get a better one,
       which is rather the point.`
    : `<span class="warn">The organiser has not published a set of prices yet. Pools and stakes are live and
       you can bet normally; the model columns fill in when he publishes.</span>`;
@@ -5184,7 +5184,7 @@ function drawRecon(){
      <td class="small"><b>This is the one to check against Starling.</b> Nothing else here is cash.</td></tr>
    <tr><th>Owed</th><th class="num">Amount</th><th>&nbsp;</th></tr>
    <tr><td>Staked on the board</td><td class="num">${money0(staked)}</td>
-     <td class="small">Everything anybody has struck. A promise of money, not money.</td></tr>
+     <td class="small">Everything anybody has placed. A promise of money, not money.</td></tr>
    <tr><td>Still to come in</td><td class="num ${owed>0?"neg":""}"><b>${money0(owed)}</b></td>
      <td class="small">${owed>0?"Men who have bet and not paid. Chase them with the morning report.":"Nobody owes a penny."}</td></tr>
    <tr><td>Won on settled markets</td><td class="num">${money0(collected)}</td>
@@ -5204,7 +5204,7 @@ function drawRecon(){
    ${stranded>0?`<tr><td class="warn">Stranded on a market no longer on the board</td>
      <td class="num neg">${money0(stranded)}</td>
      <td class="small">${strandedKeys.map(esc).join(", ")}. Nobody can win this or be paid it. Void those
-     bets and the money goes back to whoever struck them.</td></tr>`:""}
+     bets and the money goes back to whoever placed them.</td></tr>`:""}
    <tr><td><b>Left when everyone has paid up</b></td><td class="num"><b>${money0(atEnd)}</b></td>
      <td class="small">What has come in, plus what is still to come, less everything that goes back
      out &mdash; winners, and anybody in credit. Should equal the ${stranded>0?3:2} lines above it.</td></tr>
@@ -5495,7 +5495,7 @@ function drawLedger(){
     if(landed){ alert("The reply never arrived, but the payment did land — the ledger has moved. Nothing more to do."); return; }
     btn.disabled=false; btn.textContent="Gave it back";
     alert("Could not record it: "+(err.message||err)); }}));
- let b=`<tr><th>Struck</th><th>Who</th><th>Market</th><th>Selection</th><th class="num">£</th><th></th></tr>`;
+ let b=`<tr><th>Placed</th><th>Who</th><th>Market</th><th>Selection</th><th class="num">£</th><th></th></tr>`;
  DB.bets.slice().reverse().forEach(x=>{
   b+=`<tr><td class="small">${new Date(x.created_at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
     ${x.phase==="antepost"?'<span class="tag low">AP</span>':""}</td>
@@ -5509,7 +5509,7 @@ function drawLedger(){
     in the database — but nothing on screen could reach it. */
  const V=DB.voided||[];
  const vc=$("#voidCount"); if(vc) vc.textContent=V.length?`${V.length} · £${V.reduce((a,x)=>a+(+x.stake||0),0)}`:"";
- let v=`<tr><th>Struck</th><th>Who</th><th>Market</th><th>Selection</th><th class="num">£</th><th>Why</th><th></th></tr>`;
+ let v=`<tr><th>Placed</th><th>Who</th><th>Market</th><th>Selection</th><th class="num">£</th><th>Why</th><th></th></tr>`;
  V.forEach(x=>{
   v+=`<tr style="opacity:.72"><td class="small">${new Date(x.created_at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
     ${x.phase==="antepost"?'<span class="tag low">AP</span>':""}</td>
@@ -5743,7 +5743,7 @@ function drawStrip(){
      <i>${t.holder} keep it on ${t.retain}</i></div>`);
  }
  cells.push(`<div class="hs acc"><u>In the pots</u><b>£${pot.toFixed(0)}</b>
-   <i>${bets} bet${bets===1?"":"s"} struck</i></div>`);
+   <i>${bets} bet${bets===1?"":"s"} placed</i></div>`);
  /* What is about to shut. The single most useful thing on the whole board while betting is live. */
  const next=allMarkets().filter(m=>mLive(m)).sort((a,b)=>deadline(a)-deadline(b))[0];
  if(next){
@@ -5765,7 +5765,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.09</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.10</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -5879,7 +5879,7 @@ function betPlaced(staked,lines){
    <svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="26"/>
      <path d="M18 31l8.5 8.5L42 22"/></svg>
    <b>£${staked} on</b>
-   <span>${lines} bet${lines===1?"":"s"} struck &mdash; they show against your name below</span></div>`;
+   <span>${lines} bet${lines===1?"":"s"} placed &mdash; they show against your name below</span></div>`;
  document.body.appendChild(el);
  setTimeout(()=>{el.style.transition="opacity .3s";el.style.opacity="0";},1500);
  setTimeout(()=>el.remove(),1900);
@@ -6193,7 +6193,7 @@ $("#run").addEventListener("click",()=>{
  if(!ADMIN_TOKEN){$("#simStat").textContent="Organiser only.";return;}
  const N=+$("#nsim").value; $("#simStat").textContent="running…";
  setTimeout(()=>{const t0=performance.now(); runSim(N); PUB=null;
-  $("#simStat").textContent=`${N.toLocaleString()} trips in ${Math.round(performance.now()-t0)}ms — not published yet.`;
+  $("#simStat").textContent=`${N.toLocaleString("en-GB")} trips in ${Math.round(performance.now()-t0)}ms — not published yet.`;
   drawAll();},20);});
 $("#admGo").addEventListener("click",async()=>{
  const tok=$("#admPw").value.trim(); const err=$("#admErr");
@@ -6236,7 +6236,7 @@ $("#admRun").addEventListener("click",async e=>{
  const N=+($("#nsim2")||{}).value||+$("#nsim").value||6000;
  if($("#nsim")) $("#nsim").value=String(N);
  e.target.disabled=true;
- runMsg(`Running ${N.toLocaleString()} trips…`,"warn");
+ runMsg(`Running ${N.toLocaleString("en-GB")} trips…`,"warn");
  /* Yielding first so the message paints before the simulation blocks the thread. Forty
     thousand trips is several seconds of a frozen page, and a frozen page with no message on
     it is indistinguishable from a broken one. */
@@ -6245,7 +6245,7 @@ $("#admRun").addEventListener("click",async e=>{
  runSim(N); drawAll();
  const ms=Math.round(performance.now()-t0);
  if(!ADMIN_TOKEN){ e.target.disabled=false;
-   runMsg(`Re-ran ${N.toLocaleString()} trips in ${ms}ms, locally only — you are not signed in as the organiser.`,"warn");
+   runMsg(`Re-ran ${N.toLocaleString("en-GB")} trips in ${ms}ms, locally only — you are not signed in as the organiser.`,"warn");
    return; }
  try{
    /* `m` marks an entry the organiser actually changed, as against one that simply matches the
@@ -6269,7 +6269,7 @@ $("#admRun").addEventListener("click",async e=>{
    const pl=SIMPLAN.total?`  Pairings: ${SIMPLAN.fixed} of ${SIMPLAN.total} matches drawn`
      +(SIMPLAN.played?` and ${SIMPLAN.played} already played and banked`:"")
      +(SIMPLAN.fixed<SIMPLAN.total?`; the other ${SIMPLAN.total-SIMPLAN.fixed} were shuffled.`:"."):"";
-   runMsg(`Done — ${N.toLocaleString()} trips in ${ms}ms, handicaps and prices published. Everyone sees these now`
+   runMsg(`Done — ${N.toLocaleString("en-GB")} trips in ${ms}ms, handicaps and prices published. Everyone sees these now`
      +(moved?`, including ${moved} handicap${moved===1?"":"s"} changed from the Squabbit figure.`:".")
      +pl
      +(odd.length?`  CHECK THIS: ${odd.join("; ")}. That is a big gap — press ↺ to put it back if it was a slip.`:""),
