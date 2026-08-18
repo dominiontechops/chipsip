@@ -268,6 +268,8 @@ textarea{width:100%;min-height:110px;font-family:var(--mono);font-size:12.5px}
 button.go{background:var(--acc);border-color:var(--acc);color:var(--on);font-weight:700;cursor:pointer}
 button.ghost{cursor:pointer}button.ghost:hover{border-color:var(--acc)}
 .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:10px 0}
+#clrCard{border-color:var(--red);border-left:5px solid var(--red)}
+#clrCard h2{color:var(--red2)}
 .novrow{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}
 .novrow:last-child{border-bottom:0}
 .novn{flex:1 1 auto;min-width:0}
@@ -1355,6 +1357,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <div class="wrap"><table id="bkTbl"></table></div>
     </div>
 
+
 <div class="card">
 <h2>Morning report</h2>
       <p class="note">The message for the group. Score, who still owes, and the biggest pools, in plain text
@@ -1410,6 +1413,28 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         <span class="small" id="errMsg"></span>
       </div>
       <div class="wrap"><table id="errTbl"></table></div>
+    </div>
+
+    <div class="card" id="clrCard">
+      <h2>Clear the book for launch</h2>
+      <p class="note">Empties the money and the results and leaves the setup standing. Run it once,
+      the moment before the link goes to the group, so nobody opens a board carrying your testing.
+      It takes a snapshot first, which appears in Backups above, and every phone drops its own
+      half-built slip within 45 seconds.</p>
+      <p class="note"><b>What goes:</b> every bet, every payment and payout, every "I have sent it"
+      note, every settled market, and anything written on the card.
+      <b>What stays:</b> the players and their teams, the men who have already claimed their name,
+      who has admin, the declared handicaps, the published prices and the payment link.</p>
+      <div class="row" style="margin:0 0 8px">
+        <button class="ghost" id="clrShow">Show me what would go</button>
+        <span class="small" id="clrMsg"></span>
+      </div>
+      <div id="clrWrap"></div>
+      <div class="row" id="clrGoRow" style="display:none">
+        <input id="clrPhrase" placeholder="Type CLEAR THE BOOK" autocomplete="off"
+          spellcheck="false" style="min-width:210px;flex:1">
+        <button class="ghost" id="clrGo" disabled>Clear the book</button>
+      </div>
     </div>
     </div>
 
@@ -1988,7 +2013,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.06",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.07",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2592,7 +2617,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.06"+"/"+MODEL_V;
+const DATA_V="2026-08-18.07"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -5718,7 +5743,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.06</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.07</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -6356,6 +6381,82 @@ const ec=$("#errClear"); if(ec) ec.addEventListener("click",async e=>{
  try{ $("#errMsg").textContent=await rpc("admin_errors_clear",{p_token:ADMIN_TOKEN});
    DB.errors=[]; drawErrors(); }
  catch(x){ $("#errMsg").textContent="Could not clear it: "+x.message; }});
+/* CLEAR THE BOOK. The one button here that cannot be undone by pressing it again, so it is the
+   one button that makes you work for it: nothing is reachable until you have pressed Show me what
+   would go and read the figures, the phrase has to be typed out in full, and then it still arms
+   and confirms. The server checks the phrase too — the button being enabled is not the guard. */
+function drawClearPreview(v){
+ const w=$("#clrWrap"); if(!w) return;
+ if(!v){ w.innerHTML=""; return; }
+ const row=(what,amount,cls)=>`<tr><td>${what}</td><td class="num ${cls||""}">${amount}</td></tr>`;
+ const nothing = !(v.bets||v.voided||v.payments||v.payouts||v.claims||v.results||v.errors
+                 ||v.match_results||v.match_pairs);
+ w.innerHTML=`<div class="wrap"><table>
+   <tr><th>Goes</th><th class="num">&nbsp;</th></tr>
+   ${row("Bets on the board",`${v.bets} &middot; £${v.staked}`,"neg")}
+   ${v.voided?row("Bets already voided",`${v.voided} &middot; £${v.voided_stake}`):""}
+   ${row("Payments recorded",`${v.payments} &middot; £${v.paid}`,"neg")}
+   ${v.payouts?row("Payouts handed over",`${v.payouts} &middot; £${v.paid_out}`,"neg"):""}
+   ${row("&ldquo;I have sent it&rdquo; notes",v.claims)}
+   ${row("Settled markets",v.results,v.results?"neg":"")}
+   ${row("Results on the card",v.match_results)}
+   ${row("Pairings on the card",v.match_pairs)}
+   ${v.errors?row("Errors phones reported",v.errors):""}
+   <tr><th>Stays</th><th class="num">&nbsp;</th></tr>
+   ${row("Players, teams and captains",`${v.keep_players}${v.keep_bench?" (+"+v.keep_bench+" not playing)":""}`,"pos")}
+   ${row("Men who have claimed their name",v.keep_claims,"pos")}
+   ${row("Admins",v.keep_admins,"pos")}
+   ${row("Match slots waiting for the draw",v.keep_slots,"pos")}
+   ${row("Declared handicaps",v.keep_hcp?"kept":"none published",v.keep_hcp?"pos":"")}
+   ${row("Published model prices",v.keep_prices?"kept":"none published",v.keep_prices?"pos":"")}
+   ${row("Payment link",v.keep_paylink?"kept":"not set",v.keep_paylink?"pos":"")}
+ </table></div>
+ ${nothing?`<p class="note pos">There is nothing to clear. The book is already empty.</p>`:""}`;
+}
+const clrShow=$("#clrShow"); if(clrShow) clrShow.addEventListener("click",async()=>{
+ $("#clrMsg").textContent="Looking…";
+ try{
+   const v=await rpc("admin_clear_preview",{p_token:ADMIN_TOKEN});
+   drawClearPreview(v);
+   $("#clrMsg").textContent="Read it, then type the phrase.";
+   $("#clrGoRow").style.display="flex";
+   const ph=$("#clrPhrase"); if(ph){ ph.value=""; ph.focus(); }
+   $("#clrGo").disabled=true;
+ }catch(e){ $("#clrMsg").textContent="Could not read the book: "+(e.message||e); }});
+const clrPhrase=$("#clrPhrase"); if(clrPhrase) clrPhrase.addEventListener("input",e=>{
+ const ok=e.target.value.trim().replace(/\s+/g," ").toUpperCase()==="CLEAR THE BOOK";
+ const b=$("#clrGo");
+ b.disabled=!ok;
+ /* Retyping after arming disarms it, so the phrase and the confirmation always belong together. */
+ if(b.dataset.armed==="1"){ b.dataset.armed=""; b.textContent="Clear the book"; }
+});
+const clrGo=$("#clrGo"); if(clrGo) clrGo.addEventListener("click",async e=>{
+ const b=e.target, ph=($("#clrPhrase")||{}).value||"";
+ if(b.dataset.armed!=="1"){
+   b.dataset.armed="1"; b.textContent="This cannot be undone — clear it";
+   b.style.borderColor="var(--red)";
+   $("#clrMsg").textContent="Press it again and the book is empty.";
+   clearTimeout(b._t); b._t=setTimeout(()=>{ if(b.dataset.armed==="1"){
+     b.dataset.armed=""; b.textContent="Clear the book"; b.style.borderColor="";
+     $("#clrMsg").textContent="Left alone."; }},8000);
+   return;}
+ clearTimeout(b._t); b.dataset.armed=""; b.style.borderColor=""; b.disabled=true;
+ b.textContent="Clearing…";
+ try{
+   const r=await rpc("admin_clear_book",{p_token:ADMIN_TOKEN,p_confirm:ph});
+   await refresh(); drawAll(); drawAdmin();
+   drawClearPreview(null);
+   $("#clrGoRow").style.display="none";
+   $("#clrWrap").innerHTML=`<p class="note pos"><b>The book is empty.</b>
+     ${r.bets} bet${r.bets===1?"":"s"} worth £${r.staked}, ${r.payments} payment${r.payments===1?"":"s"}
+     worth £${r.paid} and ${r.results} settled market${r.results===1?"":"s"} have gone. The snapshot
+     taken first is at the top of Backups above, so none of it is actually lost.
+     Put £1 on something yourself and void it before you send the link.</p>`;
+   $("#clrMsg").textContent="";
+ }catch(err){
+   b.disabled=false; b.textContent="Clear the book";
+   $("#clrMsg").innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,160))}</span>`;
+ }});
 (function(){const src=document.getElementById("logo").src;
  const l=document.createElement("link"); l.rel="icon"; l.type="image/png"; l.href=src;
  document.head.appendChild(l);

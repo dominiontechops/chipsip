@@ -4,6 +4,11 @@
 -- Run this ONCE, immediately before the link goes to the group. It takes the board back to zero
 -- money and zero results, and leaves the twelve weeks of setup standing.
 --
+-- THERE IS NOW A BUTTON FOR THIS. Admin -> Tools -> Clear the book for launch does exactly what
+-- this script does, in one transaction, behind a phrase you have to type out in full. Use that.
+-- This file is the fallback: if the page will not load on the day, or you want to read the
+-- figures yourself before committing to anything, everything below still works.
+--
 -- HOW TO RUN IT
 --   1. Open the Supabase SQL editor for project nqewsjczuqnkqehcayzq.
 --   2. Run PART 1 on its own. It writes nothing. Read what it says is about to go.
