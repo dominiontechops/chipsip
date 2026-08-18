@@ -1058,9 +1058,9 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         whole.</li>
       <li><b>Worked example.</b> £100 in the MVP pool, made up of lots of tenners and fivers. £40 of it went
         on the winner ante-post, £20 on the winner once the marks were agreed, and £40 on men who did not
-        win. Winning shares are 40 × 1.25 = 50, plus 20, so 70 in total. The pool pays £100 ÷ 70 = £1.4286 a
-        share. The ante-post backers get £71.43 between them; the open backers get £28.57. Nothing is left
-        over, because nothing is taken out.</li>
+        win. Winning shares are 40 × 1.25 = 50, plus 20, so 70 in total. The ante-post backers hold 50 of
+        those 70 shares and take £71.43 of the pool; the open backers hold 20 and take £28.57. Nothing is
+        left over, because nothing is taken out.</li>
       <li><b>Dead heat.</b> Pool splits equally between tied outcomes, then between backers within each.</li>
       <li><b>Nobody wins the market.</b> It can happen: The Blank pays the man who scores nothing and
         everybody scores something; Perfect Record pays a four-from-four and nobody manages it. There is no
@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.10",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.11",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2568,18 +2568,18 @@ const DEF_NOV=[
   subject:"Rob Parfitt"},
  {k:"nov_social",n:"Social MVP",
   d:"Best company off the course. Not a golf market and not pretending to be one, so there is no "+
-    "model price here at all — what you see is purely how the money has landed. "+
+    "price to argue with — what you see is purely how the money has landed. "+
     "Settled by a vote of all 20 on the last night, one man one vote, and you cannot vote "+
     "for yourself. A tie splits the pool between them. The tally is posted in full afterwards, so "+
     "it is a count rather than a verdict",
   round:"",opts:[]},
  {k:"nov_back",n:"Biggest Comeback",
-  d:"The deepest hole anybody climbs out of all week. A side goes 4 down, drags it back and wins "+
-    "or halves the match: that is a 4 down comeback. Settles on the BIGGEST one of the week across "+
-    "all 25 matches, so it only takes one. A halve counts, because being 4 down and getting out with "+
-    "a half is a comeback in any clubhouse in the world. Priced off 20,000 simulated trips: 3 and 4 "+
-    "down are near enough even money, 5 down is the one worth a few quid, and 6 or more has happened "+
-    "once in living memory. The first rung, 2 down or less, means nobody all week got more than 2 down and came back, the quiet trip nobody wants to watch",
+  d:"The deepest hole anybody climbs out of all week. Go 4 down, drag it back, win or halve it — "+
+    "that is a 4 down comeback. Biggest one of the week across all 25 matches, so it only takes one "+
+    "man to bury himself and dig his way out. Halves count: 4 down and escaping with a half is a "+
+    "comeback in any clubhouse in the world. 3 and 4 down is where the money goes, 5 down is the one "+
+    "that pays for the night out, and 6 or more is the one they will still be telling in ten years. "+
+    "Back 2 down or less if you fancy a week where everybody behaves themselves",
   round:"",keepOrder:true,opts:["2 down or less","3 down","4 down","5 down","6 or more"],
   /* Measured, not guessed. Every match in 20,000 simulated weeks was played hole by hole and the
      deepest deficit any side recovered from was recorded. Counting halves is what keeps this a
@@ -2615,8 +2615,9 @@ const DEF_NOV=[
   wts:{"Eamonn Brady":2.1,"Josh Menzies":2.1,"Ben West":1.45,"Gabe Hills":1.45}},
  {k:"nov_miss3",n:"First Missed Three-Footer — Singles",
   d:"Sunday only, and it has to be inside 3 feet and genuinely missed. Gimmes are not missed, they are "+
-    "conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he is. Priced "+
-    "off handicap and volatility, which is the closest thing to a nerve rating we have",
+    "conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he is. "+
+    "The short ones are where the week is won and lost, and everybody knows exactly who they are "+
+    "worried about here",
   round:"4",opts:[],pk:"miss3"},
  {k:"nov_josh",n:"Josh Menzies to Call Someone a C**t Before the First Tee",
   d:"Any target, any tone, affectionate counts. Window opens on landing and shuts when the first ball is "+
@@ -2635,7 +2636,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.10"+"/"+MODEL_V;
+const DATA_V="2026-08-18.11"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -5765,7 +5766,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.10</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.11</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
