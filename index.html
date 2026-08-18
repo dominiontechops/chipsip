@@ -325,7 +325,7 @@ padding:10px 18px;border-radius:8px}
 .mkhead{display:none}
 .mkrow{display:grid;gap:4px 10px;padding:11px 0;border-bottom:1px solid var(--line2);
   grid-template-columns:auto minmax(0,1fr) auto;
-  grid-template-areas:"pic name act" "pic figs figs" "bar bar bar";align-items:start}
+  grid-template-areas:"pic name price" "pic figs figs" "act act act" "bar bar bar";align-items:start}
 /* ---- faces -------------------------------------------------------------------------------
    Twenty names in a table is twenty names in a table. A face turns a list into people. There
    are no photographs yet, so this draws initials on a colour derived from the name itself —
@@ -405,8 +405,8 @@ min-width:42px}
 @media(max-width:719px){
   /* Four stake buttons and a name do not both fit across a phone, and squeezing them wrapped
      every name onto two lines. The stakes drop to their own full-width row instead. */
-  .mkrow{grid-template-columns:auto minmax(0,1fr);
-    grid-template-areas:"pic name" "pic figs" "act act" "bar bar"}
+  .mkrow{grid-template-columns:auto minmax(0,1fr) auto;
+    grid-template-areas:"pic name price" "pic figs figs" "act act act" "bar bar bar"}
   .quick{justify-content:stretch;gap:6px;flex-wrap:wrap}
   .quick button{flex:1 1 0;min-width:0;padding:8px 4px}
   .mkact{margin-top:2px}
@@ -422,6 +422,17 @@ min-width:42px}
 .mkfig::before{content:attr(data-l) " ";font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   font-size:10px;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin-right:2px}
 .mkfig.strong{color:var(--acc2)}
+/* THE PRICE. It is the one number a man opens the card to see, and it was set in the same small
+   grey type as the other three, three lines below two sentences of prose. On a betting board the
+   price is the headline: it goes top right of the row, level with the name, big enough to read
+   from across a table, with its label above it in small caps instead of buried in front of it. */
+.mkprice{grid-area:price;text-align:right;line-height:1;padding-left:6px;align-self:start}
+.mkfig.big{display:block;font-family:var(--mono);font-size:27px;font-weight:700;color:var(--ink);
+  letter-spacing:-.6px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mkfig.big::before{display:block;font-size:9.5px;letter-spacing:.7px;opacity:.55;margin:0 0 3px}
+.mkrow.won .mkfig.big{color:var(--acc2)}
+.mkrow.lost .mkfig.big,.mkrow.barred .mkfig.big{opacity:.45}
+@media(max-width:719px){ .mkfig.big{font-size:24px} }
 .mkrow.barred{opacity:.5}
 /* ---- movement ------------------------------------------------------------------------------
    Green and up for a price that has lengthened, red and down for one that has shortened. The
@@ -551,15 +562,18 @@ html[data-theme="light"] .valtag.over2{color:#fff}
   .mkhead{display:grid}
   /* Seven columns, not six. The face is a grid item too, and leaving it out of the count pushed
      every figure one column left of its heading and bumped the stake buttons onto a second row. */
-  .mkhead,.mkrow{grid-template-columns:44px minmax(0,1fr) 78px 78px 74px 68px 172px;
+  .mkhead,.mkrow{grid-template-columns:44px minmax(0,1fr) 92px 78px 74px 68px 172px;
     grid-template-areas:none;align-items:center;gap:8px}
   .face{grid-area:auto;grid-column:1}
   .mkhead span{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding-bottom:6px}
   .mkhead{border-bottom:1px solid var(--line)}
-  .mkname,.mkact,.mkbar{grid-area:auto}
+  .mkname,.mkact,.mkbar,.mkprice{grid-area:auto}
   .mkfigs{display:contents}          /* each figure becomes its own column */
   .mkfig{text-align:right;font-size:13px}
   .mkfig::before{content:none}
+  .mkprice{padding-left:0;text-align:right}
+  .mkfig.big{font-size:23px}
+  .mkfig.big::before{content:none}
   .mkact{text-align:right}
   .mkbar{grid-column:1/-1;margin-top:-2px}
 }
@@ -1367,6 +1381,20 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         <button class="ghost" id="stReset">Factory reset</button></div>
       <div class="ok" id="stMsg"></div>
     </div>
+
+    <div class="card">
+      <h2>What phones are hitting</h2>
+      <p class="note">If the board misbehaves on somebody's phone it says so here, by itself. Nobody
+      has to describe the problem down a bad line, and nobody can read this but you &mdash; the phones
+      can write to the list and cannot see a word of it. Identical faults are grouped, so 40 of the
+      same thing is one line saying 40. An empty list is the answer you want.</p>
+      <div class="row">
+        <button class="ghost" id="errGo">Check the list</button>
+        <button class="ghost" id="errClear">Clear it</button>
+        <span class="small" id="errMsg"></span>
+      </div>
+      <div class="wrap"><table id="errTbl"></table></div>
+    </div>
     </div>
 
   </div>
@@ -1920,7 +1948,44 @@ const SQUAB_PULLED="2026-08-17";
 const SB={url:"https://nqewsjczuqnkqehcayzq.supabase.co",
           key:"sb_publishable_jZ3Iw2rYsGgCdsBqKmJqBw_vO00J2DO"};
 const DB={bets:[],mine:[],totals:[],ledger:[],accounts:[],settings:{},roster:[],claimed:[],
- results:[],matches:[],stand:null,detail:[],myledger:[],settle:[],unclaimed:[],claims:[],online:false,err:""};
+ results:[],matches:[],stand:null,detail:[],myledger:[],settle:[],unclaimed:[],claims:[],
+ ver:0,errors:[],online:false,err:""};
+
+/* N3. WHEN A PHONE BREAKS IN SPAIN.
+   Nobody is going to open a developer console on a Costa del Sol balcony and read a stack trace
+   down a bad line. The phone posts what went wrong and forgets about it; the organiser reads the
+   list on the Admin tab. Three rules, all of them about not making a bad situation worse:
+   it never blocks anything (fire and forget, failures swallowed), it never repeats itself (the
+   same fault a hundred times is one fact), and it stops at 8 a session, so a phone stuck in a
+   redraw loop cannot fill the book with its own noise. The table is insert-only for everyone —
+   a punter can write to it and can never read a word of it back. */
+const ERRSEEN=new Set(); let ERRSENT=0;
+function reportError(kind,msg,extra){
+ try{
+  if(!msg) return;
+  msg=String(msg).slice(0,400);
+  if(/ResizeObserver loop/i.test(msg)) return;      /* browser noise, not a fault */
+  const key=kind+"|"+msg;
+  if(ERRSEEN.has(key)||ERRSENT>=8) return;
+  ERRSEEN.add(key); ERRSENT++;
+  const x=extra||{};
+  fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
+   headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
+    "Content-Type":"application/json",Prefer:"return=minimal"},
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.04",
+    kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
+    line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
+    stack:x.stack?String(x.stack).slice(0,1500):null,
+    ua:navigator.userAgent,path:location.pathname+location.hash})}).catch(()=>{});
+ }catch(e){}
+}
+window.addEventListener("error",e=>{
+ if(e&&e.target&&e.target!==window&&e.target.tagName) return;   /* a 404 on an asset, not a crash */
+ reportError("onerror",e.message,{src:e.filename,line:e.lineno,col:e.colno,
+   stack:e.error&&e.error.stack});});
+window.addEventListener("unhandledrejection",e=>{
+ const r=e&&e.reason;
+ reportError("promise",(r&&r.message)||String(r),{stack:r&&r.stack});});
 /* same normalisation the database uses, so the page agrees with it */
 const norm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
 const myTeam=()=>{const r=DB.roster.find(x=>norm(x.name)===norm(AUTH.name||""));return r?r.team:null;};
@@ -2025,28 +2090,56 @@ async function sbFetch(path,opts={}){
   const txt=await r.text(); return txt?JSON.parse(txt):null;
 }
 const rpc=(fn,args)=>sbFetch("rpc/"+fn,{method:"POST",body:JSON.stringify(args)});
+/* N2. THE WHOLE BOARD IN ONE ROUND TRIP.
+   Every phone was firing 10 separate queries every 45 seconds. Twenty men on the terrace is 267
+   queries a minute, all of them asking the same 10 tables the same 10 questions and nearly always
+   getting the same answers. board_state() is one function that returns the lot, stamped with a
+   version number, and board_version() is one integer the poll can check first.
+   The old ten-query path is still here and still correct: if the database has not had the
+   migration, the first call fails with "function not found", the flag goes down and this session
+   quietly uses the old road. Anything else — a dead wifi, a timeout — is thrown on to the caller,
+   because that is what puts the board into its offline-with-cache state. */
+let ONECALL=true;
+const missingFn=e=>/PGRST202|404|does not exist|Could not find the function/i
+  .test(String((e&&e.message)||e));
+async function readBoard(){
+  if(ONECALL){
+    try{
+      const s=await rpc("board_state",{});
+      if(s&&typeof s==="object"&&!Array.isArray(s)&&"v" in s)
+        return {ver:+s.v||0, settings:s.settings||{}, totals:s.totals||[], mine:s.mine||[],
+          roster:s.roster||[], claimed:s.claimed||[], results:s.results||[], matches:s.matches||[],
+          stand:s.stand||null, detail:s.detail||[], myledger:s.myledger||[]};
+      ONECALL=false;                       /* something came back, but not the board */
+    }catch(e){ if(!missingFn(e)) throw e; ONECALL=false; }
+  }
+  const [st,tot,mine,ros,clm,res,mat,stand,detail,myled]=await Promise.all([
+    sbFetch("settings?select=data&id=eq.1"),
+    sbFetch("pool_totals?select=*"),                       /* aggregates, no names */
+    AUTH.tok?sbFetch("bets?select=id,bettor,market,outcome,stake,phase,created_at&voided=eq.false&order=created_at")
+            :Promise.resolve([]),                          /* RLS returns only your own */
+    sbFetch("roster?select=name,team,playing,role&order=name"),
+    sbFetch("claimed_names?select=name"),
+    sbFetch("results?select=market,outcomes,void,note,settled_at"),   /* what won: public */
+    sbFetch("matches?select=session,slot,blue,red,result,margin,ended&order=session,slot"),
+    sbFetch("standings?select=*"),
+    /* The money line. my_bets() is SECURITY DEFINER and filters on the caller's own claimed
+       name, so this returns your bets and nobody else's — the return figures are computed
+       server side and never leave it for anyone but their owner. */
+    AUTH.tok?rpc("my_bets",{}).catch(()=>[]):Promise.resolve([]),
+    /* your own ledger row, for the amount on the Pay button. RLS keeps it to you. */
+    AUTH.tok?sbFetch("my_ledger?select=*").catch(()=>[]):Promise.resolve([])]);
+  return {ver:0, settings:(st&&st[0]&&st[0].data)||{}, totals:tot||[], mine:mine||[],
+    roster:ros||[], claimed:(clm||[]).map(x=>x.name), results:res||[], matches:mat||[],
+    stand:(stand&&stand[0])||null, detail:detail||[], myledger:myled||[]};
+}
 async function refresh(){
   try{
-    const [st,tot,mine,ros,clm,res,mat,stand,detail,myled]=await Promise.all([
-      sbFetch("settings?select=data&id=eq.1"),
-      sbFetch("pool_totals?select=*"),                       /* aggregates, no names */
-      AUTH.tok?sbFetch("bets?select=id,bettor,market,outcome,stake,phase,created_at&voided=eq.false&order=created_at")
-              :Promise.resolve([]),                          /* RLS returns only your own */
-      sbFetch("roster?select=name,team,playing,role&order=name"),
-      sbFetch("claimed_names?select=name"),
-      sbFetch("results?select=market,outcomes,void,note,settled_at"),   /* what won: public */
-      sbFetch("matches?select=session,slot,blue,red,result,margin,ended&order=session,slot"),
-      sbFetch("standings?select=*"),
-      /* The money line. my_bets() is SECURITY DEFINER and filters on the caller's own claimed
-         name, so this returns your bets and nobody else's — the return figures are computed
-         server side and never leave it for anyone but their owner. */
-      AUTH.tok?rpc("my_bets",{}).catch(()=>[]):Promise.resolve([]),
-      /* your own ledger row, for the amount on the Pay button. RLS keeps it to you. */
-      AUTH.tok?sbFetch("my_ledger?select=*").catch(()=>[]):Promise.resolve([])]);
-    DB.settings=(st&&st[0]&&st[0].data)||{}; DB.totals=tot||[]; DB.mine=mine||[];
-    DB.roster=ros||[]; DB.claimed=(clm||[]).map(x=>x.name);
-    DB.results=res||[]; DB.matches=mat||[]; DB.stand=(stand&&stand[0])||null;
-    DB.detail=detail||[]; DB.myledger=myled||[];
+    const B=await readBoard();
+    DB.ver=B.ver; DB.settings=B.settings; DB.totals=B.totals; DB.mine=B.mine;
+    DB.roster=B.roster; DB.claimed=B.claimed;
+    DB.results=B.results; DB.matches=B.matches; DB.stand=B.stand;
+    DB.detail=B.detail; DB.myledger=B.myledger;
     if(ADMIN_TOKEN){
       try{ const [al,ab,ac]=await Promise.all([
              rpc("admin_ledger",{p_token:ADMIN_TOKEN}), rpc("admin_bets",{p_token:ADMIN_TOKEN}),
@@ -2462,7 +2555,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.01"+"/"+MODEL_V;
+const DATA_V="2026-08-18.04"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3363,8 +3456,8 @@ function drawPools(){
   /* "Implied", "Fair" and "Edge" are bookmaker's words. Half this group has never had a bet in
      their lives and the labels were doing the opposite of explaining. Same four numbers, said
      in English: what is on it, what it pays now, what it ought to pay, and the gap. */
-  let t=`<div class="mkhead"><span></span><span>Outcome</span><span class="num">Money on</span><span class="num">Pays now</span>
-   <span class="num">Should pay</span><span class="num">Value</span><span></span></div>`;
+  let t=`<div class="mkhead"><span></span><span>Outcome</span><span class="num">Pays now</span>
+   <span class="num">Money on</span><span class="num">Should pay</span><span class="num">Value</span><span></span></div>`;
   rows.forEach(r=>{const ec=r.ev===null?"":r.ev>0.05?"pos":r.ev<-0.05?"neg":"";
    const inSlip=S.slip.find(x=>x.market===m.k&&x.outcome===r.label);
    const blocked=blockReason(m,r.label);
@@ -3402,9 +3495,9 @@ function drawPools(){
        ${RES&&win&&!RES.void?`<div class="small" style="color:var(--acc2)">${r.cash
          ?`took <b>${money0(money/Math.max(1,WON.length))}</b> of the pool, shared across £${r.cash} of stakes`
          :"nobody had a penny on it &mdash; the pool goes unclaimed"}</div>`:""}</div>
+     <div class="mkprice"><span class="mkfig big" data-l="${RES?"Paid":"Pays now"}">${r.imp?fmtDec(r.imp):"—"}</span></div>
      <div class="mkfigs">
        <span class="mkfig" data-l="Money on">${r.cash?"£"+r.cash:"—"}</span>
-       <span class="mkfig" data-l="${RES?"Paid":"Pays now"}">${r.imp?fmtDec(r.imp):"—"}</span>
        <span class="mkfig strong" data-l="Should pay">${r.prob!=null?dec(r.prob):"manual"}</span>
        <span class="mkfig ${ec}" data-l="Value">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</span>
      </div>
@@ -5466,7 +5559,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.01</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.04</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -5482,7 +5575,8 @@ function drawAll(){
    ["what changed",drawSince],["first run",drawOnboarding]];
  const broke=[];
  steps.forEach(([name,fn])=>{try{fn();}catch(e){broke.push(name);
-   console.error("panel failed:",name,e);}});
+   console.error("panel failed:",name,e);
+   reportError("panel:"+name,(e&&e.message)||String(e),{stack:e&&e.stack});}});
  const w=$("#netWrap");
  if(broke.length&&w) w.insertAdjacentHTML("afterbegin",
   `<div class="card" style="border-color:var(--warn)"><h2 class="warn">Something is off</h2>
@@ -5672,9 +5766,21 @@ function patchPools(){
  drawStrip();                                    /* the pot, which rolls rather than jumps */
  drawSince();
 }
+/* N2. Ask the cheap question first. Every write to the book bumps one counter; if that counter
+   has not moved since the last read, nothing on the board can have changed and the correct
+   amount of work is a single integer's worth. On a quiet afternoon that is the entire cost of
+   having the board open. Note it only ever SKIPS work — if the check fails for any reason at
+   all, the poll falls through and does the full read exactly as it always did. */
+let VERCHECK=true;
+async function nothingMoved(){
+ if(!VERCHECK||!DB.ver||!DB.online) return false;
+ try{ const v=await rpc("board_version",{}); return +v===+DB.ver; }
+ catch(e){ if(missingFn(e)) VERCHECK=false; return false; }
+}
 async function pollOnce(){
  if(document.hidden) return;
  if(busyNow()){ return; }                      /* try again next tick, no harm done */
+ if(await nothingMoved()){ pollWait=POLL_MS; schedulePoll(); return; }
  const before=snapPrices();
  const shapeBefore=shapeOf();
  const okBefore=DB.online;
@@ -6032,6 +6138,39 @@ $("#stReset").addEventListener("click",e=>{
  S=freshState();save();applyPublishedHcp();runSim(6000);drawAll();drawAdmin();
  const box=$("#stateBox"); if(box) box.value=before;
  $("#stMsg").textContent="Back to defaults. Your old state is in the box above — Load pasted state puts it back.";});
+/* N3. Pulled on demand rather than on every admin refresh: the organiser looks at this when
+   something is wrong, and an empty table does not need fetching 40 times a day. */
+function drawErrors(){
+ const el=$("#errTbl"); if(!el) return;
+ const rows=DB.errors||[];
+ if(!rows.length){ el.innerHTML=`<tr><td class="small">Nothing reported. Press Check the list to look again.</td></tr>`; return; }
+ let h=`<tr><th>Last seen</th><th class="num">Times</th><th>Who</th><th>What</th><th>Where</th><th>Build</th></tr>`;
+ rows.forEach(r=>{
+  const when=r.at?new Date(r.at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"—";
+  h+=`<tr><td class="small">${esc(when)}</td><td class="num">${r.n||1}</td>
+   <td>${esc(r.who||"not signed in")}</td>
+   <td><b>${esc(r.msg||"")}</b><div class="small">${esc(r.kind||"")}</div></td>
+   <td class="small">${esc([r.src,r.line].filter(Boolean).join(" line "))||"&mdash;"}<div class="small">${esc((r.ua||"").slice(0,60))}</div></td>
+   <td class="small">${esc(r.build||"")}</td></tr>`;});
+ el.innerHTML=h;
+}
+const eg=$("#errGo"); if(eg) eg.addEventListener("click",async()=>{
+ $("#errMsg").textContent="Looking…";
+ try{ DB.errors=await rpc("admin_errors",{p_token:ADMIN_TOKEN})||[];
+   $("#errMsg").textContent=DB.errors.length
+     ? `${DB.errors.length} distinct fault${DB.errors.length===1?"":"s"} in the last 14 days.`
+     : "Nothing reported in the last 14 days.";
+   drawErrors(); }
+ catch(e){ $("#errMsg").textContent="Could not read the list: "+e.message; }});
+const ec=$("#errClear"); if(ec) ec.addEventListener("click",async e=>{
+ const btn=e.target;
+ if(btn.dataset.armed!=="1"){ btn.dataset.armed="1"; btn.textContent="Clear it — sure?";
+   setTimeout(()=>{if(btn.dataset.armed==="1"){btn.dataset.armed="";btn.textContent="Clear it";}},5000);
+   return;}
+ btn.dataset.armed=""; btn.textContent="Clear it";
+ try{ $("#errMsg").textContent=await rpc("admin_errors_clear",{p_token:ADMIN_TOKEN});
+   DB.errors=[]; drawErrors(); }
+ catch(x){ $("#errMsg").textContent="Could not clear it: "+x.message; }});
 (function(){const src=document.getElementById("logo").src;
  const l=document.createElement("link"); l.rel="icon"; l.type="image/png"; l.href=src;
  document.head.appendChild(l);

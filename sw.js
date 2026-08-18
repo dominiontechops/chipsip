@@ -1,4 +1,4 @@
-/* Chip & Sip service worker — build 2026-08-18.01
+/* Chip & Sip service worker — build 2026-08-18.04
    ----------------------------------------------------------------------------------------------
    This exists for one reason: to make the board open instantly and to keep working in a bar with
    no signal. It is deliberately narrow.
@@ -16,7 +16,7 @@
    moment it is pushed; a cache-first shell would leave men betting on last week's board until
    they happened to clear their browser. Cache is the fallback for when the network fails.
    ---------------------------------------------------------------------------------------------- */
-const BUILD = "2026-08-18.01";
+const BUILD = "2026-08-18.04";
 const CACHE = "chipsip-" + BUILD;
 
 /* Relative, so it works whether this is served from a domain root or a GitHub Pages sub-path. */
