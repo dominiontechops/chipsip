@@ -25,7 +25,8 @@
 --line2:#1e2b23;--hdr1:#18261d;--hdr2:#0e1512;--on:#06120b;--okbd:#2f6b45;
 --bluebd:#26507f;--bluebg:#13243a;--redbd:#6d2f26;--redbg:#2e1512;--warnbd:#5a4a1f;
 /* one colour per group of markets, in daylight order */
---gTrip:#c9a227;--gR1:#e08b3c;--gR2:#3f9e63;--gR3:#3d9fb0;--gR4:#c8503f;--gNov:#a06bd4;
+--gTrip:#c9a227;--gR1:#e08b3c;--gR2:#3f9e63;--gR3:#3d9fb0;--gR4:#cf6657;--gNov:#a36fd5;
+--negtx:#cf6657;   /* text-safe negative: 4.54:1 on the panel, where --red managed 3.73 */
 --flashG:rgba(63,158,99,.34);--flashR:rgba(200,80,63,.34)}
 /* Light theme. Same hues, flipped luminance, so the greens still read as Chip & Sip and not as a
    spreadsheet. Contrast is checked against the ink colour, not against white. */
@@ -37,7 +38,8 @@ html[data-theme="light"]{--bg:#eef2ea;--panel:#fdfefc;--panel2:#e9efe6;--line:#c
 --warn:#8a6212;--line2:#e2ebe2;--hdr1:#e7f0e7;--hdr2:#f4f7f3;--on:#ffffff;--okbd:#8fc4a4;
 --bluebd:#a9c4e6;--bluebg:#e6eefa;--redbd:#e6b3a8;--redbg:#fae9e5;--warnbd:#dcc68a;
 /* Darker on white so the same six colours still read against pale card stock */
---gTrip:#a17d10;--gR1:#b4661f;--gR2:#2f7d4b;--gR3:#25798a;--gR4:#b23e2c;--gNov:#7a45ad;
+--gTrip:#85670d;--gR1:#9e5a1b;--gR2:#2e7949;--gR3:#247586;--gR4:#b23e2c;--gNov:#7a45ad;
+--negtx:#b23e2c;
 --flashG:rgba(47,125,75,.22);--flashR:rgba(178,62,44,.22)}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
@@ -122,6 +124,55 @@ max-width:210px}
   border:1px solid var(--line);border-radius:8px;padding:9px;margin:8px 0}
 .tmove{font-size:11px;vertical-align:middle;margin-left:2px}
 .tmove.up{color:var(--acc2)}.tmove.dn{color:var(--red2)}.tmove.flat{opacity:.45}
+/* U1. One of these two is on screen at a time. */
+.formcards{display:none}
+@media(max-width:719px){
+  .formtable{display:none}
+  .formcards{display:grid;gap:9px;margin-top:8px}
+}
+.fcard{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:11px 12px}
+.fcard .fhd{display:flex;align-items:center;gap:9px}
+.fcard .fnm{flex:1 1 auto;min-width:0}
+.fcard .fnm b{display:block;font-size:15px}
+.fcard .fhcp{text-align:right;flex:0 0 auto}
+.fcard .fhcp span{display:block;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--dim)}
+.fcard .fhcp b{font-family:var(--mono);font-size:19px}
+.fcard .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0 6px}
+.fcard .fgrid > div{background:var(--panel2);border-radius:8px;padding:6px 8px;min-width:0}
+.fcard .fgrid span{display:block;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--dim)}
+.fcard .fgrid b{font-family:var(--mono);font-size:15px}
+.fcard .ftrend{font-size:12.5px;margin-bottom:2px}
+.fcard .fword{margin:4px 0 0;font-style:italic}
+/* and on anything wider, the name column stays put while the rest scrolls under it */
+@media(min-width:720px){
+  #formTbl td:first-child,#formTbl th:first-child{position:sticky;left:0;z-index:2;
+    background:var(--panel);box-shadow:1px 0 0 var(--line)}
+  #formTbl th:first-child{background:var(--hdr1,var(--panel2))}
+}
+/* U3. #hStrip and nav both scroll sideways and neither said so: 4 of 7 header cards and the
+   whole Admin tab sat off-screen at 360px with no cue at all. A fade at the live edge, and
+   scroll-snap so a swipe lands on a card rather than halfway across one. The fade is painted with
+   a mask so it works on any background and needs no extra element. */
+.edgefade{
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);
+          mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);
+}
+.edgefade.atend{-webkit-mask-image:none;mask-image:none}
+#hStrip{scroll-snap-type:x proximity}
+#hStrip .hs{scroll-snap-align:start}
+nav{scroll-snap-type:x proximity}
+nav button{scroll-snap-align:start}
+@media(prefers-reduced-motion:reduce){#hStrip,nav{scroll-snap-type:none}}
+.mineh{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);
+  margin:16px 0 7px;font-weight:800}
+.mineh .small{color:var(--dim);font-weight:600}
+.mbet{display:flex;gap:10px;align-items:center;justify-content:space-between;
+  border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:7px;background:var(--panel)}
+.mbet.won{border-color:var(--okbd,var(--acc))}
+.mbet.lost{opacity:.6}
+.mbetl{min-width:0;flex:1 1 auto}
+.mbetl b{font-size:14.5px}
+.mbetr{text-align:right;flex:0 0 auto;white-space:nowrap;font-family:var(--mono)}
 .paychip{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:6px 13px;
 cursor:pointer;font-size:12px;font-weight:700;background:var(--acc);border:1px solid var(--acc);
 color:var(--on);text-decoration:none}
@@ -200,7 +251,7 @@ tr:last-child td{border-bottom:0}
 .wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -14px;padding:0 14px}
 .wrap table{min-width:520px}
 @media(max-width:719px){ .wrap{margin:0 -12px;padding:0 12px} }
-.pos{color:var(--acc2)}.neg{color:var(--red)}.warn{color:var(--warn)}
+.pos{color:var(--acc2)}.neg{color:var(--negtx)}.warn{color:var(--warn)}
 .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
 .tag.low{border-color:var(--warnbd);color:var(--warn)}
 .tag.nd{border-color:var(--redbd);color:var(--red2)}
@@ -683,6 +734,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 
 <nav>
   <button data-t="pools" class="on">Place a Bet</button>
+  <button data-t="mine">My Bets</button>
   <button data-t="score">Score</button>
   <button data-t="form">Form Book</button>
   <button data-t="sched">Schedule</button>
@@ -782,6 +834,15 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
   <div id="poolWrap"></div>
 </section>
 
+<section id="mine">
+  <div class="card">
+    <h2>My bets</h2>
+    <p class="note">Everything you have on, in one place. Nobody else can see this and nobody else's
+    is visible to you &mdash; the database only ever returns your own rows.</p>
+    <div id="mineWrap"></div>
+  </div>
+</section>
+
 <section id="form">
   <div class="card">
     <h2>Form book</h2>
@@ -828,7 +889,8 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     played the last two trips, not from whatever was keyed in after the last round. <b>Form</b> is a recency-weighted scoring differential, lower is better. <b>Raw</b> is form
     minus handicap straight from the data; <b>Gap</b> is that after thin samples are discounted towards the field
     median — 7 rounds should not carry the same weight as 89. <b>Spread</b> is day-to-day volatility.</p>
-    <div class="wrap"><table id="formTbl"></table></div>
+    <div class="wrap formtable"><table id="formTbl"></table></div>
+    <div id="formCards" class="formcards"></div>
   </div>
 </section>
 
@@ -1160,6 +1222,8 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
           <input type="number" id="apBonus" min="1" max="3" step="0.05" value="1.25"></label>
         <label class="small">Blind uncertainty
           <input type="number" id="blindScale" min="0" max="3" step="0.1" value="1"></label>
+        <label class="small">Side games worth a point each
+          <input type="number" id="bonusPts" min="0" max="8" step="1" value="0" style="width:64px"></label>
       </div>
       <p class="note"><b>Blind uncertainty</b> is how much the model widens its prices while handicaps are
       undeclared. Every simulation draws each player a slightly different handicap and form — about a shot
@@ -2389,7 +2453,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-17.03"+"/"+MODEL_V;
+const DATA_V="2026-08-17.07"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -2462,20 +2526,31 @@ const backers=(k,o)=>{
    lower case with hyphens — faces/jack-mulroy.jpg — and they appear automatically. Until one
    exists this draws his initials on a colour derived from his own name, so a man is always the
    same colour on every screen and the board never looks like it is missing something. */
-const FACE_DIR="faces/";
+/* THERE ARE NO PHOTOS, and there are not going to be. The old version asked for faces/<name>.jpg
+   on every avatar and fell back to initials when it 404ed, which cost 47 failed requests the moment
+   anybody opened the cards — on villa wifi, for nothing. The monogram is now the design rather
+   than the fallback, so it has to earn its place.
+
+   Two things it does that a hashed colour did not:
+   the hue sits in the man's TEAM family, so the board reads blue and red at a glance and the
+   avatar carries information instead of noise; and the lightness is pinned at a level where white
+   text clears 4.5:1 against every hue it can produce. Checked across all 360: the worst case is
+   4.75:1 at hue 60, which passes. The previous scheme bottomed out at 3.71:1. */
 const slug=n=>String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-function faceHue(n){let h=0; for(const c of String(n||"")) h=(h*31+c.charCodeAt(0))%360; return h;}
+function nameHash(n){let h=0; for(const c of String(n||"")) h=(h*31+c.charCodeAt(0))%997; return h;}
+function faceHue(n,team){
+ const spread=(nameHash(n)%37)-18;                 /* -18..+18 degrees inside the family */
+ const base = team==="Blue" ? 214 : team==="Red" ? 4 : (nameHash(n)%360);
+ return team ? (base+spread+360)%360 : base;
+}
 function initials(n){const w=String(n||"").trim().split(/\s+/).filter(Boolean);
  if(!w.length) return "?";
  return (w[0][0]+(w.length>1?w[w.length-1][0]:"")).toUpperCase();}
 function face(name,team,cls){
  const t=team==="Blue"?"b":team==="Red"?"r":"";
- const h=faceHue(name);
- /* The photo is applied as a background so a missing file degrades to the initials underneath
-    rather than to a broken-image icon. */
+ const h=faceHue(name,team);
  return `<div class="face ${t} ${cls||""}" title="${esc(name)}"
-   style="background-color:hsl(${h} 42% 38%);background-image:url('${FACE_DIR}${slug(name)}.jpg')"
-   >${esc(initials(name))}</div>`;
+   style="background-color:hsl(${h} 45% 32%)">${esc(initials(name))}</div>`;
 }
 /* Two limits, set here so the buttons, the copy, the slip and the error messages cannot drift
    apart from one another.
@@ -2667,6 +2742,7 @@ function runSim(N){
  let bw=0,rw=0,tie=0,margin=0;
  const K=blue.length;
  const blind=!S.declared&&!S.closed;
+ const BONUS=bonusPts();   /* read once, not 40,000 times */
  const allPs=[...blue,...red];
  for(let s=0;s<N;s++){
   JIT = blind ? drawJit(allPs) : null;
@@ -2709,6 +2785,15 @@ function runSim(N){
    }
    /* ---- the day markets, settled inside the session that produced them ---- */
    const S1=ci+1;
+   /* One side game a day, if they are switched on. There is no way to simulate "fewest putts by a
+      pairing" from a model that does not deal in putts, so it is awarded to whichever team played
+      the better golf that session, measured on the matches themselves. That is a proxy and it is
+      an honest one: the side games are all scoring contests, and the team scoring better wins them
+      more often. A dead-level session splits the point. */
+   if(BONUS>0 && ci<BONUS && sN){
+     if(sB>sN/2) bTot+=1; else if(sB===sN/2) bTot+=0.5;
+     M++;
+   }
    if(sN){
      if(sB>sN/2) day[S1].Blue++; else if(sB<sN/2) day[S1].Red++; else day[S1].Tie++;
      const allB=legs.every(l=>l.r===1), allR=legs.every(l=>l.r===0);
@@ -3202,6 +3287,7 @@ function drawPools(){
   {id:"r3",   c:"var(--gR3)",   ic:"pair",   n:"Round 3 — Scramble",  hint:"Sat 26 Sep", pick:m=>m.type!=="novelty"&&m.round==="3"},
   {id:"r4",   c:"var(--gR4)",   ic:"flag",   n:"Round 4 — Singles",   hint:"Sun 27 Sep", pick:m=>m.type!=="novelty"&&m.round==="4"},
   {id:"nov",  c:"var(--gNov)",  ic:"pint",   n:"Novelty",  hint:"Settled by the organiser, on the evidence", pick:m=>m.type==="novelty"}];
+ const BODY={};            /* market key -> the body html of a card nobody has opened yet */
  const ordered=[]; const seenK=new Set();
  GROUPS.forEach(g=>{
    const ms=allMarkets().filter(m=>g.pick(m)&&!seenK.has(m.k))
@@ -3329,6 +3415,11 @@ function drawPools(){
      time a selection is added and it would be maddening to have the card shut under your thumb. */
   const isOpen=(S.openMk||[]).indexOf(m.k)>=0;
   if(g!==lastG){ out+=`<!--GH:${g.id}-->`; lastG=g; }
+  /* N1. Everything from </summary> down is held back until the card is opened. 35 cards and 350
+     runner rows were all being built into the DOM at load whether anyone looked at them or not,
+     which is the single biggest thing making an old phone feel slow. The HTML is still generated
+     here — that part is cheap — but it goes into BODY and is injected on first open. */
+  let BODYHTML="";
   out+=`<details class="card mkcard${mp==="settled"?" issettled":""}" data-k="${esc(m.k)}"${isOpen?" open":""}
     style="--gc:${g.c}${mp==="closed"||mp==="off"?";opacity:.62":""}">
    <summary class="mksum">
@@ -3340,7 +3431,8 @@ function drawPools(){
       &middot; ${mp==="settled"?(RES.void?"<b>void &mdash; nobody won it</b>":"won by <b>"+esc(WON.join(" and "))+"</b>")
         :mp==="off"?"<b>withdrawn</b>"
         :mp==="closed"?"<b>shut</b>":`closes in <b data-cd="${deadline(m).getTime()}">${untilStr(deadline(m))}</b>`}</p></div>
-    <span class="chev" aria-hidden="true">&#9662;</span></summary>
+    <span class="chev" aria-hidden="true">&#9662;</span></summary>`;
+  BODYHTML=`
    ${RES?`<div class="resbanner${RES.void?" void":""}">
      <div class="reslab">${RES.void?"Void":"Result"}</div>
      <div class="reswho">${RES.void?"Nobody won it":esc(WON.join(" and "))}</div>
@@ -3390,7 +3482,10 @@ function drawPools(){
    ${m.type==="novelty"&&m.pk?`<p class="note">Prices here are shaped by handicap and form, not simulated —
     nobody logs this sort of thing. Treat them as a starting point and back your own eyes.</p>`:""}
    <div class="mkt">${t}${hidden?`<p class="note" style="margin:8px 0 0">Plus ${hidden} other
-     ${hidden===1?"runner":"runners"}, all beaten with nothing staked on them.</p>`:""}</div></details>`;
+     ${hidden===1?"runner":"runners"}, all beaten with nothing staked on them.</p>`:""}</div>`;
+  /* Open cards get their body now; shut ones get it the moment somebody opens them. */
+  if(isOpen) out+=BODYHTML; else BODY[m.k]=BODYHTML;
+  out+=`</details>`;
  });
  function groupHead(g){
    const ms=ordered.filter(o=>o.g.id===g.id).map(o=>o.m);
@@ -3410,33 +3505,27 @@ function drawPools(){
  if(pc) pc.addEventListener("toggle",()=>{S.phaseOpen=pc.open;save();});
  document.querySelectorAll(".mkcard").forEach(el=>el.addEventListener("toggle",()=>{
   const k=el.dataset.k, cur=new Set(S.openMk||[]);
+  /* First open fills the card in. The stake buttons work because the tap handler is delegated to
+     the container, so it does not care that these rows arrived a second ago. */
+  if(el.open&&BODY[k]!=null){ el.insertAdjacentHTML("beforeend",BODY[k]); delete BODY[k]; }
   el.open?cur.add(k):cur.delete(k);
   S.openMk=[...cur]; save();}));
+ /* This button lives OUTSIDE #poolWrap, so drawPools() replaces the cards but not the button —
+    and the old code added a fresh click listener every single draw. After the second draw there
+    were two, and they fought: the first opened everything, the second saw everything open and shut
+    it again, so Expand all did nothing at all from the second redraw onwards. Bound once. */
  const ea=$("#expAll"); if(ea){
   const ks0=[...document.querySelectorAll(".mkcard")].map(el=>el.dataset.k);
   const allOpen0=ks0.length&&ks0.every(k=>(S.openMk||[]).indexOf(k)>=0);
   ea.textContent=allOpen0?"Collapse all":"Expand all";   /* it toggles, so it must say which way */
-  ea.addEventListener("click",()=>{
-   const ks=[...document.querySelectorAll(".mkcard")].map(el=>el.dataset.k);
-   const allOpen=ks.length&&ks.every(k=>(S.openMk||[]).indexOf(k)>=0);
-   S.openMk=allOpen?[]:ks; save(); drawPools();});}
+  if(!ea.dataset.bound){ ea.dataset.bound="1";
+    ea.addEventListener("click",()=>{
+     const ks=[...document.querySelectorAll(".mkcard")].map(el=>el.dataset.k);
+     const allOpen=ks.length&&ks.every(k=>(S.openMk||[]).indexOf(k)>=0);
+     S.openMk=allOpen?[]:ks; save(); drawPools();});}}
  /* One tap puts a stake on. Tapping the same amount again takes it off, so a mis-tap costs one
     tap to undo rather than a trip to the slip. */
- document.querySelectorAll(".quick button.q").forEach(el=>el.addEventListener("click",e=>{
-  const b=e.target.closest("button"), mk=b.dataset.mk, pl=b.dataset.pl, v=+b.dataset.q;
-  const at=S.slip.findIndex(x=>x.market===mk&&x.outcome===pl);
-  if(at>=0&&S.slip[at].stake===v){ S.slip.splice(at,1); if(!S.slip.length) S.slipOpen=false; }
-  else if(at>=0) S.slip[at].stake=v;
-  else S.slip.push({market:mk,outcome:pl,stake:v});
-  /* The slip opens itself. Adding a selection and then having to find and tap a bar to see it
-     was two actions for one intention, and people were losing track of what was on. */
-  if(S.slip.length) S.slipOpen=true;
-  save();drawPools();}));
- document.querySelectorAll(".slipdel").forEach(el=>el.addEventListener("click",e=>{
-  const {mk,pl}=e.target.dataset;
-  S.slip=S.slip.filter(x=>!(x.market===mk&&x.outcome===pl));
-  if(!S.slip.length) S.slipOpen=false;
-  save();drawPools();}));
+ bindPoolTaps();
  moveMaybeWrite();
  drawSlip();
  // pay button
@@ -4287,6 +4376,54 @@ function trophyMove(keeps){
    ? ` <span class="tmove up" title="Up ${d.toFixed(1)} points since the last set of prices">&#9650;</span>`
    : ` <span class="tmove dn" title="Down ${Math.abs(d).toFixed(1)} points since the last set of prices">&#9660;</span>`;
 }
+/* Paints the fade only while there is genuinely more to scroll to, and takes it off at the end so
+   the last item is not permanently half faded. Runs on scroll and on resize; both are cheap. */
+function edgeFades(){
+ ["#hStrip","nav"].forEach(sel=>{
+   const el=document.querySelector(sel); if(!el) return;
+   const more = el.scrollWidth - el.clientWidth - el.scrollLeft > 4;
+   const any  = el.scrollWidth > el.clientWidth + 4;
+   el.classList.toggle("edgefade", any);
+   el.classList.toggle("atend", any && !more);
+   if(!el.dataset.fadeBound){
+     el.dataset.fadeBound="1";
+     el.addEventListener("scroll",()=>edgeFades(),{passive:true});
+   }
+ });
+}
+window.addEventListener("resize",()=>edgeFades());
+/* One listener on the container instead of one per button. With 35 markets and 350 runners that
+   was 350-odd listeners re-attached on every redraw, and it also made it impossible to render a
+   card's body lazily, because anything injected after the bind was dead to the touch. Delegation
+   fixes both: it does not care when the button appeared. */
+let POOLTAPS=false;
+function bindPoolTaps(){
+ if(POOLTAPS) return;
+ const wrap=document.querySelector("#poolWrap"); if(!wrap) return;
+ POOLTAPS=true;
+ wrap.addEventListener("click",e=>{
+  const q=e.target.closest(".quick button.q");
+  if(q){
+    const mk=q.dataset.mk, pl=q.dataset.pl, v=+q.dataset.q;
+    const at=S.slip.findIndex(x=>x.market===mk&&x.outcome===pl);
+    if(at>=0&&S.slip[at].stake===v){ S.slip.splice(at,1); if(!S.slip.length) S.slipOpen=false; }
+    else if(at>=0) S.slip[at].stake=v;
+    else S.slip.push({market:mk,outcome:pl,stake:v});
+    /* The slip opens itself. Adding a selection and then having to find and tap a bar to see it
+       was two actions for one intention, and people were losing track of what was on. */
+    if(S.slip.length) S.slipOpen=true;
+    save(); drawPools();
+    return;
+  }
+  const d=e.target.closest(".slipdel");
+  if(d){
+    const {mk,pl}=d.dataset;
+    S.slip=S.slip.filter(x=>!(x.market===mk&&x.outcome===pl));
+    if(!S.slip.length) S.slipOpen=false;
+    save(); drawPools();
+  }
+ });
+}
 function drawKpis(){
  const ps=S.players.filter(p=>p.in);
  const val=[...ps].sort((a,b)=>(a.form-a.hcp)-(b.form-b.hcp))[0];
@@ -4359,6 +4496,73 @@ function gFiltered(){
    : s==="mvp"?(((priceSrc()||{})[b.name]||{}).mvp||0)-(((priceSrc()||{})[a.name]||{}).mvp||0)
    : (a.form-a.hcp)-(b.form-b.hcp));
  return ps;}
+/* X2. Everything a man has on, in one place. With 36 markets the only way to find your own
+   position was to open every card in turn, which is how people lose track of what they have
+   backed and then argue about it on the Sunday. Reads DB.detail, which is my_bets() — filtered
+   in the database to the caller, so this can never show anybody else's money. */
+function drawMine(){
+ const w=$("#mineWrap"); if(!w) return;
+ if(!AUTH.tok||!AUTH.name){
+   w.innerHTML=`<p class="note">Sign in and your bets appear here. Signed out, the board still shows
+     you everything else &mdash; it is only your own money that needs an account.</p>`;
+   return; }
+ const rows=(DB.detail||[]).slice();
+ if(!rows.length){
+   w.innerHTML=`<p class="note">Nothing on yet. Everything you back shows up here with what it is
+     worth, so you never have to go hunting through the markets to remember what you did.</p>
+     <div class="row"><button class="go" id="mineGo">Go and have a bet</button></div>`;
+   const g=$("#mineGo"); if(g) g.addEventListener("click",()=>
+     document.querySelector('nav button[data-t="pools"]').click());
+   return; }
+ const staked =rows.reduce((a,b)=>a+(+b.stake||0),0);
+ const settled=rows.filter(b=>b.settled);
+ const live   =rows.filter(b=>!b.settled);
+ const won    =settled.reduce((a,b)=>a+(+b.ret||0),0);
+ const wonBets=settled.filter(b=>b.status==="won").length;
+ const settledStake=settled.reduce((a,b)=>a+(+b.stake||0),0);
+ /* What the running bets would be worth if they all landed. It is a projection and it says so:
+    every one of them is a share of a pool that is still moving. */
+ const proj=live.reduce((a,b)=>{
+   const pool=+b.pool||0, ow=+b.outcome_weight||0, mw=+b.my_weight||0;
+   return a+((ow>0&&pool>0)?Math.min(pool,pool*mw/ow):0);},0);
+ const owed=myOwed();
+ const money=v=>money0(v);
+ const line=b=>{
+   const m=allMarkets().find(x=>x.k===b.market)||{n:b.market};
+   const pool=+b.pool||0, ow=+b.outcome_weight||0, mw=+b.my_weight||0;
+   const share=(ow>0&&pool>0)?Math.min(pool,pool*mw/ow):0;
+   const ret=+b.ret||0;
+   const tag=b.phase==="antepost"?'<span class="tag low">ante-post</span>':"";
+   const right=b.settled
+     ? (b.status==="won"    ? `<b class="pos">won ${money(ret)}</b>`
+       : b.status==="refund"? `<b>refunded ${money(ret)}</b>`
+       : `<b class="neg">lost</b>`)
+     : (share>0 ? `<b>${money(share)}</b><span class="small"> if it lands</span>`
+                : `<span class="small">no pool yet</span>`);
+   return `<div class="mbet${b.settled?(b.status==="won"?" won":b.status==="lost"?" lost":""):""}">
+     <div class="mbetl"><b>${esc(b.outcome)}</b> ${tag}
+       <div class="small">${esc(m.n)}</div></div>
+     <div class="mbetr"><span class="small">£${b.stake} on</span><br>${right}</div>
+   </div>`;};
+ const grp=(title,list,note)=>list.length
+   ? `<h3 class="mineh">${title} <span class="small">${list.length}</span></h3>
+      ${note?`<p class="note" style="margin:0 0 6px">${note}</p>`:""}
+      ${list.slice().sort((a,b)=>(b.stake||0)-(a.stake||0)).map(line).join("")}` : "";
+ w.innerHTML=`
+  <div class="paytotals">
+    <div class="paytot big${owed>0?"":" clear"}"><span>${owed>0?"You owe the pot":"All square with the pot"}</span>
+      <b>${money(owed)}</b></div>
+    <div class="paytot"><span>Staked in total</span><b>${money(staked)}</b></div>
+    <div class="paytot"><span>${settled.length?"Won so far":"Nothing settled yet"}</span>
+      <b class="${won>0?"pos":""}">${settled.length?money(won):"&mdash;"}</b></div>
+  </div>
+  ${live.length?`<p class="note"><b>${live.length} bet${live.length===1?"":"s"} still running</b>
+    on ${new Set(live.map(b=>b.market)).size} market${new Set(live.map(b=>b.market)).size===1?"":"s"}.
+    If every one of them landed you would collect <b>${money(proj)}</b> &mdash; a projection, not a
+    promise, because each is a share of a pool that is still moving.</p>`:""}
+  ${grp("Still running",live)}
+  ${grp("Settled",settled, settled.length?`${wonBets} of ${settled.length} landed, turning £${settledStake} into ${money(won)}.`:"")}`;
+}
 function drawForm(){
  const nerd=!!ADMIN_TOKEN;                       /* the detail is organiser's homework */
  const TRIP={rating:69.7,slope:133.25};             /* average of the four courses we are playing */
@@ -4388,6 +4592,36 @@ function drawForm(){
     <td class="num">${p.sd.toFixed(1)}</td><td class="num ${p.n<10?"warn":""}">${p.n}</td>`:""}
    <td class="small">${read}</td></tr>`;});
  $("#formTbl").innerHTML=h;
+ /* U1. The table is 1,110px wide and a phone shows 368 of it, so two thirds of the Form Book was
+    off-screen and the player's name scrolled away with it — you were left reading numbers with no
+    idea whose they were. Below 720px the same data is rendered as one card per man instead.
+    Both are always in the DOM and CSS picks; no resize listener, nothing to get out of step. */
+ $("#formCards").innerHTML=gFiltered().map(p=>{
+   const g=p.form-p.hcp;
+   const read=p.unknown?"Complete unknown. Bet with your heart."
+    :g<3.5?"Robbed by his own handicap. Back him."
+    :g<4.8?"Fair value, if he turns up in one piece."
+    :g<5.8?"About right. Nothing to see here."
+    :g<6.8?"Getting more shots than the golf deserves."
+    :"Carrying that handicap like a rucksack of bricks.";
+   const cell=(l,v)=>`<div><span>${l}</span><b>${v}</b></div>`;
+   return `<div class="fcard">
+     <div class="fhd">${face(p.name,p.team,"sm")}
+       <div class="fnm"><b>${esc(p.name)}</b>
+         <div class="small">${teamTag(p.team)}${roleTag(p.name)}${
+           p.unknown?' <span class="tag nd">form assumed</span>':p.low?' <span class="tag low">thin sample</span>':""}</div>
+       </div>
+       <div class="fhcp"><span>handicap</span><b>${p.hcp.toFixed(1)}</b></div>
+     </div>
+     <div class="fgrid">
+       ${cell("his average", p.avg||"&mdash;")}
+       ${cell("likely in Spain", typical(p))}
+       ${cell("last played", p.last?agoStr(p.last):"&mdash;")}
+       ${nerd?cell("gap",(g>=0?"+":"")+g.toFixed(1)):""}
+     </div>
+     <div class="ftrend">${trendCell(p)}</div>
+     <p class="note fword">${read}</p>
+   </div>`;}).join("");
  drawSquabAge();}
 function drawOdds(){
  const ctl=$("#simCtl"); if(ctl) ctl.style.display = ADMIN_TOKEN ? "flex" : "none";
@@ -5097,6 +5331,7 @@ function drawAdmin(){
  $("#payLink").value=S.payLink||"";$("#payLabel").value=S.payLabel||"";
  $("#minStake").value=S.minStake;$("#allow").value=String(S.allowance);
  $("#apBonus").value=S.apBonus;
+ const bp=$("#bonusPts"); if(bp) bp.value=bonusPts();
  drawSwitches();
  $("#blindScale").value=S.blindScale==null?1:S.blindScale;
  drawLedger(); drawAccounts(); drawSettle();
@@ -5109,11 +5344,21 @@ function fillMarketFilter(){
    Deleted rather than fixed: dead copy is worse than no copy, because it goes wrong unobserved. */
 /* 25 points is not a constant, it is 3 pairs sessions of n/4 matches plus n/2 singles. Hard-coding it
    meant the header cheerfully promised 25 while the roster made it arithmetically impossible. */
-function pointsOnOffer(){
+/* Golf points: 3 pairs sessions of n/4 matches, plus n/2 singles. With 20 men that is 25. */
+function golfPoints(){
  const n=S.players.filter(p=>p.in).length;
  if(n<4) return 0;
  return 3*Math.floor(n/4)+Math.floor(n/2);
 }
+/* SIDE GAMES. One bonus point a day was how it ran in 2025 and it takes the total to 29, which
+   moves the winning target from 13 to 15 and the retain line from 12.5 to 14.5 — so it cannot be
+   flipped casually. It is OFF until the organiser turns it on in Admin and publishes, and while it
+   is off every number on the board is exactly what it was. */
+const bonusPts=()=>{
+ const v=(DB.settings&&DB.settings.bonusPts);
+ return Number.isFinite(+v)?Math.max(0,Math.min(8,Math.round(+v))):0;
+};
+function pointsOnOffer(){ const g=golfPoints(); return g?g+bonusPts():0; }
 function drawHeader(){
  const n=S.players.filter(p=>p.in).length;
  const ap=$("#apShow"); if(ap) ap.textContent=(S.apBonus||1.25).toFixed(2).replace(/0$/,"");
@@ -5121,7 +5366,7 @@ function drawHeader(){
     rather than folded away in a panel nobody opens. */
  $("#hdr").textContent=`Costa del Sol · 24–27 Sep 2026 · ${n} players · Ryder Cup · ${pointsOnOffer()} points`
    +(phase()==="antepost"?" (provisional)":"");
- drawStrip();}
+ drawStrip(); edgeFades();}
 /* The strip under the masthead. Four or five numbers, always on screen, whichever tab you are on —
    what every betting site puts across the top, because these are the figures people open the app
    to check and making them hunt for them on another tab is the whole problem. */
@@ -5163,7 +5408,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-17.03</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-17.07</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -5171,7 +5416,7 @@ function drawStrip(){
    is the only screen that actually matters. A broken panel should be a broken panel. */
 function drawAll(){
  const steps=[["header",drawHeader],["account",drawAuth],["score",drawScore],["figures",drawKpis],
-   ["form book",drawForm],["model prices",drawOdds],["filters",fillMarketFilter],
+   ["my bets",drawMine],["form book",drawForm],["model prices",drawOdds],["filters",fillMarketFilter],
    ["pools",drawPools],["schedule",drawSched],
    /* Admin used to be drawn only by the unlock handler. The organiser is now let in without
       clicking it, so the panel appeared with nothing in it. */
@@ -5679,6 +5924,17 @@ $("#apBonus").addEventListener("change",async e=>{S.apBonus=Math.max(1,+e.target
 
 $("#blindScale").addEventListener("change",e=>{S.blindScale=Math.max(0,+e.target.value||0);save();
  runSim(+$("#nsim").value||6000);drawAll();});
+/* F3. Zero means golf only, which is what everyone has been betting into. Setting it to 4 adds one
+   point a day, takes the total to 29, and moves both trophy targets — so it is published like any
+   other settings change and every price is re-run against it. */
+$("#bonusPts").addEventListener("change",async e=>{
+ const v=Math.max(0,Math.min(8,Math.round(+e.target.value||0)));
+ e.target.value=v;
+ try{ await pushSettings({bonusPts:v}); }catch(x){ alert("Could not save: "+x.message); return; }
+ runSim(+($("#nsim")||{}).value||6000); drawAll(); drawAdmin();
+ const m=$("#runMsg"); if(m) m.textContent = v
+   ? `Side games on: ${v} bonus point${v===1?"":"s"}, ${pointsOnOffer()} in total. Publish to put it on everyone's phone.`
+   : `Side games off. Back to ${pointsOnOffer()} points, golf only.`;});
 $("#allow").addEventListener("change",e=>{S.allowance=+e.target.value;save();});
 $("#stExport").addEventListener("click",()=>{$("#stateBox").value=JSON.stringify(S);
  $("#stMsg").textContent="Copied out. Keep it somewhere safe.";});
