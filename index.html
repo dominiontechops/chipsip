@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.16",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.18",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2282,6 +2282,11 @@ function applyPublishedHcp(){
  const flagged=rows.some(h=>"m" in h);
  rows.forEach(h=>{
    const p=S.players.find(x=>x.name===h.n); if(!p) return;
+   /* The scoring record itself is not an opinion and is never a local edit, so it comes across
+      whatever this phone has typed in: a published refit is a newer read of the same rounds. */
+   if(h.s!=null) p.sd=h.s;
+   if(h.t!==undefined) p.trend=(h.t==null?null:h.t);
+   if(h.r!=null) p.n=h.r;
    if(p.edited) return;                 /* typed in on this phone and not yet published */
    if(!flagged){ if(h.h!=null) p.hcp=h.h; return; }
    if(h.m){ p.hcp=h.h; if(h.f!=null) p.form=h.f; }
@@ -2642,16 +2647,18 @@ const DEF_NOV=[
 
  {k:"nov_cut",n:"The Cut",
   d:"Whose handicap comes down after the trip. Settles weeks later on Squabbit, in black and "+
-    "white, with nobody to argue with — the only market on this board that judges itself. Luke "+
-    "Holland is 6/1 because he already plays to his mark and is trending the right way, Luke Usher "+
-    "is 10/1 with the smallest gap in the field, Gabe Hills is 14/1 and knows exactly why, and Rob "+
-    "Parfitt is 14/1 as the most improved man in the group by some distance",
-  round:"",opts:[],
-  wts:{"Luke Holland":2.98,"Luke Usher":1.93,"Eamonn Brady":1.68,"Mark Sturgess":1.64,
-   "Gabe Hills":1.37,"Rob Parfitt":1.28,"Matt Holland":1.19,"Matt Petty":0.95,"Jack Mulroy":0.93,
-   "Ben West":0.92,"Tom Bucknall":0.9,"Theo Smith-Harris":0.85,"Josh Evans":0.85,"Chris Best":0.76,
-   "Dom Mills":0.74,"Josh Menzies":0.43,"Dave Huddleston":0.38,"Alex Mulvin":0.36,
-   "Jay France":0.17,"Dong Ming Lau":0.11}},
+    "white, with nobody to argue with — the only market on this board that judges itself. The men "+
+    "at the front are the ones already scoring closest to their mark and moving the right way, so "+
+    "this one is worth watching: it is the only novelty market that re-prices every time another "+
+    "weekend's golf goes in. Gabe Hills is shorter than his figures alone would make him, and "+
+    "everybody knows why",
+  round:"",opts:[],pk:"cut",
+  /* The one novelty market read straight off the scoring record rather than off character, so it
+     is computed here rather than frozen into a list of numbers. Two inputs, both of which move
+     when the organiser publishes a fresh scrape: how close a man is scoring to his mark, and
+     which way he has been going. */
+  wts:{"Gabe Hills":2.0}},
+
 
  {k:"nov_water",n:"First in the Drink",
   d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it. "+
@@ -2733,7 +2740,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.16"+"/"+MODEL_V;
+const DATA_V="2026-08-18.18"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3241,7 +3248,7 @@ const NOV_TUNE={air:[0.85,0.45,1.15],water:[0.70,0.55,1.10],clubs:[0.55,0.35,1.0
  };
 function noveltyProbs(m){
  const t=m.pk?NOV_TUNE[m.pk]:null, wts=m.wts||null;
- if(!t&&!wts&&m.pk!=="sun") return null;
+ if(!t&&!wts&&m.pk!=="sun"&&m.pk!=="cut") return null;
  const ps=S.players.filter(p=>p.in); if(ps.length<2) return null;
  const hs=ps.map(p=>p.hcp).slice().sort((a,b)=>a-b);
  const med=hs.length%2?hs[(hs.length-1)/2]:(hs[hs.length/2-1]+hs[hs.length/2])/2;
@@ -3252,6 +3259,21 @@ function noveltyProbs(m){
  ps.forEach(p=>{
   let w=1;
   if(m.pk==="sun") w=0.45+(p.n||0)/meanN;
+  /* THE CUT. Nothing to do with how high a man's mark is — everything to do with how close he is
+     playing to it and which way he is going. A small gap between his scoring average and his
+     handicap says the mark is about to be found out; an improving trend says it already has been.
+     Both figures come off Squabbit and both are republished with every scrape, so this market is
+     the one that genuinely moves as the golf goes in. A man with no record sits mid-field: no
+     rounds means no evidence in either direction, and guessing at him would be inventing one. */
+  else if(m.pk==="cut"){
+   if(p.unknown||p.form==null) w=0.85;
+   else{ const gap=p.form-p.hcp, tr=(p.trend==null?0:p.trend);
+     /* Bounded on purpose. One extraordinary weekend should shorten a man hard, but an
+        unbounded exponent would let a single scrape put one runner at odds-on in a 20-runner
+        market, and a novelty book that reads like a certainty is not a market at all. */
+     const e=Math.max(-2.6,Math.min(1.8,-0.45*(gap-5.0)-0.55*tr));
+     w=Math.exp(e); }
+  }
   else if(t){const h=(p.hcp-med)/6, v=((p.sd||5)-5)/5;
    w=Math.exp(t[0]*h+t[1]*v);
    if(p.unknown) w*=t[2];}    /* no record — assume the worst. It is funnier and usually right */
@@ -5863,7 +5885,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.16</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.18</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -6352,7 +6374,11 @@ $("#admRun").addEventListener("click",async e=>{
       board, and re-publishing merely wrote the stale numbers back. Handicaps typed in the bar
       must stick; untouched form must be free to move when the model is refitted. */
    await pushSettings({hcpModelV:MODEL_V,
-     hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form,
+     /* s and t ride along because the novelty prices are computed from them on every phone.
+        Without them a fresh Squabbit scrape moved the handicaps everybody could see and left the
+        spread and the trend behind at whatever the last BUILD carried — so The Cut, which is
+        entirely a form market, would not have moved a penny after a weekend's golf. */
+     hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form,s:p.sd,t:p.trend,r:p.n,
        m:!!(p.base&&(Math.abs(p.hcp-p.base.hcp)>0.001
                   || (p.base.form!=null&&Math.abs(p.form-p.base.form)>0.001)))})),
      blindScale:S.blindScale,
