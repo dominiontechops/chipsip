@@ -431,6 +431,10 @@ min-width:42px}
   letter-spacing:-.6px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .mkfig.big::before{display:block;font-size:9.5px;letter-spacing:.7px;opacity:.55;margin:0 0 3px}
 .mkrow.won .mkfig.big{color:var(--acc2)}
+.mkfig.big.model{color:var(--acc2)}          /* the model's price, the colour it has everywhere else */
+.mkfig.big.none{font-size:14px;font-weight:600;opacity:.5;letter-spacing:0}
+.mkrow.refunded .mkfig.big{font-size:15px;letter-spacing:0;font-weight:600;color:var(--acc2)}
+@media(max-width:719px){ .mkfig.dupe{display:none} }
 .mkrow.lost .mkfig.big,.mkrow.barred .mkfig.big{opacity:.45}
 @media(max-width:719px){ .mkfig.big{font-size:24px} }
 .mkrow.barred{opacity:.5}
@@ -573,7 +577,10 @@ html[data-theme="light"] .valtag.over2{color:#fff}
   .mkfig::before{content:none}
   .mkprice{padding-left:0;text-align:right}
   .mkfig.big{font-size:23px}
-  .mkfig.big::before{content:none}
+  /* on a laptop the other three columns are labelled by the header; this one labels itself,
+     because which price it is showing depends on whether there is money in the market yet */
+  .mkfig.big::before{content:attr(data-l) " ";display:block;font-size:9.5px;text-transform:uppercase;
+    letter-spacing:.7px;opacity:.55;margin:0 0 2px}
   .mkact{text-align:right}
   .mkbar{grid-column:1/-1;margin-top:-2px}
 }
@@ -1173,8 +1180,17 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <div class="card">
 <h2>Every bet</h2>
       <p class="note">Void anything struck in error. Voided bets leave the pools and the ledger immediately
-      but stay in the database, so there is always a record of what happened.</p>
+      but stay in the database, so there is always a record of what happened &mdash; and they are listed
+      below, where you can put one back if you voided the wrong line. A market that has already been
+      settled has to be unsettled first, in both directions: the pool was worked out on those bets.</p>
       <div class="wrap"><table id="betsTbl"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Voided <span class="small" id="voidCount"></span></h2>
+      <p class="note">Struck and then taken off. None of this money is in a pool or on anybody's balance.
+      If a man paid before you voided his bets he is now in credit, and the ledger above says so.</p>
+      <div class="wrap"><table id="voidTbl"></table></div>
     </div>
 
     <div class="card">
@@ -1949,7 +1965,7 @@ const SB={url:"https://nqewsjczuqnkqehcayzq.supabase.co",
           key:"sb_publishable_jZ3Iw2rYsGgCdsBqKmJqBw_vO00J2DO"};
 const DB={bets:[],mine:[],totals:[],ledger:[],accounts:[],settings:{},roster:[],claimed:[],
  results:[],matches:[],stand:null,detail:[],myledger:[],settle:[],unclaimed:[],claims:[],
- ver:0,errors:[],online:false,err:""};
+ ver:0,errors:[],voided:[],online:false,err:""};
 
 /* N3. WHEN A PHONE BREAKS IN SPAIN.
    Nobody is going to open a developer console on a Costa del Sol balcony and read a stack trace
@@ -1972,7 +1988,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.04",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.05",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2099,19 +2115,29 @@ const rpc=(fn,args)=>sbFetch("rpc/"+fn,{method:"POST",body:JSON.stringify(args)}
    migration, the first call fails with "function not found", the flag goes down and this session
    quietly uses the old road. Anything else — a dead wifi, a timeout — is thrown on to the caller,
    because that is what puts the board into its offline-with-cache state. */
-let ONECALL=true;
+let ONECALL=true, ONEFAIL=0;
 const missingFn=e=>/PGRST202|404|does not exist|Could not find the function/i
   .test(String((e&&e.message)||e));
 async function readBoard(){
   if(ONECALL){
     try{
       const s=await rpc("board_state",{});
-      if(s&&typeof s==="object"&&!Array.isArray(s)&&"v" in s)
+      if(s&&typeof s==="object"&&!Array.isArray(s)&&"v" in s){
+        ONEFAIL=0;
         return {ver:+s.v||0, settings:s.settings||{}, totals:s.totals||[], mine:s.mine||[],
           roster:s.roster||[], claimed:s.claimed||[], results:s.results||[], matches:s.matches||[],
-          stand:s.stand||null, detail:s.detail||[], myledger:s.myledger||[]};
+          stand:s.stand||null, detail:s.detail||[], myledger:s.myledger||[]};}
       ONECALL=false;                       /* something came back, but not the board */
-    }catch(e){ if(!missingFn(e)) throw e; ONECALL=false; }
+    }catch(e){
+      if(missingFn(e)){ ONECALL=false; }
+      else if(++ONEFAIL<3){ throw e; }     /* a dropped wifi: offline-with-cache is the right answer */
+      else{
+        /* Three in a row is not the wifi, it is this one function. A permission error on one table
+           inside it, a bad row, a statement timeout — any of those used to take betting down for
+           everybody while a working ten-query road sat unused two lines below. */
+        ONECALL=false;
+      }
+    }
   }
   const [st,tot,mine,ros,clm,res,mat,stand,detail,myled]=await Promise.all([
     sbFetch("settings?select=data&id=eq.1"),
@@ -2152,7 +2178,8 @@ async function refresh(){
              rpc("admin_payout_sheet",{p_token:ADMIN_TOKEN}).catch(()=>[]),
              rpc("admin_backups",{p_token:ADMIN_TOKEN}).catch(()=>[])]);
            DB.settle=se||[]; DB.unclaimed=un||[]; DB.claims=cl||[]; DB.payout=ps||[]; DB.backups=bk||[];
-      }catch(e){ DB.ledger=[]; DB.bets=[]; DB.accounts=[]; DB.settle=[]; DB.unclaimed=[]; DB.claims=[]; DB.payout=[]; DB.backups=[]; }
+           DB.voided=await rpc("admin_voided",{p_token:ADMIN_TOKEN}).catch(()=>[]);
+      }catch(e){ DB.ledger=[]; DB.bets=[]; DB.accounts=[]; DB.settle=[]; DB.unclaimed=[]; DB.claims=[]; DB.payout=[]; DB.backups=[]; DB.voided=[]; }
     } else { DB.ledger=[]; DB.bets=DB.mine; }
     DB.online=true; DB.err="";
     S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
@@ -2492,8 +2519,8 @@ const DEF_NOV=[
   d:"Best company off the course. Not a golf market and not pretending to be one, so there is no "+
     "model price here at all — what you see is purely how the money has landed. "+
     "Settled by a vote of all 20 on the last night, one man one vote, and you cannot vote "+
-    "for yourself. A tie splits the pool between them. The organiser counts the votes and posts "+
-    "the tally, so it is a count rather than a verdict",
+    "for yourself. A tie splits the pool between them. The tally is posted in full afterwards, so "+
+    "it is a count rather than a verdict",
   round:"",opts:[]},
  {k:"nov_back",n:"Biggest Comeback",
   d:"The deepest hole anybody climbs out of all week. A side goes 4 down, drags it back and wins "+
@@ -2508,13 +2535,15 @@ const DEF_NOV=[
      market rather than a lottery: on a strict win-only rule, "nobody" comes in at 18.5% and
      7-or-more at 0.1%, which is a dead runner and a pool that fails to settle one week in five. */
   oprobs:{"2 down or less":0.049,"3 down":0.384,"4 down":0.409,"5 down":0.135,"6 or more":0.023}},
- {k:"nov_water",n:"First in the Drink",d:"First ball wet. Provisional does not count, we all saw it",round:"",opts:[],pk:"water"},
+ {k:"nov_water",n:"First in the Drink",d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it",round:"",opts:[],pk:"water"},
  {k:"nov_air",n:"First Air Shot",d:"A genuine swing and miss. Practice swings excepted, obviously",round:"",opts:[],pk:"air"},
  {k:"nov_cart",n:"First Buggy Incident",
-  d:"Kerb, bunker, flowerbed or tree. The FIRST one only, adjudicated by the organiser, so the second and "+
-    "third do not count however good they are. Josh Menzies has previous and heads the market on it. Tom, "+
-    "Dong, Rob and Gabe are the organiser's fancy at a price, on no evidence whatsoever. 1 winner out of "+
-    "20 means the outsiders are long — that is arithmetic, not an opinion about their driving",
+  d:"Kerb, bunker, flowerbed or tree. The FIRST one only, so the second and third do not count "+
+    "however spectacular they are, and the buggy does not have to survive for it to count. Josh "+
+    "Menzies has previous and heads the market on it. Tom, Dong, Rob and Gabe are shorter than the "+
+    "field on a hunch and nothing else, which is said out loud here so nobody mistakes it for "+
+    "evidence. 1 winner out of 20 means the outsiders are long — that is arithmetic, not a comment "+
+    "on anybody's driving",
   round:"",opts:[],pk:"cart",
   /* Hand-set on previous form off the tee box rather than on it. Josh's is history; the other four
      are a hunch, said out loud in the description so nobody mistakes it for data. The rest come
@@ -2555,7 +2584,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.04"+"/"+MODEL_V;
+const DATA_V="2026-08-18.05"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3392,7 +3421,7 @@ function drawPools(){
   {id:"r2",   c:"var(--gR2)",   ic:"pair",   n:"Round 2 — Fourball",  hint:"Fri 25 Sep", pick:m=>m.type!=="novelty"&&m.round==="2"},
   {id:"r3",   c:"var(--gR3)",   ic:"pair",   n:"Round 3 — Scramble",  hint:"Sat 26 Sep", pick:m=>m.type!=="novelty"&&m.round==="3"},
   {id:"r4",   c:"var(--gR4)",   ic:"flag",   n:"Round 4 — Singles",   hint:"Sun 27 Sep", pick:m=>m.type!=="novelty"&&m.round==="4"},
-  {id:"nov",  c:"var(--gNov)",  ic:"pint",   n:"Novelty",  hint:"Settled by the organiser, on the evidence", pick:m=>m.type==="novelty"}];
+  {id:"nov",  c:"var(--gNov)",  ic:"pint",   n:"Novelty",  hint:"Settled on the evidence, video beats testimony", pick:m=>m.type==="novelty"}];
  for(const bk in BODY) delete BODY[bk];   /* stash from the last draw is worthless now */
  const ordered=[]; const seenK=new Set();
  GROUPS.forEach(g=>{
@@ -3456,7 +3485,7 @@ function drawPools(){
   /* "Implied", "Fair" and "Edge" are bookmaker's words. Half this group has never had a bet in
      their lives and the labels were doing the opposite of explaining. Same four numbers, said
      in English: what is on it, what it pays now, what it ought to pay, and the gap. */
-  let t=`<div class="mkhead"><span></span><span>Outcome</span><span class="num">Pays now</span>
+  let t=`<div class="mkhead"><span></span><span>Outcome</span><span class="num"></span>
    <span class="num">Money on</span><span class="num">Should pay</span><span class="num">Value</span><span></span></div>`;
   rows.forEach(r=>{const ec=r.ev===null?"":r.ev>0.05?"pos":r.ev<-0.05?"neg":"";
    const inSlip=S.slip.find(x=>x.market===m.k&&x.outcome===r.label);
@@ -3466,7 +3495,9 @@ function drawPools(){
    const win=isWin(r.label);
    const band=(!RES&&mp!=="closed")?valueBand(r.ev):null;
    const mv  =(!RES&&mp!=="closed")?moveOf(m.k,r.label,r.imp):null;
-   t+=`<div class="mkrow${blocked?" barred":""}${RES?(win?" won":" lost"):""}"
+   /* A void refunds every stake. Marking every row "lost" and greying it out told a man whose
+      money is coming back in full that he had been beaten. */
+   t+=`<div class="mkrow${blocked?" barred":""}${RES&&RES.void?" refunded":RES?(win?" won":" lost"):""}"
      data-o="${esc(r.label)}" data-imp="${r.imp||0}">
      ${face(r.label,r.player?r.player.team:null)}
      <div class="mkname">${win?'<span class="wintick">&#10004;</span> ':""}${esc(r.label)}${r.player?" "+teamTag(r.player.team)+roleTag(r.label):""}${r.player&&r.player.unknown?' <span class="tag nd">form assumed</span>':""}
@@ -3495,13 +3526,26 @@ function drawPools(){
        ${RES&&win&&!RES.void?`<div class="small" style="color:var(--acc2)">${r.cash
          ?`took <b>${money0(money/Math.max(1,WON.length))}</b> of the pool, shared across £${r.cash} of stakes`
          :"nobody had a penny on it &mdash; the pool goes unclaimed"}</div>`:""}</div>
-     <div class="mkprice"><span class="mkfig big" data-l="${RES?"Paid":"Pays now"}">${r.imp?fmtDec(r.imp):"—"}</span></div>
+     ${(()=>{
+       /* With nothing in the pool "Pays now" is a dash, and the dash was getting the big type
+          while the only real number on the row — what the model says it should pay — sat in
+          small grey text underneath. So the headline slot takes whichever price exists: the
+          live one when there is money, the model one when there is not. It always says which,
+          and the small run drops the duplicate rather than printing it twice. */
+       const heroModel=!RES&&!r.imp&&r.prob!=null;
+       /* No money and no model price either: there is nothing to headline, so it shrinks out of
+          the way rather than printing a dash the size of a price. */
+       const heroNone =!RES&&!r.imp&&r.prob==null;
+       const heroLab=RES?(RES.void?"Refunded":"Paid"):heroNone?"No price yet":heroModel?"Should pay":"Pays now";
+       const heroVal=RES&&RES.void?"stake back":heroModel?dec(r.prob):(r.imp?fmtDec(r.imp):"—");
+       return `<div class="mkprice"><span class="mkfig big${heroModel?" model":""}${heroNone?" none":""}"
+           data-l="${heroLab}">${heroVal}</span></div>
      <div class="mkfigs">
        <span class="mkfig" data-l="Money on">${r.cash?"£"+r.cash:"—"}</span>
-       <span class="mkfig strong" data-l="Should pay">${r.prob!=null?dec(r.prob):"manual"}</span>
+       <span class="mkfig strong${heroModel?" dupe":""}" data-l="Should pay">${r.prob!=null?dec(r.prob):"manual"}</span>
        <span class="mkfig ${ec}" data-l="Value">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</span>
-     </div>
-     <div class="mkact">${mp==="settled"?`<span class="small">${win?'<b class="pos">won</b>':"beaten"}</span>`
+     </div>`;})()}
+     <div class="mkact">${mp==="settled"?`<span class="small">${RES&&RES.void?"refunded":win?'<b class="pos">won</b>':"beaten"}</span>`
       :mp==="off"?'<span class="small">withdrawn</span>'
       :mp==="closed"?'<span class="small">shut</span>'
       :blocked?`<span class="small nope" title="${esc(blocked)}">${esc(blocked)}</span>`
@@ -3548,8 +3592,8 @@ function drawPools(){
          +esc(WON.join(" and "))+". This market is closed and takes no further bets."}${
        RES.note?" "+esc(RES.note):""}</div>
      ${myResult(m.k)}</div>`:""}
-   ${mp==="off"?`<p class="note" style="color:var(--warn)"><b>Withdrawn.</b> The organiser has taken this
-     market off the board and it accepts nothing further.${money?" Anything already staked on it will be refunded in full when he settles it as void.":""}</p>`:""}
+   ${mp==="off"?`<p class="note" style="color:var(--warn)"><b>Withdrawn.</b> This market has been taken off
+     the board and accepts nothing further.${money?" Anything already staked on it is refunded in full when it is settled as void.":""}</p>`:""}
    ${/* esc() on purpose: a description is plain text, never markup. Four of them briefly carried
         <b> and &mdash; and rendered them literally on the card — including the sentence saying the
         points total is provisional, which is the one people most needed to read. Em dashes go in
@@ -3580,8 +3624,8 @@ function drawPools(){
         `<span><b style="background:${col(x)}"></b>${esc(x.label)} £${x.cash}</span>`).join("")}
         ${rest?`<span><b style="background:var(--dim)"></b>the rest £${rest}</span>`:""}</div>`;})()}
    ${(m.type!=="novelty"&&rows.length&&rows.every(x=>x.prob==null))
-     ? `<p class="note" style="color:var(--warn)"><b>No model price on this market yet.</b> The organiser
-        has published a set of prices that predates it &mdash; one press of <em>Apply, re-run and publish</em>
+     ? `<p class="note" style="color:var(--warn)"><b>No model price on this market yet.</b> The published
+        prices predate it &mdash; one press of <em>Apply, re-run and publish</em>
         fills the Should pay and Value columns in. <b>You can bet on it
         perfectly safely in the meantime</b>: what you collect is decided by the pool when it settles,
         never by the model.</p>`:""}
@@ -3885,6 +3929,12 @@ async function placeSlip(){
 }
 /* What this person still owes the pot, from his own ledger row. Nobody else's figure is
    fetched or shown — the header is not a leaderboard of who is behind on his payments. */
+/* The other direction. A man who has paid and then had bets voided has money sitting in the pot
+   with nothing riding on it, and being told he is "all square" is not true. */
+function myCredit(){
+ const r=(DB.myledger&&DB.myledger[0])||null;
+ return r?Math.max(0,-(+r.balance||0)):0;
+}
 function myOwed(){
  const r=(DB.myledger&&DB.myledger[0])||null;
  const owed=r?Math.max(0,+r.balance||0):0;
@@ -4628,7 +4678,15 @@ function drawMine(){
    return; }
  const rows=(DB.detail||[]).slice();
  if(!rows.length){
-   w.innerHTML=`<p class="note">Nothing on yet. Everything you back shows up here with what it is
+   /* A man whose every bet was voided after he had paid has no bets and is owed money, and this
+      guard used to fire first and tell him he had nothing. He would have read "Nothing on yet"
+      while the pot sat on his £24. */
+   const cr=myCredit(), ow=myOwed();
+   w.innerHTML=`${cr>0||ow>0?`<div class="paytotals"><div class="paytot big ${ow>0?"due":"due"}">
+       <span>${ow>0?"You owe the pot":"The pot owes you"}</span><b>${money0(ow>0?ow:cr)}</b></div></div>
+     ${cr>0?`<p class="note">Bets you had on were voided after you paid, so that money is sitting in
+       the pot with nothing riding on it. It comes back to you &mdash; you do not have to bet it.</p>`:""}`:""}
+     <p class="note">Nothing on yet. Everything you back shows up here with what it is
      worth, so you never have to go hunting through the markets to remember what you did.</p>
      <div class="row"><button class="go" id="mineGo">Go and have a bet</button></div>`;
    const g=$("#mineGo"); if(g) g.addEventListener("click",()=>
@@ -4679,8 +4737,9 @@ function drawMine(){
       ${list.slice().sort((a,b)=>(b.stake||0)-(a.stake||0)).map(line).join("")}` : "";
  w.innerHTML=`
   <div class="paytotals">
-    <div class="paytot big${owed>0?"":" clear"}"><span>${owed>0?"You owe the pot":"All square with the pot"}</span>
-      <b>${money(owed)}</b></div>
+    <div class="paytot big${owed>0?"":myCredit()>0?" due":" clear"}"><span>${owed>0?"You owe the pot"
+      :myCredit()>0?"The pot owes you":"All square with the pot"}</span>
+      <b>${money(owed>0?owed:myCredit())}</b></div>
     <div class="paytot"><span>Staked in total</span><b>${money(staked)}</b></div>
     <div class="paytot"><span>${settled.length?"Won so far":"Nothing settled yet"}</span>
       <b class="${won>0?"pos":""}">${settled.length?money(won):"&mdash;"}</b></div>
@@ -5021,8 +5080,15 @@ function drawRecon(){
  const staked  = L.reduce((a,r)=>a+(+r.staked||0),0);
  const paidIn  = L.reduce((a,r)=>a+(+r.paid||0),0);
  const owed    = L.reduce((a,r)=>a+Math.max(0,+r.balance||0),0);
+ /* Money in the account that is nobody's bet. A man pays £248, his bets are voided down to £51,
+    and £197 of his money is sitting in the bank behind nothing at all. Before this line the page
+    said "everything reconciles" while holding it, because it only ever asked who owed money and
+    never who was owed it. It is a debt like any other and it goes on the page as one. */
+ const credit  = L.reduce((a,r)=>a+Math.max(0,-(+r.balance||0)),0);
+ const inCredit= L.filter(r=>(+r.balance||0)<0).sort((a,b)=>a.balance-b.balance);
  const paidOut = S2.reduce((a,r)=>a+(+r.paid_out||0),0);
  const due     = S2.reduce((a,r)=>a+(+r.due||0),0);
+ const winnersDue=Math.max(0,Math.round((due-credit)*100)/100);
  const collected=S2.reduce((a,r)=>a+(+r.collected||0),0);
  const unclaimed=(DB.unclaimed||[]).reduce((a,x)=>a+ +x.unclaimed,0);
  /* Money still riding on markets nobody has called yet. It is the bulk of what you are holding
@@ -5045,7 +5111,11 @@ function drawRecon(){
     money. That is stakes less returns, and it should be exactly the markets still running plus
     the money that won with nobody on it. If those two do not match, the arithmetic is wrong
     somewhere and it is worth knowing now rather than at midnight on the Sunday. */
- const atEnd = Math.round((staked - collected)*100)/100;
+ /* atEnd was "stakes less winnings", which quietly assumed every man ends up having paid in
+    exactly what he staked. An overpayment breaks that assumption, so it is now written the way the
+    money actually moves: what has arrived, plus what is still to arrive, less what has gone out
+    and what still has to. Identical to the old formula whenever nobody is in credit. */
+ const atEnd = Math.round((paidIn + owed - paidOut - winnersDue - credit)*100)/100;
  const should= Math.round((running + unclaimed + stranded)*100)/100;
  const drift = Math.round((atEnd - should)*100)/100;
  w.innerHTML=`<div class="paytotals">
@@ -5068,8 +5138,13 @@ function drawRecon(){
      <td class="small">${owed>0?"Men who have bet and not paid. Chase them with the morning report.":"Nobody owes a penny."}</td></tr>
    <tr><td>Won on settled markets</td><td class="num">${money0(collected)}</td>
      <td class="small">What the settled pools have paid out to their backers.</td></tr>
-   <tr><td>Still to hand over</td><td class="num ${due>0?"neg":""}"><b>${money0(due)}</b></td>
-     <td class="small">${due>0?"Winners waiting to be paid. They are listed under Who to pay.":"Everyone who has won has had it."}</td></tr>
+   <tr><td>Winners still waiting</td><td class="num ${winnersDue>0?"neg":""}"><b>${money0(winnersDue)}</b></td>
+     <td class="small">${winnersDue>0?"Listed under Who to pay.":"Everyone who has won has had it."}</td></tr>
+   ${credit>0?`<tr><td class="warn">Paid in beyond what is staked</td>
+     <td class="num neg"><b>${money0(credit)}</b></td>
+     <td class="small">${inCredit.map(r=>esc(r.bettor)+" "+money0(-r.balance)).join(", ")}. Money in the
+     account with no bet behind it, usually because bets were voided after he had paid. It has to go
+     back to him. Record it as a payment of <b>minus</b> the amount and the books clear.</td></tr>`:""}
    <tr><th>When it is all done</th><th class="num">Amount</th><th>&nbsp;</th></tr>
    <tr><td>Riding on markets not yet called</td><td class="num">${money0(running)}</td>
      <td class="small">Still in play. It leaves the account as each market is settled and paid.</td></tr>
@@ -5080,7 +5155,8 @@ function drawRecon(){
      <td class="small">${strandedKeys.map(esc).join(", ")}. Nobody can win this or be paid it. Void those
      bets and the money goes back to whoever struck them.</td></tr>`:""}
    <tr><td><b>Left when everyone has paid up</b></td><td class="num"><b>${money0(atEnd)}</b></td>
-     <td class="small">Stakes less winnings. Should equal the ${stranded>0?3:2} lines above it.</td></tr>
+     <td class="small">What has come in, plus what is still to come, less everything that goes back
+     out &mdash; winners, and anybody in credit. Should equal the ${stranded>0?3:2} lines above it.</td></tr>
  </table></div>
  ${Math.abs(drift)>0.02
    ? `<p class="note" style="color:var(--warn)"><b>${money0(Math.abs(drift))} does not add up.</b>
@@ -5090,7 +5166,9 @@ function drawRecon(){
         : "Most likely a pool has been paid out twice, or a market was settled and then re-settled on a different outcome."}
       Nothing is lost &mdash; every bet is still in the database &mdash; but do not pay anybody out on these
       figures until it reconciles.</p>`
-   : `<p class="note pos">Everything reconciles. ${running>0
+   : `<p class="note ${credit>0?"":"pos"}">Everything reconciles.${credit>0?` You are holding
+      <b class="warn">${money0(credit)} that has to go back</b> to men whose bets were voided after they
+      paid &mdash; it is out of the figure below, so do not spend it twice.` :""} ${running>0
       ? `Once every man has paid up and every settled market has been handed over, ${money0(atEnd)} would be
          left in the account &mdash; ${money0(running)} still riding on markets nobody has called yet${
          unclaimed>0?` and ${money0(unclaimed)} unclaimed for 2027`:""}.`
@@ -5288,16 +5366,29 @@ function drawLedger(){
      you are not chasing a man who has already paid. Confirm it against your bank, then press
      the button, which is the only thing that actually moves the ledger. */
   const cl=(DB.claims||[]).find(c=>norm(c.bettor)===norm(r.bettor));
+  /* A negative balance is not "nothing to do", it is the pot holding money that is not its own —
+     usually because his bets were voided after he had paid. It used to print as a green minus
+     figure, which reads like a man who is all square. */
+  const back=r.balance<0?-r.balance:0;
   h+=`<tr><td>${esc(r.bettor)}${cl&&r.balance>0?`<div class="small warn">says he has paid £${cl.claimed}${
-    cl.claimed<r.balance?" of £"+r.balance:""}</div>`:""}</td>
+    cl.claimed<r.balance?" of £"+r.balance:""}</div>`:""}${
+    back?`<div class="small warn">paid more than he has riding</div>`:""}</td>
    <td class="num">${r.bet_count}</td><td class="num">£${r.staked}</td>
    <td class="num">£${r.paid}</td>
-   <td class="num ${r.balance>0?"neg":"pos"}"><b>£${r.balance}</b></td>
+   <td class="num ${r.balance>0?"neg":back?"warn":"pos"}"><b>${back?"£"+back+" back":"£"+r.balance}</b></td>
    <td class="num">${r.balance>0?`<span class="payrow">£<input type="number" class="payamt" min="1" step="1"
      inputmode="numeric" value="${r.balance}" data-w="${esc(r.bettor)}" style="width:64px">
-     <button class="ghost payoff" data-w="${esc(r.bettor)}" style="padding:3px 9px">Record</button></span>`:""}</td></tr>`;});
+     <button class="ghost payoff" data-w="${esc(r.bettor)}" style="padding:3px 9px">Record</button></span>`
+    :back?`<span class="payrow">£<input type="number" class="refamt" min="1" step="1"
+     inputmode="numeric" value="${back}" data-w="${esc(r.bettor)}" style="width:64px">
+     <button class="ghost refoff" data-w="${esc(r.bettor)}" style="padding:3px 9px">Gave it back</button></span>`:""}</td></tr>`;});
+ /* Netting a man who owes £30 against a man owed £197 produced a single figure that described
+    nobody's position and hid both. They are two different debts going in two directions. */
+ const tOwed=L.reduce((a,r)=>a+Math.max(0,+r.balance||0),0);
+ const tBack=L.reduce((a,r)=>a+Math.max(0,-(+r.balance||0)),0);
  h+=`<tr><td><b>Total</b></td><td></td><td class="num"><b>£${ts}</b></td><td class="num"><b>£${tp}</b></td>
-   <td class="num ${ts-tp>0?"neg":"pos"}"><b>£${ts-tp}</b></td><td></td></tr>`;
+   <td class="num"><b class="${tOwed>0?"neg":"pos"}">£${tOwed}</b>${tBack>0
+     ? `<div class="small warn">£${tBack} to give back</div>`:""}</td><td></td></tr>`;
  if(!L.length) h=`<tr><td class="small">Nobody owes anybody anything. Enjoy it, it will not last.</td></tr>`;
  $("#ledgTbl").innerHTML=h;
  /* The amount is editable, so a man who sends half is recorded as having sent half rather than
@@ -5312,8 +5403,43 @@ function drawLedger(){
   if(!raw||!isFinite(a)||a<1){ e.target.blur(); alert("Put an amount in first."); return; }
   e.target.disabled=true;
   try{ await rpc("record_payment",{p_bettor:w,p_amount:a,p_note:"marked in admin",p_token:ADMIN_TOKEN});
-    await refresh(); drawLedger(); }
+    /* drawSettle is what redraws the reconciliation. Without it the panel kept showing the money
+       as still to come in, on the one line that says "check this against Starling". */
+    await refresh(); drawLedger(); drawSettle(); }
   catch(err){ e.target.disabled=false; alert("Could not record it: "+err.message); }}));
+ /* Handing money back is a payment in reverse, and it is recorded as exactly that: a negative
+    payment. Nothing new to reconcile, no second ledger, and the "paid in" figure goes back to
+    matching what is actually in the bank the moment the transfer leaves. */
+ document.querySelectorAll(".refoff").forEach(el=>el.addEventListener("click",async e=>{
+  const w=e.target.dataset.w;
+  const box=[...document.querySelectorAll(".refamt")].find(x=>x.dataset.w===w);
+  const btn=e.target;
+  const cap=Math.max(0,-(+(((DB.ledger||[]).find(r=>norm(r.bettor)===norm(w))||{}).balance||0)));
+  const raw=(box&&String(box.value||"").trim())||"";
+  let a=Math.round(+raw);
+  if(!raw||!isFinite(a)||a<1){ btn.blur(); alert("Put an amount in first."); return; }
+  if(a>cap){ btn.blur(); alert(`He is only ${money0(cap)} in credit. Handing back more than that puts him in debt to the pot.`); return; }
+  if(btn.dataset.armed!=="1"){
+    /* The amount is frozen at the moment of arming. Reading the box again on the confirming tap
+       meant the button could say "Sent £197?" and post something else entirely. */
+    btn.dataset.armed="1"; btn.dataset.amt=String(a); btn.textContent="Sent £"+a+"?";
+    setTimeout(()=>{if(btn.dataset.armed==="1"){btn.dataset.armed="";btn.textContent="Gave it back";}},5000);
+    return;}
+  a=Math.round(+btn.dataset.amt)||a;
+  btn.dataset.armed=""; btn.disabled=true;
+  try{ await rpc("record_payment",{p_bettor:w,p_amount:-a,p_note:"handed back — overpaid",p_token:ADMIN_TOKEN});
+    await refresh(); drawLedger(); drawSettle(); }
+  catch(err){
+    /* Villa wifi drops the reply, not the write. Re-read before offering the button back, so a
+       refund that actually landed cannot be sent a second time on the strength of an error
+       message. If the balance has moved, the money went. */
+    let landed=false;
+    try{ await refresh(); drawLedger(); drawSettle();
+      const now=Math.max(0,-(+(((DB.ledger||[]).find(r=>norm(r.bettor)===norm(w))||{}).balance||0)));
+      landed=now<cap; }catch(x){}
+    if(landed){ alert("The reply never arrived, but the payment did land — the ledger has moved. Nothing more to do."); return; }
+    btn.disabled=false; btn.textContent="Gave it back";
+    alert("Could not record it: "+(err.message||err)); }}));
  let b=`<tr><th>Struck</th><th>Who</th><th>Market</th><th>Selection</th><th class="num">£</th><th></th></tr>`;
  DB.bets.slice().reverse().forEach(x=>{
   b+=`<tr><td class="small">${new Date(x.created_at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
@@ -5323,6 +5449,31 @@ function drawLedger(){
    <td><button class="ghost voidb" data-id="${x.id}" style="padding:3px 9px">Void</button></td></tr>`;});
  if(!DB.bets.length) b=`<tr><td class="small">Not a penny wagered. A group of unusually sensible men.</td></tr>`;
  $("#betsTbl").innerHTML=b;
+ /* Voiding used to be a one way door: the list above filters voided bets out, so a bet voided by
+    mistake could not be found again, let alone put back. It was never lost — the row was always
+    in the database — but nothing on screen could reach it. */
+ const V=DB.voided||[];
+ const vc=$("#voidCount"); if(vc) vc.textContent=V.length?`${V.length} · £${V.reduce((a,x)=>a+(+x.stake||0),0)}`:"";
+ let v=`<tr><th>Struck</th><th>Who</th><th>Market</th><th>Selection</th><th class="num">£</th><th>Why</th><th></th></tr>`;
+ V.forEach(x=>{
+  v+=`<tr style="opacity:.72"><td class="small">${new Date(x.created_at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
+    ${x.phase==="antepost"?'<span class="tag low">AP</span>':""}</td>
+   <td>${esc(x.bettor)}</td><td class="small">${esc(marketName(x.market))}</td><td>${esc(x.outcome)}</td>
+   <td class="num">£${x.stake}</td><td class="small">${esc(x.void_reason||"")}</td>
+   <td><button class="ghost unvoidb" data-id="${x.id}" style="padding:3px 9px">Put it back</button></td></tr>`;});
+ if(!V.length) v=`<tr><td class="small">Nothing has been voided.</td></tr>`;
+ const vt=$("#voidTbl"); if(vt){
+  vt.innerHTML=v;
+  vt.querySelectorAll(".unvoidb").forEach(el=>el.addEventListener("click",async e=>{
+   const btn=e.target;
+   if(btn.dataset.armed!=="1"){ btn.dataset.armed="1"; btn.textContent="Sure?";
+     setTimeout(()=>{if(btn.dataset.armed==="1"){btn.dataset.armed="";btn.textContent="Put it back";}},5000);
+     return;}
+   btn.dataset.armed=""; btn.disabled=true;
+   try{ await rpc("unvoid_bet",{p_id:btn.dataset.id,p_token:ADMIN_TOKEN});
+     await refresh(); drawAll(); drawAdmin(); }
+   catch(err){ btn.disabled=false; btn.textContent="Put it back"; alert("Could not put it back: "+(err.message||err)); }}));
+ }
  document.querySelectorAll(".voidb").forEach(el=>el.addEventListener("click",async e=>{
   e.target.disabled=true;
   try{ await rpc("void_bet",{p_id:e.target.dataset.id,p_reason:"voided in admin",p_token:ADMIN_TOKEN});
@@ -5559,7 +5710,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.04</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.05</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -5731,16 +5882,38 @@ function patchPools(){
   if(resultOf(k)) return;                       /* settled cards are static until a redraw */
   const {money}=poolTotals(k);
   const mp=mPhase(m), live=mLive(m);
-  const outs=marketOutcomes(m);
+   /* withStakedOutcomes, not marketOutcomes — the same list the card was drawn from. A runner
+     carrying money who has since been taken off the roster still gets a row in the markup, and
+     matching on marketOutcomes silently skipped it here: his price stayed frozen at whatever it
+     was when the card was last rebuilt, in 27px type, while the pool underneath it moved. */
+  const outs=withStakedOutcomes(m);
   card.querySelectorAll(".mkrow").forEach(row=>{
    const label=row.dataset.o; if(label==null) return;
-   const o=outs.find(x=>x.label===label); if(!o) return;
+   const o=outs.find(x=>x.label===label)||{label:label,prob:null};
    const v=bet(k,label), wt=weighted(v), c=cash(v);
    const imp=wt>0?money/wt:0;
    const ev=(c>0&&o.prob>0)?o.prob*imp-1:null;
    const set=(sel,txt)=>{const el=row.querySelector(sel); if(el&&el.innerHTML!==txt) el.innerHTML=txt;};
    set('.mkfig[data-l="Money on"]', c?"£"+c:"&mdash;");
-   set('.mkfig[data-l="Pays now"]', imp?fmtDec(imp):"&mdash;");
+   /* The headline slot swaps the moment the first pound lands: model price while the pool is
+      empty, live price the instant there is one. Done here rather than by a redraw, so a market
+      coming to life mid-poll flips over without the page rebuilding underneath anybody. */
+   const big=row.querySelector(".mkfig.big");
+   if(big){
+     const heroModel=!(imp>0)&&o.prob!=null;
+     const heroNone =!(imp>0)&&o.prob==null;
+     const lab=heroNone?"No price yet":heroModel?"Should pay":"Pays now";
+     const val=heroModel?dec(o.prob):(imp?fmtDec(imp):"&mdash;");
+     if(big.getAttribute("data-l")!==lab) big.setAttribute("data-l",lab);
+     big.classList.toggle("model",heroModel);
+     big.classList.toggle("none",heroNone);
+     if(big.innerHTML!==val) big.innerHTML=val;
+     /* Scoped to .mkfigs on purpose. Unscoped this matches the hero itself the moment the hero
+        IS the should-pay figure, and putting the hide-the-duplicate class on the hero would have
+        made the price vanish off the phone entirely on the first poll of an empty market. */
+     const sp=row.querySelector('.mkfigs .mkfig[data-l="Should pay"]');
+     if(sp) sp.classList.toggle("dupe",heroModel);
+   }
    const evEl=row.querySelector('.mkfig[data-l="Value"]');
    if(evEl){
      evEl.className="mkfig "+(ev===null?"":ev>0.05?"pos":ev<-0.05?"neg":"")+" ";
@@ -5779,7 +5952,11 @@ async function nothingMoved(){
 }
 async function pollOnce(){
  if(document.hidden) return;
- if(busyNow()){ return; }                      /* try again next tick, no harm done */
+ /* "Try again next tick" was a lie: nothing rescheduled, so the timer died here. One tap in the
+    stake box, the market filter, or the onboarding overlay sitting on screen for 45 seconds, and
+    that phone never polled again for the rest of the session — pools, prices and the clock frozen
+    at whatever they were on load, with nothing on screen to say so. */
+ if(busyNow()){ schedulePoll(); return; }
  if(await nothingMoved()){ pollWait=POLL_MS; schedulePoll(); return; }
  const before=snapPrices();
  const shapeBefore=shapeOf();

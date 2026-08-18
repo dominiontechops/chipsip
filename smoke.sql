@@ -42,3 +42,25 @@ begin;
          jsonb_array_length(s->'roster')   as roster_rows
   from (select public.board_state() as s) q;
 rollback;
+
+-- ---------------------------------------------------------------------------------------------
+-- A VOID MUST NOT MAKE MONEY DISAPPEAR. Added 18 Aug after voiding Jack's bets and 22 of Dom's.
+-- Everything below rolls back.
+begin;
+  -- a man who has paid and then had every bet voided must still be on the books, in credit
+  insert into public.payments(bettor,amount,note) values ('jack mulroy',24,'test - rolled back');
+  select bettor, staked, paid, balance, bet_count
+  from public.ledger order by balance desc;          -- expect a Jack Mulroy row, balance -24
+                                                     -- and the lowercase name matched to the roster
+
+  -- and he must be on the settle-up sheet, with the credit counted as money the pot owes him
+  select bettor, staked, paid, owes, due
+  from public.admin_settlement('REPLACE-WITH-THE-ADMIN-PASSPHRASE');
+rollback;
+
+-- the reconciliation identity, straight out of the database:
+--   what is in the account  =  money riding on live markets  +  money owed back to punters
+select (select coalesce(sum(amount),0) from public.payments)                     as paid_in,
+       (select coalesce(sum(staked),0) from public.pool_totals)                  as riding,
+       (select coalesce(sum(greatest(-balance,0)),0) from public.ledger)         as owed_back,
+       (select coalesce(sum(greatest(balance,0)),0) from public.ledger)          as still_to_come;
