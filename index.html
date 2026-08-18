@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.14",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.16",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2603,6 +2603,56 @@ const DEF_NOV=[
      market rather than a lottery: on a strict win-only rule, "nobody" comes in at 18.5% and
      7-or-more at 0.1%, which is a dead runner and a pool that fails to settle one week in five. */
   oprobs:{"2 down or less":0.049,"3 down":0.384,"4 down":0.409,"5 down":0.135,"6 or more":0.023}},
+ {k:"nov_home",n:"First to Mention His Home Club",
+  d:"Unprompted, out loud, in earshot of at least 2 witnesses, from wheels down in Malaga to the "+
+    "last putt on Sunday. Chris Best is 4/1 and would be shorter if the photographs counted. Theo "+
+    "is 10/1 on his first trip and has four days of introductions to get through, Mark Sturgess is "+
+    "14/1 for the same reason, and Ben West is 20/1 because he would rather tell you the number "+
+    "than the name. Somebody always does it before the bags are off the carousel",
+  round:"",opts:[],
+  wts:{"Chris Best":6.0,"Theo Smith-Harris":2.6,"Mark Sturgess":1.9,"Gabe Hills":1.8,
+   "Eamonn Brady":1.5,"Ben West":1.4,"Josh Menzies":1.2,"Tom Bucknall":1.15,"Matt Petty":0.8,
+   "Jay France":0.8,"Dong Ming Lau":0.7}},
+
+ {k:"nov_stat",n:"Ben West to Quote a Squabbit Stat",
+  d:"An actual number, read off Squabbit, said out loud, any time between the airport and the "+
+    "flight home. 2 witnesses and it is settled. The No is 6/1 and is the only bet on this board "+
+    "that requires a man to change the habit of a lifetime",
+  round:"",opts:["Yes","No"],oprobs:{"Yes":0.86,"No":0.14},subject:"Ben West"},
+
+ {k:"nov_shorts",n:"Dong to Play a Round in Shorts",
+  d:"On the course, on the tee, in shorts. Round the pool does not count and neither does the walk "+
+    "to breakfast — he has to play golf in them, and 1 of the 4 rounds is enough. It is the Costa "+
+    "del Sol in September and the man has never knowingly been seen on a golf course in anything "+
+    "but long trousers, which is why the No is 1/7 and the Yes pays 15/2. Somebody will spend the "+
+    "whole week working on him",
+  round:"",opts:["Yes","No"],oprobs:{"Yes":0.12,"No":0.88},subject:"Dong Ming Lau"},
+
+ {k:"nov_last",n:"Last Man Standing",
+  d:"Last to bed wins the night. Whoever does it on the most nights of the 4 takes the pool, and a "+
+    "tie splits it — a count rather than a verdict, settled by whoever is still awake to see it. "+
+    "Alex Mulvin is 5/1 and knows every barman on that coast, Rob Parfitt is 15/2 with a birthday "+
+    "to defend, and Theo is 11/1 on volume alone. At the other end, Matt Petty is 80/1 and Dong "+
+    "Ming Lau is 100/1, and neither of those prices is an insult",
+  round:"",opts:[],
+  wts:{"Alex Mulvin":4.5,"Rob Parfitt":3.2,"Theo Smith-Harris":2.3,"Josh Evans":1.9,
+   "Josh Menzies":1.5,"Ben West":1.3,"Eamonn Brady":1.3,"Gabe Hills":1.25,"Tom Bucknall":1.1,
+   "Matt Holland":0.95,"Dom Mills":0.9,"Chris Best":0.9,"Mark Sturgess":0.9,"Jay France":0.85,
+   "Luke Usher":0.8,"Luke Holland":0.8,"Matt Petty":0.3,"Dong Ming Lau":0.25}},
+
+ {k:"nov_cut",n:"The Cut",
+  d:"Whose handicap comes down after the trip. Settles weeks later on Squabbit, in black and "+
+    "white, with nobody to argue with — the only market on this board that judges itself. Luke "+
+    "Holland is 6/1 because he already plays to his mark and is trending the right way, Luke Usher "+
+    "is 10/1 with the smallest gap in the field, Gabe Hills is 14/1 and knows exactly why, and Rob "+
+    "Parfitt is 14/1 as the most improved man in the group by some distance",
+  round:"",opts:[],
+  wts:{"Luke Holland":2.98,"Luke Usher":1.93,"Eamonn Brady":1.68,"Mark Sturgess":1.64,
+   "Gabe Hills":1.37,"Rob Parfitt":1.28,"Matt Holland":1.19,"Matt Petty":0.95,"Jack Mulroy":0.93,
+   "Ben West":0.92,"Tom Bucknall":0.9,"Theo Smith-Harris":0.85,"Josh Evans":0.85,"Chris Best":0.76,
+   "Dom Mills":0.74,"Josh Menzies":0.43,"Dave Huddleston":0.38,"Alex Mulvin":0.36,
+   "Jay France":0.17,"Dong Ming Lau":0.11}},
+
  {k:"nov_water",n:"First in the Drink",
   d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it. "+
     "Josh Menzies heads it because there is no shot on earth he loves more than a 4 iron he has no "+
@@ -2634,11 +2684,11 @@ const DEF_NOV=[
      from the formula, so there is a pecking order rather than a wall of identical prices. */
   wts:{"Josh Menzies":4.4,"Tom Bucknall":1.85,"Dong Ming Lau":1.85,"Rob Parfitt":1.75,"Gabe Hills":1.7}},
  {k:"nov_shout",n:"First to Blame His Clubs",
-  d:"Out loud, in earshot of at least 2 witnesses. Chris Best is favourite for the happiest of "+
-    "reasons: the clubs are brand new, they are very good, and a man who has just spent that kind "+
-    "of money is entitled to expect better of them. Luke Usher is 17/2 off 13.8, because a low "+
-    "mark makes a bad shot somebody else's fault, Josh Menzies is in the same bracket with a "+
-    "shorter fuse, and Eamonn Brady is 12/1 because he tends to blame the card instead",
+  d:"Out loud, in earshot of at least 2 witnesses. Chris Best heads it because a man who talks "+
+    "that fondly about his golf expects rather more from it than it has ever given him. Luke Usher "+
+    "is 17/2 off 13.8, because a low mark makes a bad shot somebody else's fault, Josh Menzies is "+
+    "in the same bracket with a shorter fuse, and Eamonn Brady is 12/1 because he tends to blame "+
+    "the card instead",
   round:"",opts:[],pk:"clubs",
   wts:{"Chris Best":2.55,"Luke Usher":4.95,"Josh Menzies":3.56,"Eamonn Brady":2.59}},
  {k:"nov_row",n:"Most Likely to Have a Heated Discussion",
@@ -2683,7 +2733,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.14"+"/"+MODEL_V;
+const DATA_V="2026-08-18.16"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -5813,7 +5863,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.14</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.16</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
