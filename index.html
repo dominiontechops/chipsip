@@ -1988,7 +1988,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.05",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.06",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2189,6 +2189,14 @@ async function refresh(){
     if(DB.settings.payLabel!=null)  S.payLabel=DB.settings.payLabel;
     if(DB.settings.payLabel!=null)  S.payLabel=DB.settings.payLabel;
     PUB = DB.settings.prices || null;
+    /* THE BOOK WAS CLEARED. The launch script stamps the moment it emptied everything. A phone
+       that was used in testing is still carrying a half-built slip and possibly an "I have sent
+       it" note against a payment that no longer exists — neither is money, but both are wrong,
+       and telling twenty men to clear their browser is not a plan. Cleared here, once, silently,
+       the first time each phone sees the new stamp. */
+    if(DB.settings.cleared && S.clearedAt!==DB.settings.cleared){
+      S.clearedAt=DB.settings.cleared; S.slip=[]; S.paidClaim=0; save();
+    }
     applyPublishedHcp();
     /* Villa wifi and roaming data. Keep the last good read so the score and the pools still
        render on the tee. Betting is NOT cached-and-queued: a stake struck against a stale pool
@@ -2584,7 +2592,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.05"+"/"+MODEL_V;
+const DATA_V="2026-08-18.06"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -5710,7 +5718,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.05</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.06</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
