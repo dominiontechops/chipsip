@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.11",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.12",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2568,11 +2568,19 @@ const DEF_NOV=[
   subject:"Rob Parfitt"},
  {k:"nov_social",n:"Social MVP",
   d:"Best company off the course. Not a golf market and not pretending to be one, so there is no "+
-    "price to argue with — what you see is purely how the money has landed. "+
-    "Settled by a vote of all 20 on the last night, one man one vote, and you cannot vote "+
-    "for yourself. A tie splits the pool between them. The tally is posted in full afterwards, so "+
-    "it is a count rather than a verdict",
-  round:"",opts:[]},
+    "price to argue with once the money starts landing. Settled by a vote of all 20 on the last "+
+    "night, one man one vote, and you cannot vote for yourself. A tie splits the pool between them. "+
+    "The tally is posted in full afterwards, so it is a count rather than a verdict. Alex Mulvin "+
+    "and Rob Parfitt are the market, which will surprise nobody who has shared a taxi with either. "+
+    "Chris, Dong and Jay are out at 50/1 and bigger and have four days to do something about it",
+  round:"",opts:[],
+  /* No formula here at all — a handicap tells you nothing about whether a man is good company.
+     These are hand-set, they are opinions, and the market is free to disagree with every one of
+     them the moment somebody backs it. */
+  wts:{"Alex Mulvin":4.0,"Rob Parfitt":3.4,"Ben West":1.9,"Josh Menzies":1.7,"Matt Petty":1.6,
+   "Luke Usher":1.4,"Eamonn Brady":1.35,"Gabe Hills":1.25,"Tom Bucknall":1.15,"Theo Smith-Harris":1.05,
+   "Mark Sturgess":1.0,"Jack Mulroy":0.95,"Luke Holland":0.9,"Matt Holland":0.85,"Josh Evans":0.8,
+   "Dave Huddleston":0.75,"Dom Mills":0.7,"Chris Best":0.45,"Dong Ming Lau":0.4,"Jay France":0.35}},
  {k:"nov_back",n:"Biggest Comeback",
   d:"The deepest hole anybody climbs out of all week. Go 4 down, drag it back, win or halve it — "+
     "that is a 4 down comeback. Biggest one of the week across all 25 matches, so it only takes one "+
@@ -2586,8 +2594,27 @@ const DEF_NOV=[
      market rather than a lottery: on a strict win-only rule, "nobody" comes in at 18.5% and
      7-or-more at 0.1%, which is a dead runner and a pool that fails to settle one week in five. */
   oprobs:{"2 down or less":0.049,"3 down":0.384,"4 down":0.409,"5 down":0.135,"6 or more":0.023}},
- {k:"nov_water",n:"First in the Drink",d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it",round:"",opts:[],pk:"water"},
- {k:"nov_air",n:"First Air Shot",d:"A genuine swing and miss. Practice swings excepted, obviously",round:"",opts:[],pk:"air"},
+ {k:"nov_water",n:"First in the Drink",
+  d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it. "+
+    "Luke Holland heads the market because he takes on carries no sensible man would look at, and "+
+    "Jay France is in at single figures purely because the good ones drown in style. Two Hollands "+
+    "in one market and only one of them can be first",
+  round:"",opts:[],pk:"water",
+  /* Hand-set to break the handicap ladder. Low, high, low, high and Red, Blue, Red, Blue on
+     purpose: water is not a handicap market, it is a decision market, and the men who take on
+     the carry are as often the good ones as the bad. */
+  wts:{"Luke Holland":7.5,"Tom Bucknall":1.53,"Jay France":7.15,"Matt Holland":1.3}},
+ {k:"nov_air",n:"First Air Shot",
+  d:"A genuine swing and miss. Practice swings excepted, obviously. Matt Holland is favourite on "+
+    "the strength of a backswing nobody has ever been able to explain, Rob Parfitt shortens every "+
+    "year on the Thursday after a birthday, and Tom Bucknall is here because 25 shots have to come "+
+    "from somewhere. Fresh air is not a bad shot, it is theatre, and whoever provides it will be "+
+    "hearing about it in 2030",
+  round:"",opts:[],pk:"air",
+  /* Mostly the high marks, as it should be, but deliberately not in handicap order and with the
+     organiser pulled back off favouritism — he was top of four of these books and it looked like
+     a man pricing up his own funeral. */
+  wts:{"Matt Holland":1.7,"Rob Parfitt":1.6,"Dom Mills":0.72,"Chris Best":0.88}},
  {k:"nov_cart",n:"First Buggy Incident",
   d:"Kerb, bunker, flowerbed or tree. The FIRST one only, so the second and third do not count "+
     "however spectacular they are, and the buggy does not have to survive for it to count. Josh "+
@@ -2600,7 +2627,14 @@ const DEF_NOV=[
      are a hunch, said out loud in the description so nobody mistakes it for data. The rest come
      from the formula, so there is a pecking order rather than a wall of identical prices. */
   wts:{"Josh Menzies":4.4,"Tom Bucknall":1.85,"Dong Ming Lau":1.85,"Rob Parfitt":1.75,"Gabe Hills":1.7}},
- {k:"nov_shout",n:"First to Blame His Clubs",d:"Out loud, in earshot of at least 2 witnesses",round:"",opts:[],pk:"clubs"},
+ {k:"nov_shout",n:"First to Blame His Clubs",
+  d:"Out loud, in earshot of at least 2 witnesses. Chris Best is a warm order: the clubs are newer "+
+    "than the swing and he has told everybody what they cost. Luke Usher is shorter than his mark "+
+    "deserves, because a low handicap makes a bad shot somebody else's fault, Mark Sturgess has "+
+    "previous, and Eamonn Brady is only a price because he usually blames himself first",
+  round:"",opts:[],pk:"clubs",
+  /* Nothing to do with handicap: a 13 blames the clubs as readily as a 26, and usually louder. */
+  wts:{"Chris Best":2.44,"Luke Usher":4.5,"Mark Sturgess":1.94,"Eamonn Brady":2.41}},
  {k:"nov_row",n:"Most Likely to Have a Heated Discussion",
   d:"Voices up, clubs down, somebody walking to the next tee on his own. Eamonn and Josh Menzies renewing "+
     "last year's hostilities is the obvious way in; Ben and Gabe are shorter than they should be purely "+
@@ -2614,11 +2648,15 @@ const DEF_NOV=[
      four days and a birthday, so the tail is 9/1, not 33/1. */
   wts:{"Eamonn Brady":2.1,"Josh Menzies":2.1,"Ben West":1.45,"Gabe Hills":1.45}},
  {k:"nov_miss3",n:"First Missed Three-Footer — Singles",
-  d:"Sunday only, and it has to be inside 3 feet and genuinely missed. Gimmes are not missed, they are "+
-    "conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he is. "+
-    "The short ones are where the week is won and lost, and everybody knows exactly who they are "+
-    "worried about here",
-  round:"4",opts:[],pk:"miss3"},
+  d:"Sunday only, and it has to be inside 3 feet and genuinely missed. Gimmes are not missed, they "+
+    "are conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he "+
+    "is. Jay France and Dong Ming Lau head the market on current evidence, both arriving in the "+
+    "sort of nick that turns a tap-in into an event. The short ones are where the week is won and "+
+    "lost, and everybody already knows who they are worried about here",
+  round:"4",opts:[],pk:"miss3",
+  /* Priced off who is arriving out of nick rather than off handicap. A three-footer on the last
+     day does not care what you go round in, it cares what the last four days have done to you. */
+  wts:{"Jay France":13.65,"Dong Ming Lau":3.47,"Dom Mills":0.97,"Alex Mulvin":4.41}},
  {k:"nov_josh",n:"Josh Menzies to Call Someone a C**t Before the First Tee",
   d:"Any target, any tone, affectionate counts. Window opens on landing and shuts when the first ball is "+
     "placed on Thursday. Odds-on for a reason and the market is not apologising for it",
@@ -2636,7 +2674,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.11"+"/"+MODEL_V;
+const DATA_V="2026-08-18.12"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -5766,7 +5804,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.11</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.12</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
