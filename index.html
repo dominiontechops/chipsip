@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.20",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.22",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2787,7 +2787,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.20"+"/"+MODEL_V;
+const DATA_V="2026-08-18.22"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3390,6 +3390,52 @@ function marketOutcomes(m){
    the whole week however many times the captains redraw. The names go in `sub`, which is display
    only and can change as often as it likes. That is the difference between a board that fills
    itself in and a board that quietly orphans everyone's bets on Saturday night. */
+/* WHAT THE CARD SAYS. All 16 day markets settle off the scores the captains are entering anyway
+   — the copy on the cards has always promised "settles straight off the card, no argument" — but
+   nothing on the page ever worked it out. The organiser had to read 5 rows on a Sunday night,
+   decide which match went furthest and which was the widest, and pick it by hand 16 times.
+   This does the reading. It never settles anything on its own: it offers an answer and the
+   organiser presses the button, so the card stays the source and he stays the referee. */
+function cardOutcome(m){
+ const r=+m.round||0; if(!m.dyn||!r) return null;
+ const ms=(DB.matches||[]).filter(x=>+x.session===r);
+ if(!ms.length) return null;
+ const played=ms.filter(x=>x.result);
+ if(!played.length) return null;
+ const all=played.length===ms.length;
+
+ if(m.dyn==="day"){
+   const b=played.reduce((a,x)=>a+(x.result==="blue"?1:x.result==="half"?0.5:0),0);
+   const rd=played.reduce((a,x)=>a+(x.result==="red" ?1:x.result==="half"?0.5:0),0);
+   if(!all) return {wait:`${played.length} of ${ms.length} in — Blue ${b}, Red ${rd}`};
+   return {outcomes:[b>rd?"Blue":rd>b?"Red":"Tie"], why:`Blue ${b}, Red ${rd}`};
+ }
+ if(m.dyn==="sweep"){
+   const allB=played.every(x=>x.result==="blue"), allR=played.every(x=>x.result==="red");
+   if(!all){
+     if(!allB&&!allR) return {outcomes:["No sweep"],why:`already gone — ${played.length} of ${ms.length} in`};
+     return {wait:`${played.length} of ${ms.length} in and still alive`};
+   }
+   return {outcomes:[allB?"Blue win them all":allR?"Red win them all":"No sweep"],
+     why:allB||allR?"every match":"somebody dropped one"};
+ }
+ if(m.dyn==="match"){
+   const isMotd=m.k.slice(0,4)==="motd";
+   /* Match of the day is the highest hole anybody reached; biggest hiding is the widest margin,
+      and a halved match has no margin so it cannot win that one. */
+   const pool=isMotd?played.filter(x=>x.ended!=null)
+                    :played.filter(x=>x.result!=="half"&&x.margin!=null&&+x.margin>0);
+   if(!pool.length) return all?{none:true}:null;
+   const key=x=>isMotd?+x.ended:+x.margin;
+   const best=Math.max(...pool.map(key));
+   const win=pool.filter(x=>key(x)===best).map(x=>"Match "+x.slot);
+   const why=isMotd?`went to the ${best}${best===18?"th":best===1?"st":best===2?"nd":best===3?"rd":"th"}`
+                   :`${best} up`;
+   if(!all) return {outcomes:win,why:why+` — but only ${played.length} of ${ms.length} are in`,partial:true};
+   return {outcomes:win,why:why+(win.length>1?", shared":"")};
+ }
+ return null;
+}
 function dynOutcomes(m){
  const E=extraSrc(), r=+m.round||0;
  const c=S.courses[r-1]||{}, single=c.fmt==="singles";
@@ -3512,20 +3558,33 @@ const ICONS={
  sun:   '<circle cx="10" cy="10" r="3.6"/><path d="M10 2.4v1.8M10 15.8v1.8M2.4 10h1.8M15.8 10h1.8M4.6 4.6l1.3 1.3M14.1 14.1l1.3 1.3M15.4 4.6l-1.3 1.3M5.9 14.1l-1.3 1.3"/>',
  putt:  '<circle cx="6.2" cy="14.6" r="1.9"/><path d="M15.4 3.6v8.2"/><path d="M13.2 11.8h4.4"/><path d="M8.1 14.6h4"/>',
  row:   '<path d="M3.2 4.6h6.4v4.6H6l-2.8 2.4V9.2H3.2z"/><path d="M10.6 8h6.2v4.4h-2.6l2.2 2.2-3.4-2.2h-2.4z"/>',
- mouth: '<circle cx="10" cy="10" r="6.6"/><path d="M6.6 11.6c1.1 1.3 2.1 1.9 3.4 1.9s2.3-.6 3.4-1.9"/><path d="M7.4 7.8h1.4M11.2 7.8h1.4"/>'
+ mouth: '<circle cx="10" cy="10" r="6.6"/><path d="M6.6 11.6c1.1 1.3 2.1 1.9 3.4 1.9s2.3-.6 3.4-1.9"/><path d="M7.4 7.8h1.4M11.2 7.8h1.4"/>',
+ /* scissors — the handicap coming down */
+ cut:   '<circle cx="6.2" cy="14.4" r="2"/><circle cx="13.8" cy="14.4" r="2"/><path d="M12.6 13 5.6 4.2"/><path d="M7.4 13 14.4 4.2"/>',
+ /* out of the hole and up the other side */
+ rise:  '<path d="M3 15.4l4.2-4.6 3.1 2.6 5-6.2"/><path d="M11.6 7.2h4v4"/>',
+ /* a number on a screen: the man who has read the stats */
+ stat:  '<path d="M3.4 4.4h13.2v9.4H3.4z"/><path d="M6.2 11.4V9M9.4 11.4V7M12.6 11.4v-3"/><path d="M7.6 16.6h4.8"/>',
+ /* shorts */
+ shorts:'<path d="M5.6 4.6h8.8l.9 11h-3.6L10 9.8l-1.7 5.8H4.7z"/><path d="M5.6 7.6h8.8"/>'
 };
 /* Which glyph belongs to which novelty market. The `pk` on each market is the pricing model it
    uses, which happens to be exactly the right key for this. */
 const NOV_ICON={
  /* by pricing model */
- cart:"buggy",water:"water",clubs:"club",miss3:"putt",air:"ball",
+ cart:"buggy",water:"water",clubs:"club",miss3:"putt",air:"ball",cut:"cut",
  /* and by market key, for the hand-priced ones that have no pricing model at all */
  shout:"club",row:"row",heat:"row",josh:"mouth",cunt:"mouth",rob:"pint",rob30:"pint",drunk:"pint",
- social:"pint",back:"row"};
+ /* Social MVP is about company, not beer — the two-people glyph says that and a pint does not. */
+ social:"pair",last:"pint",
+ back:"rise",home:"flag",stat:"stat",shorts:"shorts"};
+/* The fallback used to be a pint, so every market nobody had thought to map turned up wearing a
+   beer glass — 6 of them at one point, on markets about home clubs, handicap cuts and a man's
+   trousers. It is a golf ball now: neutral, and obviously a placeholder if one ever slips through. */
 const iconFor=(g,m)=>{
  if(g.id!=="nov") return icon(g.ic);
  const k=(m&&m.k||"").replace(/^nov_/,"");
- return icon(NOV_ICON[m&&m.pk]||NOV_ICON[k]||"pint");};
+ return icon(NOV_ICON[m&&m.pk]||NOV_ICON[k]||"ball");};
 const icon=k=>`<svg class="mico" viewBox="0 0 20 20" aria-hidden="true">${ICONS[k]||ICONS.ball}</svg>`;
 /* "20 runners" is racing. Half these markets are not people at all, and calling Yes and No a
    pair of runners is the sort of thing that makes a board feel like it was written for somebody
@@ -5229,6 +5288,18 @@ function drawSettle(){
         :off?' &middot; <span class="warn"><b>WITHDRAWN</b></span>':""}</span></div>
     <p class="note" style="margin:0 0 5px">Pick the winner. Hold ${navigator.platform.indexOf("Mac")>=0?"Cmd":"Ctrl"}
       to pick two for a dead heat &mdash; the pool then splits between them.</p>
+    ${(()=>{ if(R) return "";
+      /* All 16 day markets settle off the card the captains are entering anyway, and the copy on
+         every one of them has always promised exactly that. Until now nothing worked it out, so
+         the organiser read 5 rows on a Sunday night and decided by eye, 16 times. */
+      const c=cardOutcome(m); if(!c) return "";
+      if(c.none) return `<p class="note warn" style="margin:0 0 5px">The card has nothing that can
+        win this &mdash; every match was halved. Tick <em>Nobody won it</em> and settle.</p>`;
+      if(c.wait) return `<p class="note" style="margin:0 0 5px">Card so far: ${esc(c.wait)}.</p>`;
+      return `<p class="note${c.partial?" warn":" pos"}" style="margin:0 0 5px">
+        <b>The card says ${esc(c.outcomes.join(" and "))}</b> &mdash; ${esc(c.why)}.
+        <button class="ghost setlCard" data-o="${esc(c.outcomes.join("|"))}"
+          style="padding:2px 8px;margin-left:4px">Take it off the card</button></p>`;})()}
     <div class="row" style="margin:0;align-items:flex-start">
       <select class="setlOut" multiple size="${Math.min(6,Math.max(2,outs.length))}"
         style="min-width:190px;flex:1 1 190px;height:auto;max-height:150px;overflow:auto">
@@ -5246,6 +5317,15 @@ function drawSettle(){
  w.innerHTML=h;
  w.querySelectorAll("[data-sk]").forEach(card=>{
   const k=card.dataset.sk, msg=card.querySelector(".setlMsg");
+  /* Fills the selection in from the card and stops there. The organiser still has to press
+     Settle, so nothing on this board ever settles itself. */
+  const cb=card.querySelector(".setlCard");
+  if(cb) cb.addEventListener("click",e=>{
+    const want=new Set(String(e.target.dataset.o||"").split("|").filter(Boolean));
+    const sel=card.querySelector(".setlOut"); if(!sel) return;
+    [...sel.options].forEach(o=>{o.selected=want.has(o.value);});
+    const v=card.querySelector(".setlVoid"); if(v) v.checked=false;
+    msg.innerHTML='<span class="pos">Taken off the card. Check it, then press Settle.</span>';});
   card.querySelector(".setlGo").addEventListener("click",async e=>{
    const outs=[...card.querySelector(".setlOut").selectedOptions].map(o=>o.value);
    const vd=card.querySelector(".setlVoid").checked;
@@ -5959,7 +6039,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.20</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.22</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
