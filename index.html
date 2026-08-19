@@ -124,12 +124,26 @@ max-width:210px}
   border:1px solid var(--line);border-radius:8px;padding:9px;margin:8px 0}
 .tmove{font-size:11px;vertical-align:middle;margin-left:2px}
 .tmove.up{color:var(--acc2)}.tmove.dn{color:var(--red2)}.tmove.flat{opacity:.45}
-/* U1. One of these two is on screen at a time. */
+/* U1. One of these two is on screen at a time. The breakpoint picks a sensible default — table on
+   a laptop, cards on a phone — and an explicit Table/List choice overrides it at any width, because
+   plenty of people want the full grid on a phone and will happily scroll sideways for it. */
 .formcards{display:none}
 @media(max-width:719px){
   .formtable{display:none}
   .formcards{display:grid;gap:9px;margin-top:8px}
 }
+#fbookWrap.v-table .formtable{display:block}
+#fbookWrap.v-table .formcards{display:none}
+#fbookWrap.v-list  .formtable{display:none}
+#fbookWrap.v-list  .formcards{display:grid;gap:9px;margin-top:8px}
+.fbhead{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:2px 0 10px}
+details.how{border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:0 12px;margin:10px 0}
+details.how>summary{cursor:pointer;padding:9px 0;font-size:12.5px;color:var(--dim);list-style:none}
+details.how>summary::-webkit-details-marker{display:none}
+details.how>summary::before{content:"+ ";font-family:var(--mono)}
+details.how[open]>summary::before{content:"\2212 "}
+details.how>summary:hover{color:var(--ink)}
+details.how .note:last-child{margin-bottom:11px}
 .fcard{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:11px 12px}
 .fcard .fhd{display:flex;align-items:center;gap:9px}
 .fcard .fnm{flex:1 1 auto;min-width:0}
@@ -635,7 +649,10 @@ html[data-theme="light"] .valtag.over2{color:#fff}
   .count{font-size:24px}
   .day{margin:12px 0}
 }
-@media(max-width:400px){ .kpi div{min-width:100%} }
+/* Was 1 tile per row below 400px, which turned 6 tiles into 6 full-width bands and pushed the
+   players themselves the best part of a screen further down. 2 across fits at 320px. */
+@media(max-width:400px){ .kpi div{min-width:calc(50% - 5px);flex:1 1 calc(50% - 5px)}
+  .kpi b{font-size:17px} .kpi span{font-size:10px;letter-spacing:.3px} }
 /* the slip is a genuine bottom sheet on a phone, an ordinary card on a laptop */
 #slip .card{box-shadow:0 -10px 24px rgba(0,0,0,.5);margin:0}
 .sliplist{max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -893,61 +910,76 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 <section id="form">
   <div class="card">
     <h2>Form book</h2>
-    <p class="note">Built from <b>602 individual rounds</b> pulled from Squabbit across every player's whole
-    history, not just the trips. Pairs-format rounds are excluded throughout, because identical scores across
-    a pairing say nothing about either man. Nine-hole rounds count, doubled onto an 18-hole scale.
-    <b>18 of the 20</b> have a scoring record; the other 2 have a handicap and nothing else.</p>
+    <p class="note">Built from <b>602 rounds</b> pulled from Squabbit &mdash; every player's whole history,
+    not just the trips. <b>18 of the 20</b> have a scoring record. The workings are under the table.</p>
     <p class="note" id="squabAge"></p>
     <div class="kpi" id="kpis"></div>
   </div>
-  <div class="filters">
+  <details class="how" id="gFold"><summary id="gFoldSum">Filter and sort</summary>
+  <div class="filters" style="margin:0 0 10px">
     <label>Team <select id="gTeam"><option value="">All</option><option>Blue</option><option>Red</option></select></label>
     <label>Hcp <input type="number" id="gHmin" placeholder="min" style="width:64px">
       <input type="number" id="gHmax" placeholder="max" style="width:64px"></label>
     <label>Show <select id="gData"><option value="">Everyone</option><option value="good">Solid sample</option>
       <option value="low">Thin or no sample</option></select></label>
     <label>Sort <select id="gSort"><option value="gap">Best value first</option><option value="mvp">Shortest price</option>
+      <option value="form">Form now</option><option value="trip">Trip record</option>
       <option value="hcp">Handicap</option><option value="name">Name</option></select></label>
     <button class="ghost" id="gClear">Clear</button>
   </div>
+  </details>
   <div class="card">
     <h2>Players</h2>
-    <p class="note"><b>His average</b> is exactly that: every 18-hole round he has ever logged on Squabbit,
-    on a par-72 basis. Not the last 20 &mdash; all of them, right back to his first. Pairs formats are
-    thrown out, because in foursomes and scrambles two men share one ball and the score says nothing about
-    either of them on his own.</p>
-    <p class="note"><b>"Isn't it the best 8 of the last 20?"</b> That is the <b>handicap</b>, and yes it is
-    &mdash; that is how a WHS index is built. It is deliberately <em>not</em> how these two columns are built.
-    A handicap is a measure of how well you can play: it takes your 8 best days out of 20 and throws
-    the other 12 in the bin. These columns are a measure of what you will actually shoot on Thursday,
-    which has to include the 12 in the bin. Price a golf match off everybody's best eight and you have
-    priced a tournament nobody is playing in.</p>
-    <p class="note">Which is also why <b>nearly everyone's average sits above his handicap</b> &mdash; the
-    middle of this group is about 4 shots above, and that is completely normal rather than evidence that
-    anyone is at it. A man is supposed to beat his handicap roughly 1 round in 4. If you want to know
-    who is genuinely getting more shots than his golf deserves, that is what the verdict in the last column is
-    telling you. The number behind it is the organiser's homework.</p>
-    <p class="note"><b>Likely in Spain</b> is the number that matters, and it is deliberately higher than his
-    average for nearly everybody. Marbella, La Cala Asia and Santa Maria are harder than the courses this lot
-    play at home &mdash; those three average a slope of 135, where a gentle parkland track is nearer 120 &mdash; so the
-    same golfer shoots more. The gap between the two columns <em>is</em> the course difficulty. Recent rounds
-    count for more than old ones in working it out, so a man who has found something lately shows it.</p>
-    <p class="note"><b>Form now</b> is where he sits in this squad on current scoring, 1st being the
-    best golfer in the room right now. <b>Trip record</b> is every match he has played on the last 2
-    trips, oldest block first: <span class="wld"><i class="w">W</i></span> won,
-    <span class="wld"><i class="l">L</i></span> lost, <span class="wld"><i class="d">D</i></span>
-    halved, read straight off Squabbit. The position beside it ranks the 16 men who have a record,
-    on points per match, with more matches breaking a tie. 4 of this squad have never played one, and
-    they are marked as first-timers rather than dumped at the bottom &mdash; no record is not a bad
-    record. <b>The 2 columns are measuring different things and are supposed to disagree.</b> These
-    matches are played off handicap, so a man can score badly and still win: Tom Bucknall went
-    4 from 4 last year off the highest mark in the field. That is the point of the format.</p>
-    <p class="note">Handicaps are the marks on each player's <b>Squabbit profile</b>, taken from the account that actually
-    played the last two trips, not from whatever was keyed in after the last round. <b>Form</b> is a recency-weighted scoring differential, lower is better. <b>Raw</b> is form
-    minus handicap straight from the data; <b>Gap</b> is that after thin samples are discounted towards the field
-    median — 7 rounds should not carry the same weight as 89. <b>Spread</b> is day-to-day volatility.</p>
+    <div class="fbhead">
+      <p class="note" style="margin:0;flex:1 1 240px"><b>Likely in Spain</b> is the number that matters:
+      what he is expected to shoot out there, which is higher than his home average because the courses
+      are harder. Everything else is context.</p>
+      <div class="seg" id="fbView"><button data-v="table">Table</button><button data-v="list">List</button></div>
+    </div>
+    <details class="how" id="fbHow"><summary>How these numbers are worked out, and the arguments they settle</summary>
+      <p class="note"><b>His average</b> is exactly that: every 18-hole round he has ever logged on Squabbit,
+      on a par-72 basis. Not the last 20 &mdash; all of them, right back to his first. Pairs formats are
+      thrown out, because in foursomes and scrambles two men share one ball and the score says nothing about
+      either of them on his own.</p>
+      <p class="note"><b>"Isn't it the best 8 of the last 20?"</b> That is the <b>handicap</b>, and yes it is
+      &mdash; that is how a WHS index is built. It is deliberately <em>not</em> how these two columns are built.
+      A handicap is a measure of how well you can play: it takes your 8 best days out of 20 and throws
+      the other 12 in the bin. These columns are a measure of what you will actually shoot on Thursday,
+      which has to include the 12 in the bin. Price a golf match off everybody's best eight and you have
+      priced a tournament nobody is playing in.</p>
+      <p class="note">Which is also why <b>nearly everyone's average sits above his handicap</b> &mdash; the
+      middle of this group is about 4 shots above, and that is completely normal rather than evidence that
+      anyone is at it. A man is supposed to beat his handicap roughly 1 round in 4. If you want to know
+      who is genuinely getting more shots than his golf deserves, that is what the verdict in the last column is
+      telling you. The number behind it is the organiser's homework.</p>
+      <p class="note"><b>Likely in Spain</b> is deliberately higher than his average for nearly everybody.
+      Marbella, La Cala Asia and Santa Maria are harder than the courses this lot
+      play at home &mdash; those three average a slope of 135, where a gentle parkland track is nearer 120 &mdash; so the
+      same golfer shoots more. The gap between the two columns <em>is</em> the course difficulty. Recent rounds
+      count for more than old ones in working it out, so a man who has found something lately shows it.</p>
+      <p class="note"><b>Form now</b> is where he sits in this squad on current scoring, 1st being the
+      best golfer in the room right now. <b>Trip record</b> is every match he has played on the last 2
+      trips, oldest block first: <span class="wld"><i class="w">W</i></span> won,
+      <span class="wld"><i class="l">L</i></span> lost, <span class="wld"><i class="d">D</i></span>
+      halved, read straight off Squabbit. The position beside it ranks the 16 men who have a record,
+      on points per match, with more matches breaking a tie. 4 of this squad have never played one, and
+      they are marked as first-timers rather than dumped at the bottom &mdash; no record is not a bad
+      record. <b>The 2 columns are measuring different things and are supposed to disagree.</b> These
+      matches are played off handicap, so a man can score badly and still win: Tom Bucknall went
+      4 from 4 last year off the highest mark in the field. That is the point of the format.</p>
+      <p class="note"><b>Trending</b> compares a man's last 10 rounds with his whole record, in shots per
+      18, so it shows who has found something lately and who has lost it. Pairs-format rounds are excluded
+      everywhere, because identical scores across a pairing say nothing about either man; nine-hole rounds
+      count, doubled onto an 18-hole scale.</p>
+      <p class="note">Handicaps are the marks on each player's <b>Squabbit profile</b>, taken from the account that actually
+      played the last two trips, not from whatever was keyed in after the last round. <b>Form</b> is a recency-weighted scoring differential, lower is better. <b>Raw</b> is form
+      minus handicap straight from the data; <b>Gap</b> is that after thin samples are discounted towards the field
+      median &mdash; 7 rounds should not carry the same weight as 89. <b>Spread</b> is day-to-day volatility.</p>
+    </details>
+    <div id="fbookWrap">
     <div class="wrap formtable"><table id="formTbl"></table></div>
     <div id="formCards" class="formcards"></div>
+    </div>
   </div>
 </section>
 
@@ -2849,7 +2881,7 @@ const DATA_V="2026-08-19.1"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
- admPane:"settle",poView:"market",poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,paidClaim:0,
+ admPane:"settle",poView:"market",fbView:"",fbHow:false,gFold:null,poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,paidClaim:0,
  onboarded:false,onbStep:0,rulesV:0,rulesAt:0,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
  players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
@@ -2885,6 +2917,9 @@ function load(){
  if(saved.installDone) S.installDone=true;
  if(saved.admPane)     S.admPane=saved.admPane;
  if(saved.poView)      S.poView=saved.poView;
+ if(saved.fbView)      S.fbView=saved.fbView;
+ if(saved.fbHow!=null) S.fbHow=!!saved.fbHow;
+ if(saved.gFold!=null) S.gFold=!!saved.gFold;
  if(Array.isArray(saved.alSeen)) S.alSeen=saved.alSeen;
  if(saved.phaseOpen) S.phaseOpen=true;
  if(saved.howOpen)   S.howOpen=true;
@@ -4900,14 +4935,16 @@ function drawSquabAge(){
     "latest round counted" quietly stops moving while still looking like a live figure. So the
     read is stamped separately, and it complains once it is older than three days. */
  const pull=dayGap(SQUAB_PULLED);
- el.innerHTML=`<b>Latest round counted:</b> ${d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}
-   (${when}) &mdash; ${who.map(esc).join(", ")}. Every player's own last round is in the table below, and
-   <b>Trending</b> compares his last 10 rounds with his whole record, in shots per 18.
-   ${pull==null?"":`<br><span class="${pull>=3?"warn":""}">Squabbit last read:</span> ${
+ el.innerHTML=`<b>Latest round counted:</b> ${d.toLocaleDateString("en-GB",{day:"numeric",month:"long"})}
+   (${when}) &mdash; ${who.map(esc).join(", ")}.
+   ${pull==null?"":`<span class="${pull>=3?"warn":""}">Squabbit last read:</span> ${
      pull<=0?"today":pull===1?"yesterday":pull+" days ago"}${
      pull>=3?" &mdash; anything played since then is not in these figures yet.":"."}`}
-   ${stale.length?`<br><span class="warn">Running on old golf:</span> ${stale.map(p=>esc(p.name)+" ("+
-     dayGap(p.last)+" days)").join(", ")}.`:""}`;
+   ${stale.length?`<br><span class="warn">Running on old golf:</span> ${
+     ADMIN_TOKEN||stale.length<=2
+       ? stale.map(p=>esc(p.name)+" ("+dayGap(p.last)+" days)").join(", ")+"."
+       : `${stale.length} men, the worst being ${esc(stale[0].name)} at ${dayGap(stale[0].last)} days. `
+         +`Each man's own last round is in his row.`}`:""}`;
 }
 /* Remembers the trophy percentage from the previous published price set and reports the move.
    Nothing is shown until a second set has been published, because an arrow with nothing to point
@@ -5048,7 +5085,20 @@ function gFiltered(){
  if(d==="good")ps=ps.filter(p=>p.n>=10);
  if(d==="low")ps=ps.filter(p=>p.n<10);
  const s=$("#gSort").value;
+ /* Sorting on the trip record needs a single comparable number per man. Points per match is the
+    only fair one — half this squad has 8 matches on record and half has 4, so raw points would
+    just sort by who has been on more trips. Ties go to the man with more matches behind the same
+    rate, and the 4 who have never played one sort to the bottom of THIS list rather than being
+    given a position in the column, which is a different question. */
+ const tripKey=p=>{const t=tripOf(p.name); if(!t) return null;
+   const seq=TRIP_YEARS.map(y=>t[y]||"").join("");
+   return seq.length?{r:wldPts(seq)/seq.length,m:seq.length}:null;};
  ps.sort((a,b)=> s==="hcp"?a.hcp-b.hcp : s==="sd"?b.sd-a.sd : s==="name"?a.name.localeCompare(b.name)
+   : s==="form"?a.form-b.form                       /* lower over-par is the better golfer */
+   : s==="trip"?(()=>{const x=tripKey(a),y=tripKey(b);
+       if(!x&&!y) return a.name.localeCompare(b.name);
+       if(!x) return 1; if(!y) return -1;            /* first-timers last, never interleaved */
+       return (y.r-x.r)||(y.m-x.m)||a.name.localeCompare(b.name);})()
    : s==="mvp"?(((priceSrc()||{})[b.name]||{}).mvp||0)-(((priceSrc()||{})[a.name]||{}).mvp||0)
    : (a.form-a.hcp)-(b.form-b.hcp));
  return ps;}
@@ -5209,6 +5259,18 @@ function wldHtml(name){
    [...t[y]].map(c=>c==="W"?"won":c==="L"?"lost":"halved").join(", ")+`"><u>'${String(y).slice(2)}</u>`+
    [...t[y]].map(c=>`<i class="${c.toLowerCase()}">${c}</i>`).join("")+`</span>`).join("");
 }
+/* Table or List. An empty setting means "whatever the screen suggests", which is what everybody
+   gets on their first visit; the moment a man picks one it sticks on that phone and the breakpoint
+   stops having an opinion. Nothing is re-rendered — both views are always in the DOM, CSS decides. */
+function applyFbView(){
+ const w=$("#fbookWrap"); if(!w) return;
+ w.classList.toggle("v-table",S.fbView==="table");
+ w.classList.toggle("v-list", S.fbView==="list");
+ const auto=matchMedia("(max-width:719px)").matches?"list":"table";
+ document.querySelectorAll("#fbView button").forEach(b=>
+   b.classList.toggle("on",b.dataset.v===(S.fbView||auto)));
+ const d=$("#fbHow"); if(d && d.open!==!!S.fbHow) d.open=!!S.fbHow;
+}
 function drawForm(){
  const nerd=!!ADMIN_TOKEN;                       /* the detail is organiser's homework */
  const RK=formRanks();
@@ -5281,6 +5343,20 @@ function drawForm(){
      <div class="ftrend">${trendCell(p)}</div>
      <p class="note fword">${read}</p>
    </div>`;}).join("");
+ applyFbView();
+ /* A collapsed filter panel that is silently hiding half the squad is a trap, so the summary says
+    what is on. "Sort" is not counted as a filter — it hides nobody. */
+ (()=>{const sum=$("#gFoldSum"); if(!sum) return;
+   const on=[]; const t=$("#gTeam").value, d=$("#gData").value,
+     lo=$("#gHmin").value, hi=$("#gHmax").value, so=$("#gSort");
+   if(t) on.push(t+" only");
+   if(d==="good") on.push("solid samples"); if(d==="low") on.push("thin samples");
+   if(lo||hi) on.push("handicap "+(lo||"any")+" to "+(hi||"any"));
+   const srt=so.options[so.selectedIndex].textContent;
+   sum.innerHTML = on.length
+     ? `Filter and sort &mdash; <span class="warn">${esc(on.join(", "))}</span>, ${gFiltered().length} of ${
+         S.players.filter(p=>p.in).length} shown, by ${esc(srt.toLowerCase())}`
+     : `Filter and sort &mdash; everyone, by ${esc(srt.toLowerCase())}`;})();
  drawSquabAge();}
 function drawOdds(){
  const ctl=$("#simCtl"); if(ctl) ctl.style.display = ADMIN_TOKEN ? "flex" : "none";
@@ -6603,6 +6679,13 @@ document.querySelectorAll("#admNav button").forEach(b=>b.addEventListener("click
  setAdmPane(b.dataset.a);}));
 document.querySelectorAll("#poView button").forEach(b=>b.addEventListener("click",()=>{
  S.poView=b.dataset.v; save(); drawPayout();}));
+document.querySelectorAll("#fbView button").forEach(b=>b.addEventListener("click",()=>{
+ S.fbView=b.dataset.v; save(); applyFbView();}));
+/* The long explanation stays shut until somebody wants it, and stays open once they have opened it.
+   It used to sit above the table as 6 paragraphs, which pushed the players themselves below the
+   fold on a phone — the one thing the page exists to show. */
+(()=>{const d=$("#fbHow"); if(!d) return;
+ d.addEventListener("toggle",()=>{S.fbHow=d.open;save();});})();
 if($("#poDone")) $("#poDone").addEventListener("change",e=>{S.poDone=e.target.checked;save();drawPayout();});
 function setAdmPane(a){
  S.admPane=a; save();
@@ -6995,7 +7078,13 @@ paintFmt();paintTheme();setAdmPane(S.admPane||"settle");
 (function(){const h=$("#howCard"); if(h){
  h.open=!!S.howOpen; h.addEventListener("toggle",()=>{S.howOpen=h.open;save();});}
  const f=$("#fFold"); if(f){
- f.open=!!S.filtOpen; f.addEventListener("toggle",()=>{S.filtOpen=f.open;save();});}})();
+ f.open=!!S.filtOpen; f.addEventListener("toggle",()=>{S.filtOpen=f.open;save();});}
+ /* The Form Book filters are 5 stacked rows on a phone and one tidy row on a laptop, so the
+    default follows the screen rather than being the same everywhere. Once a man opens or shuts
+    it himself his choice is kept and the screen stops deciding. */
+ const g=$("#gFold"); if(g){
+ g.open = S.gFold==null ? !matchMedia("(max-width:719px)").matches : !!S.gFold;
+ g.addEventListener("toggle",()=>{S.gFold=g.open;save();});}})();
 drawAll();drawInstall();tick();setInterval(tick,30000);
 /* The odds live in the database. A punter's phone reads them; it never computes them,
    so every screen shows the same price and nobody can reroll their way to a better one.
