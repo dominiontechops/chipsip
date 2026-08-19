@@ -252,6 +252,20 @@ tr:last-child td{border-bottom:0}
 .wrap table{min-width:520px}
 @media(max-width:719px){ .wrap{margin:0 -12px;padding:0 12px} }
 .pos{color:var(--acc2)}.neg{color:var(--negtx)}.warn{color:var(--warn)}
+/* Football-style form guide. Green won, red lost, grey halved. The letter is never the only
+   signal — each carries a title so a colour-blind reader gets the word, and the aggregate
+   position sits next to it in plain text. */
+.wld{display:inline-flex;gap:2px;align-items:center;vertical-align:middle}
+.wld+.wld{margin-left:7px;padding-left:7px;border-left:1px solid var(--line)}
+.wld i{font-style:normal;font-family:var(--mono);font-size:10px;line-height:1;
+  width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:3px;border:1px solid transparent;font-weight:700}
+.wld i.w{color:var(--on);background:var(--acc)}
+.wld i.l{color:var(--on);background:var(--red)}
+.wld i.d{color:var(--dim);border-color:var(--line);background:transparent}
+.wld u{text-decoration:none;color:var(--dim);font-size:10px;font-family:var(--mono);margin-right:3px}
+.rankcell{white-space:nowrap}
+.rankcell .rk{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
 .tag.low{border-color:var(--warnbd);color:var(--warn)}
 .tag.nd{border-color:var(--redbd);color:var(--red2)}
@@ -918,6 +932,16 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     play at home &mdash; those three average a slope of 135, where a gentle parkland track is nearer 120 &mdash; so the
     same golfer shoots more. The gap between the two columns <em>is</em> the course difficulty. Recent rounds
     count for more than old ones in working it out, so a man who has found something lately shows it.</p>
+    <p class="note"><b>Form now</b> is where he sits in this squad on current scoring, 1st being the
+    best golfer in the room right now. <b>Trip record</b> is every match he has played on the last 2
+    trips, oldest block first: <span class="wld"><i class="w">W</i></span> won,
+    <span class="wld"><i class="l">L</i></span> lost, <span class="wld"><i class="d">D</i></span>
+    halved, read straight off Squabbit. The position beside it ranks the 16 men who have a record,
+    on points per match, with more matches breaking a tie. 4 of this squad have never played one, and
+    they are marked as first-timers rather than dumped at the bottom &mdash; no record is not a bad
+    record. <b>The 2 columns are measuring different things and are supposed to disagree.</b> These
+    matches are played off handicap, so a man can score badly and still win: Tom Bucknall went
+    4 from 4 last year off the highest mark in the field. That is the point of the format.</p>
     <p class="note">Handicaps are the marks on each player's <b>Squabbit profile</b>, taken from the account that actually
     played the last two trips, not from whatever was keyed in after the last round. <b>Form</b> is a recency-weighted scoring differential, lower is better. <b>Raw</b> is form
     minus handicap straight from the data; <b>Gap</b> is that after thin samples are discounted towards the field
@@ -5119,12 +5143,85 @@ function drawMine(){
   ${grp("Still running",live)}
   ${grp("Settled",settled, settled.length?`${wonBets} of ${settled.length} landed, turning ${money(settledStake)} into ${money(won)}.${refunded>0?` A further ${money(refunded)} came back on voided markets.`:""}`:"")}`;
 }
+/* ================= TRIP RECORD =================================================================
+   Every match either man played on the last 2 trips, in order, read off the Squabbit Ryder Cup
+   leaderboards on 19 Aug 2026. W won, L lost, D halved.
+     2024 — "Rimmed It Roundup", Portugal, 19-22 Sep, 12 men, 4 matches each.
+            Alternate shot, scramble, best ball, singles. Red (then Team Lukey) won 9.5-5.5.
+     2025 — "Chip & Sip Championship 2025", Spain, 16 men, 4 matches each.
+            Alternate shot, best ball, scramble, singles. 12 apiece, Red retained.
+   Side games are excluded: 2025 ran a "Minigame Player" as a 5th match each session and no
+   individual is named on it, so it cannot be attributed to anybody.
+   4 of the 2026 squad have never played one of these: Mark Sturgess, Matt Petty, Josh Evans and
+   Theo Smith-Harris. They are shown as first-timers, NOT ranked last — no record is not a bad
+   record, and burying them at 20th would say something the data does not.
+   Marcus Enderson, Declan Ward and Jake Walsh played but are not on the 2026 roster, so they are
+   left out entirely rather than kept as ghosts.
+   NOTE FOR NEXT YEAR: add a "2026" key after the trip and the column keeps working untouched. */
+const TRIP_FORM={
+ "Eamonn Brady":    {2024:"WWLW", 2025:"WLWL"},
+ "Jack Mulroy":     {2024:"WLLL", 2025:"LWWL"},
+ "Jay France":      {2024:"WWWL", 2025:"LLWW"},
+ "Luke Holland":    {2024:"WLWW"},
+ "Gabe Hills":      {2024:"WLWW", 2025:"WDWW"},
+ "Alex Mulvin":     {2024:"LWLL", 2025:"WDWW"},
+ "Ben West":        {2024:"LWWW", 2025:"LWLL"},
+ "Dom Mills":       {2024:"LWWD", 2025:"LDLL"},
+ "Josh Menzies":    {2024:"LWLL", 2025:"LWLW"},
+ "Matt Holland":    {2024:"LLLW"},
+ "Tom Bucknall":    {2025:"WWWW"},
+ "dong ming lau":   {2025:"WWDW"},
+ "Rob Parfitt":     {2025:"WWDL"},
+ "Chris Best":      {2025:"WDLL"},
+ "Luke Usher":      {2025:"WLDL"},
+ "Dave Huddleston": {2025:"LLLW"}};
+const TRIP_YEARS=[2024,2025];
+const tripOf=n=>{const k=Object.keys(TRIP_FORM).find(x=>norm(x)===norm(n)); return k?TRIP_FORM[k]:null;};
+const wldPts=str=>[...(str||"")].reduce((a,c)=>a+(c==="W"?1:c==="D"?0.5:0),0);
+/* Ordinals, because "3rd" reads and "3" does not. */
+const ord=n=>{const t=n%100; if(t>=11&&t<=13) return n+"th";
+ return n+({1:"st",2:"nd",3:"rd"}[n%10]||"th");};
+/* Competition ranking: equal keys share a position and the next man skips. Ties are broken on
+   matches played first, so a man with 8 matches at the same rate sits above one with 4 — more
+   evidence for the same claim. */
+function rankBy(list,key,better){
+ const rows=list.map(x=>({x,k:key(x)})).filter(r=>r.k!=null).sort((a,b)=>better(a.k,b.k));
+ const out=new Map(); let pos=0,seen=0,prev=null;
+ rows.forEach(r=>{seen++; if(prev===null||better(prev,r.k)!==0) pos=seen; prev=r.k; out.set(r.x,pos);});
+ return {rank:out,total:rows.length};
+}
+/* Both rankings are worked out over the WHOLE squad, never the filtered view — "3rd" has to mean
+   3rd of the twenty, not 3rd of whoever happens to be on screen after a team filter. */
+function formRanks(){
+ const squad=S.players.filter(p=>p.in);
+ const fr=rankBy(squad,p=>(p.form==null?null:p.form),(a,b)=>a-b);   /* lower over-par is better */
+ const tr=rankBy(squad,p=>{const t=tripOf(p.name); if(!t) return null;
+   const seq=TRIP_YEARS.map(y=>t[y]||"").join("");
+   return seq.length?[-(wldPts(seq)/seq.length),-seq.length]:null;},
+   (a,b)=>(a[0]-b[0])||(a[1]-b[1]));
+ return {fr,tr,squad:squad.length};
+}
+function wldHtml(name){
+ const t=tripOf(name); if(!t) return "";
+ /* Each trip is labelled. Without the year a man with 2 blocks reads as one 8-match run, and when
+    2026 is added there would be 3 unlabelled blocks and nobody would know which was which. */
+ return TRIP_YEARS.filter(y=>t[y]).map(y=>`<span class="wld" title="${y}: `+
+   [...t[y]].map(c=>c==="W"?"won":c==="L"?"lost":"halved").join(", ")+`"><u>'${String(y).slice(2)}</u>`+
+   [...t[y]].map(c=>`<i class="${c.toLowerCase()}">${c}</i>`).join("")+`</span>`).join("");
+}
 function drawForm(){
  const nerd=!!ADMIN_TOKEN;                       /* the detail is organiser's homework */
+ const RK=formRanks();
+ const posCell=(p)=>{const r=RK.fr.rank.get(p);
+   return r?`<span class="rk">${ord(r)}</span> <span class="tag">of ${RK.fr.total}</span>`:"&mdash;";};
+ const tripCell=(p)=>{const r=RK.tr.rank.get(p), w=wldHtml(p.name);
+   if(!w) return `<span class="tag">first trip</span>`;
+   return `<span class="rankcell"><span class="rk">${ord(r)}</span> <span class="tag">of ${RK.tr.total}</span></span><br>${w}`;};
  const TRIP={rating:69.7,slope:133.25};             /* average of the four courses we are playing */
  const typical=p=>Math.round(p.form*TRIP.slope/113+TRIP.rating);
  let h=`<tr><th>Player</th><th>Team</th><th class="num">Handicap</th>
-  <th class="num">His average</th><th class="num">Likely in Spain</th><th>Trending</th><th class="num">Last played</th>
+  <th class="num">His average</th><th class="num">Likely in Spain</th><th class="num">Form now</th>
+  <th>Trip record</th><th>Trending</th><th class="num">Last played</th>
   ${nerd?`<th class="num">Form</th><th class="num">Raw</th><th class="num">Gap</th><th class="num">Spread</th><th class="num">Rounds</th>`:""}
   <th>The word on him</th></tr>`;
  gFiltered().forEach(p=>{const g=p.form-p.hcp;
@@ -5140,6 +5237,8 @@ function drawForm(){
    <span>${esc(p.name)}${p.unknown?' <span class="tag nd">form assumed</span>':p.low?' <span class="tag low">thin sample</span>':""}</span></span></td>
    <td>${teamTag(p.team)}${roleTag(p.name)}</td><td class="num">${p.hcp.toFixed(1)}</td>
    <td class="num">${p.avg||"—"}</td><td class="num strong">${typical(p)}</td>
+   <td class="num small">${posCell(p)}</td>
+   <td class="small">${tripCell(p)}</td>
    <td class="small">${trendCell(p)}</td>
    <td class="num small">${p.last?agoStr(p.last):"&mdash;"}</td>
    ${nerd?`<td class="num">${p.form.toFixed(1)}</td>
@@ -5172,9 +5271,13 @@ function drawForm(){
      <div class="fgrid">
        ${cell("his average", p.avg||"&mdash;")}
        ${cell("likely in Spain", typical(p))}
+       ${cell("form now", (RK.fr.rank.get(p)?ord(RK.fr.rank.get(p))+" of "+RK.fr.total:"&mdash;"))}
        ${cell("last played", p.last?agoStr(p.last):"&mdash;")}
        ${nerd?cell("gap",(g>=0?"+":"")+g.toFixed(1)):""}
      </div>
+     <div class="ftrend">${(()=>{const r=RK.tr.rank.get(p),w=wldHtml(p.name);
+        return w?`<span class="small">trip record</span> <b>${ord(r)} of ${RK.tr.total}</b> ${w}`
+                :`<span class="small">trip record</span> <span class="tag">first trip</span>`;})()}</div>
      <div class="ftrend">${trendCell(p)}</div>
      <p class="note fword">${read}</p>
    </div>`;}).join("");
