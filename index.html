@@ -941,7 +941,8 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <label>Show <select id="gData"><option value="">Everyone</option><option value="good">Solid sample</option>
       <option value="low">Thin or no sample</option></select></label>
     <label>Sort <select id="gSort"><option value="gap">Best value first</option><option value="mvp">Shortest price</option>
-      <option value="form">Form now</option><option value="trip">Trip record</option>
+      <option value="form">Form</option><option value="trip">Trip record</option>
+      <option value="spain">Scoring level</option>
       <option value="hcp">Handicap</option><option value="name">Name</option>
       <option value="__col" disabled>Table column</option></select></label>
     <button class="ghost" id="gClear">Clear</button>
@@ -950,10 +951,10 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
   <div class="card">
     <h2>Players</h2>
     <div class="fbhead">
-      <p class="note" style="margin:0;flex:1 1 240px"><b>Likely in Spain</b> is the number that matters:
-      what he is expected to shoot out there, higher than his home average because the courses are harder.
-      <b>Form now</b> ranks him against the room; <b>Trending</b> compares him with himself, so a man can
-      lead the group and still be off his own pace.</p>
+      <p class="note" style="margin:0;flex:1 1 240px"><b>Likely in Spain</b> is how good he is: what he is
+      expected to shoot out there, higher than his home average because the courses are harder.
+      <b>Form</b> is a different question &mdash; how he is playing against his own standard, so a 24 handicapper
+      can be 1st on form and the best golfer here can be 20th.</p>
       <div class="seg" id="fbView"><button data-v="table">Table</button><button data-v="list">List</button></div>
     </div>
     <details class="how" id="fbHow"><summary>How these numbers are worked out, and the arguments they settle</summary>
@@ -987,12 +988,19 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       record. <b>The 2 columns are measuring different things and are supposed to disagree.</b> These
       matches are played off handicap, so a man can score badly and still win: Tom Bucknall went
       4 from 4 last year off the highest mark in the field. That is the point of the format.</p>
-      <p class="note"><b>Form now against Trending, and why they argue.</b> Form now is a league table of
-      the 20: 1st is the lowest scorer in the room. Trending is each man against his own record &mdash; his
-      last 10 rounds against everything he has ever logged, in shots per 18. Nothing links them. Jay France
-      is 1st on form and off his own pace: he is still the best golfer here, he is just not playing as well
-      as Jay France usually plays. The reverse happens too, and a man climbing back towards his own best
-      from 17th is still 17th. Pairs-format rounds are excluded everywhere, because identical scores across
+      <p class="note"><b>Form is not the same as being good.</b> Form here means what it means when
+      somebody says a player is in form: how he is going <em>right now</em> against his own standard. It is
+      his last 10 rounds measured against everything he has ever logged, in shots per 18. A man off 9 who
+      shoots 85 on a good day and is currently going round in 95 is in worse form than a man whose history
+      says 105 and who is shooting 98 &mdash; the second man is playing better than himself, the first is not.
+      Handicap plays no part in it at all.</p>
+      <p class="note">So <b>Form</b> and <b>Likely in Spain</b> are asking 2 different things and will often
+      disagree. Likely in Spain is class: who shoots the lowest number. Form is momentum: who is ahead of
+      his own game this month. A high handicapper who has found something can top the form table while
+      still being 19th on the card, and the best golfer in the group can sit near the bottom of it because
+      he has been off his own pace since June. Both are worth knowing and neither replaces the other.
+      2 men have no scoring record and cannot be ranked on form at all.</p>
+      <p class="note">Pairs-format rounds are excluded everywhere, because identical scores across
       a pairing say nothing about either man; nine-hole rounds count, doubled onto an 18-hole scale.</p>
       <p class="note">Handicaps are the marks on each player's <b>Squabbit profile</b>, taken from the account that actually
       played the last two trips, not from whatever was keyed in after the last round. <b>Form</b> is a recency-weighted scoring differential, lower is better. <b>Raw</b> is form
@@ -5153,7 +5161,8 @@ function drawKpis(){
 const GSORTS={
  gap:  {lbl:"best value first", v:p=>p.form-p.hcp,           first:1},
  mvp:  {lbl:"shortest price",   v:p=>((priceSrc()||{})[p.name]||{}).mvp??null, first:-1},
- form: {lbl:"form now",         v:p=>p.form,                 first:1},
+ form: {lbl:"form",             v:p=>(p.unknown?null:p.trend??null), first:1},
+ class:{lbl:"scoring level",    v:p=>p.form,                 first:1},
  trip: {lbl:"trip record",      v:p=>{const t=tripOf(p.name); if(!t) return null;
           const q=TRIP_YEARS.map(y=>t[y]||"").join("");
           /* points per match, then matches, folded into one number so ties break the right way
@@ -5163,8 +5172,8 @@ const GSORTS={
  team: {lbl:"team",             v:p=>p.team||"",              first:1},
  hcp:  {lbl:"handicap",         v:p=>p.hcp,                   first:1},
  avg:  {lbl:"his average",      v:p=>p.avg??null,             first:1},
- spain:{lbl:"likely in Spain",  v:p=>p.form,                  first:1},
- trend:{lbl:"trending",         v:p=>p.trend??null,           first:1},
+ spain:{lbl:"likely in Spain",  v:p=>p.form,                  first:1},   /* absolute: how good he is */
+ trend:{lbl:"form",             v:p=>(p.unknown?null:p.trend??null), first:1},  /* kept: old saved state */
  last: {lbl:"last played",      v:p=>p.last||null,            first:-1},
  raw:  {lbl:"raw gap",          v:p=>p.rawGap??null,          first:1},
  sd:   {lbl:"spread",           v:p=>p.sd,                    first:-1},
@@ -5340,7 +5349,14 @@ function rankBy(list,key,better){
    3rd of the twenty, not 3rd of whoever happens to be on screen after a team filter. */
 function formRanks(){
  const squad=S.players.filter(p=>p.in);
- const fr=rankBy(squad,p=>(p.form==null?null:p.form),(a,b)=>a-b);   /* lower over-par is better */
+ /* FORM IS RELATIVE, NOT ABSOLUTE. This used to rank on p.form — the man's scoring level — which
+    made it a duplicate of "Likely in Spain" wearing a different hat and put the best golfer top
+    whatever he had been shooting lately. That is class, not form. A man off 9 who shoots 85 on a
+    good day and is going round in 95 is in WORSE form than a man whose history says 105 and who
+    is going round in 98, and the old column said the opposite. So it ranks on trend: his last 10
+    rounds against his whole record, in shots per 18, negative being better. Nothing to do with
+    his handicap and nothing to do with how good he is. */
+ const fr=rankBy(squad,p=>(p.unknown||p.trend==null?null:p.trend),(a,b)=>a-b);
  const tr=rankBy(squad,p=>{const t=tripOf(p.name); if(!t) return null;
    const seq=TRIP_YEARS.map(y=>t[y]||"").join("");
    return seq.length?[-(wldPts(seq)/seq.length),-seq.length]:null;},
@@ -5375,8 +5391,11 @@ function applyFbView(){
 function drawForm(){
  const nerd=!!ADMIN_TOKEN;                       /* the detail is organiser's homework */
  const RK=formRanks();
+ /* Form is a position AND the thing behind it, exactly like Trip record — otherwise "4th" is a
+    number with no working shown, and the trend words on their own were a verdict with no scale. */
  const posCell=(p)=>{const r=RK.fr.rank.get(p);
-   return r?`<span class="rk">${ord(r)}</span> <span class="tag">of ${RK.fr.total}</span>`:"&mdash;";};
+   return (r?`<span class="rankcell"><span class="rk">${ord(r)}</span> <span class="tag">of ${RK.fr.total}</span></span><br>`:"")
+     +trendCell(p);};
  const tripCell=(p)=>{const r=RK.tr.rank.get(p), w=wldHtml(p.name);
    if(!w) return `<span class="tag">first trip</span>`;
    return `<span class="rankcell"><span class="rk">${ord(r)}</span> <span class="tag">of ${RK.tr.total}</span></span><br>${w}`;};
@@ -5390,8 +5409,8 @@ function drawForm(){
    title="Sort by ${GSORTS[k].lbl}">${label}<i class="sar${G.k===k?" on":""}">${
      G.k===k?(G.dir===1?"\u25B4":"\u25BE"):"\u25B4"}</i></th>`;
  let h=`<tr>${th("name","Player")}${th("team","Team")}${th("hcp","Handicap","num")}
-  ${th("avg","His average","num")}${th("spain","Likely in Spain","num")}${th("form","Form now","num")}
-  ${th("trip","Trip record")}${th("trend","Trending")}${th("last","Last played","num")}
+  ${th("avg","His average","num")}${th("spain","Likely in Spain","num")}${th("form","Form")}
+  ${th("trip","Trip record")}${th("last","Last played","num")}
   ${nerd?`${th("form","Form","num")}${th("raw","Raw","num")}${th("gap","Gap","num")}${th("sd","Spread","num")}${th("n","Rounds","num")}`:""}
   ${th("word","The word on him")}</tr>`;
  gFiltered().forEach(p=>{const g=p.form-p.hcp;
@@ -5407,9 +5426,8 @@ function drawForm(){
    <span>${esc(p.name)}${p.unknown?' <span class="tag nd">form assumed</span>':p.low?' <span class="tag low">thin sample</span>':""}</span></span></td>
    <td>${teamTag(p.team)}${roleTag(p.name)}</td><td class="num">${p.hcp.toFixed(1)}</td>
    <td class="num">${p.avg||"—"}</td><td class="num strong">${typical(p)}</td>
-   <td class="num small">${posCell(p)}</td>
+   <td class="small">${posCell(p)}</td>
    <td class="small">${tripCell(p)}</td>
-   <td class="small">${trendCell(p)}</td>
    <td class="num small">${p.last?agoStr(p.last):"&mdash;"}</td>
    ${nerd?`<td class="num">${p.form.toFixed(1)}</td>
     <td class="num small">${p.rawGap==null?"—":(p.rawGap>=0?"+":"")+p.rawGap.toFixed(1)}</td>
@@ -5441,7 +5459,7 @@ function drawForm(){
      <div class="fgrid">
        ${cell("his average", p.avg||"&mdash;")}
        ${cell("likely in Spain", typical(p))}
-       ${cell("form now", (RK.fr.rank.get(p)?ord(RK.fr.rank.get(p))+" of "+RK.fr.total:"&mdash;"))}
+       ${cell("form", (RK.fr.rank.get(p)?ord(RK.fr.rank.get(p))+" of "+RK.fr.total:"&mdash;"))}
        ${cell("last played", p.last?agoStr(p.last):"&mdash;")}
        ${nerd?cell("gap",(g>=0?"+":"")+g.toFixed(1)):""}
      </div>
