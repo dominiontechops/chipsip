@@ -1031,7 +1031,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         one point, a half is a half. Change the squad size and the board recalculates; the numbers on this
         page follow the roster, not the other way round.</li>
       <li><b>Red are the holders, and that makes the 2 targets different.</b> Red won it in 2024 and
-        retained it in 2025 on a 12.5 apiece tie. So this year <b>Blue need 13 to take it and Red need only
+        retained it in 2025 on a 12 apiece tie. So this year <b>Blue need 13 to take it and Red need only
         12.5 to keep it</b>. Anyone quoting "13 to win" at both teams is giving Red half a point they do not
         need. The scoreboard shows the two targets separately for exactly this reason.</li>
       <li><b>A tie is its own outcome in the betting, whatever it does to the trophy.</b> Team Result settles
@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.23",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-19.1",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2541,12 +2541,18 @@ const MARKETS=[
     "you probably rate anyway. Somebody has to be",
   type:"model",round:"",only:"Red"},
  {k:"perfect",n:"Perfect Record",
-  /* The old copy said "it has never been done on this trip". Nothing on this board can support
-     that: Squabbit records rounds, not matchplay results, so there is no source here for who won
-     what in 2024 or 2025. Claim removed rather than dressed up. */
-  d:"4 from 4, no halves, nothing dropped. 4 partners, 4 formats and 4 days of not having a bad "+
-    "one, which is why the prices are long enough to be worth a fiver. Insufferable for a decade "+
-    "if it lands",
+  /* Verified off the 2025 Squabbit leaderboard (Chip & Sip Championship 2025, tournament TOC9Hx6Gk).
+     Tom Bucknall won all 4: R1 alternate shot 2&1 with Luke Usher, R2 best ball 3&2 with Josh
+     Menzies, R3 scramble 2&1 with Alex Mulvin, R4 singles 4&2 over Chris Best. Full 2025 tally
+     checked player by player: next best were Alex Mulvin, Gabe Hills and dong ming lau on three
+     and a half. 2024 (Rimmed It Roundup) also checked: best was 3, shared by Eamonn Brady, Jay
+     France, Luke Holland, Gabe Hills and Ben West — Bucknall was not on that trip. So across both
+     recorded years he is the only man to have done it. No invented history in the copy. */
+  d:"4 from 4, no halves, nothing dropped. Tom Bucknall did it last year and has not stopped "+
+    "mentioning it: 2&1 with Luke Usher, 3&2 with Josh Menzies, 2&1 with Alex Mulvin, then 4&2 "+
+    "over Chris Best in the singles. 3 men finished on three and a half and nobody else got near "+
+    "it, and in 2024 nobody got past 3. So it can be done — it just needs 4 "+
+    "partners, 4 formats and 4 days without a bad one. Insufferable for a decade if it lands",
   type:"model",round:""},
  {k:"blank",n:"The Blank",
   d:"4 matches, nil points, 1 very quiet flight home. Somebody usually gets close, and the man you "+
@@ -2589,11 +2595,21 @@ const MARKETS=[
      "the last beats one that finished 4&3 on the 15th. If two go up the last they share it. Settles "+
      "straight off the card, no argument"},
   {k:"marg"+R,n:"Biggest Hiding "+R,type:"model",round:R,dyn:"match",
+   /* Widest on record across both years on Squabbit: Luke Holland beat Alex Mulvin 7&6 in the
+      2024 singles. 2025's widest was 5&4. Both read off the leaderboard, not estimated. */
    d:"Which match is won by the widest margin. 5&4 beats 3&2 beats 1 up. A halved match has no margin "+
-     "and cannot win it. Ties share the pool"},
+     "and cannot win it. The record is Luke Holland's 7&6 over Alex Mulvin in Portugal in 2024, and "+
+     "nothing in 2025 got wider than 5&4. Ties share the pool"},
   {k:"swp"+R,n:"Clean Sweep "+R,type:"model",round:R,team:true,dyn:"sweep",
+   /* Both recorded years checked session by session on Squabbit.
+      2024 (Rimmed It Roundup, Portugal, 12 men): R1 alternate shot 3-0 — a genuine clean sweep.
+      Then 1-2, 2-1, 3.5-2.5.
+      2025 (Chip & Sip Championship): R1 2-2, R2 2.5-1.5, R3 2.5-1.5, R4 5-3. Nothing swept.
+      So it HAS happened, once, in the opening session of 2024, off 3 matches rather than 5. */
    d:"Does either side take every single match on "+dayOnly+"? All of them, no halves, no "+
-     "exceptions. One halved match anywhere and it is gone, which is why it pays what it pays"}
+     "exceptions. It has happened once: the opening alternate shot in Portugal in 2024, when "+
+     "Luke Holland's lot took all 3. That was 3 matches though, and this is "+
+     (r===4?"10":"5")+" — one halved match anywhere and it is gone, which is why it pays what it pays"}
  );
  /* MATCH OUTRIGHTS. The bet most men actually want: back a match, not a statistic. One market per
     match, 25 across the week.
@@ -2802,7 +2818,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.23"+"/"+MODEL_V;
+const DATA_V="2026-08-19.1"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -6080,7 +6096,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.23</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-19.1</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
