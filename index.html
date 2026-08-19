@@ -278,6 +278,12 @@ tr:last-child td{border-bottom:0}
 .wld i.l{color:var(--on);background:var(--red)}
 .wld i.d{color:var(--dim);border-color:var(--line);background:transparent}
 .wld u{text-decoration:none;color:var(--dim);font-size:10px;font-family:var(--mono);margin-right:3px}
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+th.sortable:hover{color:var(--acc2)}
+th.sortable .sar{font-style:normal;font-size:9px;margin-left:4px;opacity:0;transition:opacity .12s}
+th.sortable:hover .sar{opacity:.5}
+th.sortable .sar.on{opacity:1;color:var(--acc2)}
+@media(max-width:719px){ th.sortable .sar{opacity:.5} }
 .rankcell{white-space:nowrap}
 .rankcell .rk{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
@@ -725,6 +731,18 @@ padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px}
 .grouphd .gpot{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700;
   color:var(--gc,var(--acc2));white-space:nowrap}
 .grouphd:first-child{margin-top:0}
+/* The group folds. A summary cannot be a flex parent in every browser, so the heading keeps doing
+   the layout and the summary is only a hit area. */
+details.gwrap>summary.gsum{list-style:none;cursor:pointer}
+details.gwrap>summary.gsum::-webkit-details-marker{display:none}
+details.gwrap>summary.gsum:hover .grouphd h3{filter:brightness(1.25)}
+.grouphd .gcount{color:var(--dim);font-size:11px;margin-left:auto;white-space:nowrap}
+.grouphd .gpot{margin-left:9px}
+.grouphd .gchev{color:var(--gc,var(--acc2));font-size:11px;margin-left:9px;transition:transform .15s;display:inline-block}
+details.gwrap[open]>summary.gsum .grouphd .gchev{transform:rotate(180deg)}
+details.gwrap>summary.gsum .grouphd{margin-bottom:0}
+details.gwrap[open]>summary.gsum .grouphd{margin-bottom:9px}
+@media(max-width:719px){ .grouphd .gcount{font-size:10px} }
 /* the little glyph that runs through the heading, the card and the market filter */
 .mico{width:17px;height:17px;flex:0 0 auto;display:inline-block;vertical-align:-3px}
 .mico path,.mico circle,.mico line{stroke:currentColor;stroke-width:1.7;fill:none;
@@ -924,7 +942,8 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <option value="low">Thin or no sample</option></select></label>
     <label>Sort <select id="gSort"><option value="gap">Best value first</option><option value="mvp">Shortest price</option>
       <option value="form">Form now</option><option value="trip">Trip record</option>
-      <option value="hcp">Handicap</option><option value="name">Name</option></select></label>
+      <option value="hcp">Handicap</option><option value="name">Name</option>
+      <option value="__col" disabled>Table column</option></select></label>
     <button class="ghost" id="gClear">Clear</button>
   </div>
   </details>
@@ -932,8 +951,9 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <h2>Players</h2>
     <div class="fbhead">
       <p class="note" style="margin:0;flex:1 1 240px"><b>Likely in Spain</b> is the number that matters:
-      what he is expected to shoot out there, which is higher than his home average because the courses
-      are harder. Everything else is context.</p>
+      what he is expected to shoot out there, higher than his home average because the courses are harder.
+      <b>Form now</b> ranks him against the room; <b>Trending</b> compares him with himself, so a man can
+      lead the group and still be off his own pace.</p>
       <div class="seg" id="fbView"><button data-v="table">Table</button><button data-v="list">List</button></div>
     </div>
     <details class="how" id="fbHow"><summary>How these numbers are worked out, and the arguments they settle</summary>
@@ -967,10 +987,13 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       record. <b>The 2 columns are measuring different things and are supposed to disagree.</b> These
       matches are played off handicap, so a man can score badly and still win: Tom Bucknall went
       4 from 4 last year off the highest mark in the field. That is the point of the format.</p>
-      <p class="note"><b>Trending</b> compares a man's last 10 rounds with his whole record, in shots per
-      18, so it shows who has found something lately and who has lost it. Pairs-format rounds are excluded
-      everywhere, because identical scores across a pairing say nothing about either man; nine-hole rounds
-      count, doubled onto an 18-hole scale.</p>
+      <p class="note"><b>Form now against Trending, and why they argue.</b> Form now is a league table of
+      the 20: 1st is the lowest scorer in the room. Trending is each man against his own record &mdash; his
+      last 10 rounds against everything he has ever logged, in shots per 18. Nothing links them. Jay France
+      is 1st on form and off his own pace: he is still the best golfer here, he is just not playing as well
+      as Jay France usually plays. The reverse happens too, and a man climbing back towards his own best
+      from 17th is still 17th. Pairs-format rounds are excluded everywhere, because identical scores across
+      a pairing say nothing about either man; nine-hole rounds count, doubled onto an 18-hole scale.</p>
       <p class="note">Handicaps are the marks on each player's <b>Squabbit profile</b>, taken from the account that actually
       played the last two trips, not from whatever was keyed in after the last round. <b>Form</b> is a recency-weighted scoring differential, lower is better. <b>Raw</b> is form
       minus handicap straight from the data; <b>Gap</b> is that after thin samples are discounted towards the field
@@ -2881,7 +2904,7 @@ const DATA_V="2026-08-19.1"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
- admPane:"settle",poView:"market",fbView:"",fbHow:false,gFold:null,poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,paidClaim:0,
+ admPane:"settle",poView:"market",fbView:"",fbHow:false,gFold:null,gCol:"gap",gDir:0,openGrp:[],poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,paidClaim:0,
  onboarded:false,onbStep:0,rulesV:0,rulesAt:0,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
  players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
@@ -2920,6 +2943,9 @@ function load(){
  if(saved.fbView)      S.fbView=saved.fbView;
  if(saved.fbHow!=null) S.fbHow=!!saved.fbHow;
  if(saved.gFold!=null) S.gFold=!!saved.gFold;
+ if(saved.gCol)        S.gCol=saved.gCol;
+ if(saved.gDir)        S.gDir=saved.gDir;
+ if(Array.isArray(saved.openGrp)) S.openGrp=saved.openGrp;
  if(Array.isArray(saved.alSeen)) S.alSeen=saved.alSeen;
  if(saved.phaseOpen) S.phaseOpen=true;
  if(saved.howOpen)   S.howOpen=true;
@@ -3819,6 +3845,8 @@ function drawPools(){
    el.textContent=on.length?on.join(" · "):"showing everything";
    el.classList.toggle("on",!!on.length);
  })();
+ /* Any active filter forces every group open — see the fold comment below. */
+ const anyFilter=!!(mk||rd||ty||st||vf||($("#fTeam")||{}).value||($("#fHmin")||{}).value||($("#fHmax")||{}).value);
  let out="",shown=0;
  /* Twenty cards in declaration order is a scroll, and on a phone in a bar nobody touches a
     filter. Group them the way people actually think about them — the trip, then day by day,
@@ -3837,12 +3865,24 @@ function drawPools(){
   {id:"nov",  c:"var(--gNov)",  ic:"pint",   n:"Novelty",  hint:"Settled on the evidence, video beats testimony", pick:m=>m.type==="novelty"}];
  for(const bk in BODY) delete BODY[bk];   /* stash from the last draw is worthless now */
  const ordered=[]; const seenK=new Set();
+ /* Names carry numbers, and a plain string sort files "Sunday Match 10" between Match 1 and
+    Match 2 — which is exactly what it was doing. Compare digit runs as numbers. */
+ const natural=(a,b)=>a.localeCompare(b,"en-GB",{numeric:true,sensitivity:"base"});
  GROUPS.forEach(g=>{
    const ms=allMarkets().filter(m=>g.pick(m)&&!seenK.has(m.k))
-     .sort((a,b)=>poolTotals(b.k).money-poolTotals(a.k).money||a.n.localeCompare(b.n));
+     .sort((a,b)=>poolTotals(b.k).money-poolTotals(a.k).money||natural(a.n,b.n));
    ms.forEach(m=>{seenK.add(m.k);ordered.push({g,m});});});
- allMarkets().forEach(m=>{if(!seenK.has(m.k))ordered.push({g:GROUPS[0],m});});
+ /* Anything the 6 pickers somehow missed goes in with the whole-trip markets — but SPLICED into
+    that group rather than pushed on the end, which would have opened a second "The whole trip"
+    fold below Novelty with the same id as the first. */
+ const orphans=allMarkets().filter(m=>!seenK.has(m.k)).map(m=>({g:GROUPS[0],m}));
+ if(orphans.length){ let i=ordered.length; while(i>0&&ordered[i-1].g!==GROUPS[0]) i--;
+   ordered.splice(i,0,...orphans); }
  let lastG=null;
+ /* groupHead runs after this loop and used to count what was ORDERED, while the loop renders
+    only what has runners — so a market with no outcomes yet made the heading say 8 above 7 cards.
+    Count what actually gets drawn. */
+ const drawnIn={};
  ordered.forEach(({g,m})=>{
   if(mk&&m.k!==mk)return; if(ty&&m.type!==ty)return;
   if(rd&&(m.round||"")!==rd)return;
@@ -3872,7 +3912,7 @@ function drawPools(){
      ? ((m.opts||[]).indexOf(x.label)-(m.opts||[]).indexOf(y.label))
      : m.dyn==="match"
        ? (parseInt(x.label.replace(/\D+/g,""),10)-parseInt(y.label.replace(/\D+/g,""),10))
-       : ((y.prob||0)-(x.prob||0)||x.label.localeCompare(y.label)));
+       : ((y.prob||0)-(x.prob||0)||x.label.localeCompare(y.label,"en-GB",{numeric:true})));
   /* Once a market is settled the interesting question is no longer "who is favourite" but
      "who won it". The winners go to the top of the list, whatever the model thought of them. */
   const RES=resultOf(m.k), WON=RES&&!RES.void?(RES.outcomes||[]):[];
@@ -3982,7 +4022,14 @@ function drawPools(){
   /* Collapsed by default. Which ones are open is remembered, because drawPools() re-runs every
      time a selection is added and it would be maddening to have the card shut under your thumb. */
   const isOpen=(S.openMk||[]).indexOf(m.k)>=0;
-  if(g!==lastG){ out+=`<!--GH:${g.id}-->`; lastG=g; }
+  /* Each group is a fold. 66 markets in one column is a scroll nobody finishes, and the 25 match
+     outrights alone bury everything under them. Shut by default; what you open is remembered.
+     The exception is filtering: a filter that returns 3 markets inside 3 shut folds looks like a
+     filter that returned nothing, so any active filter forces every group open. */
+  if(g!==lastG){ out+=(lastG?"</details>":"")
+    +`<details class="gwrap" data-g="${g.id}"${(anyFilter||(S.openGrp||[]).indexOf(g.id)>=0)?" open":""}>`
+    +`<summary class="gsum"><!--GH:${g.id}--></summary>`;
+    lastG=g; }
   /* N1. Everything from </summary> down is held back until the card is opened. 35 cards and 350
      runner rows were all being built into the DOM at load whether anyone looked at them or not,
      which is the single biggest thing making an old phone feel slow. The HTML is still generated
@@ -4054,13 +4101,19 @@ function drawPools(){
   /* Open cards get their body now; shut ones get it the moment somebody opens them. */
   if(isOpen) out+=BODYHTML; else BODY[m.k]=BODYHTML;
   out+=`</details>`;
+  (drawnIn[g.id]=drawnIn[g.id]||[]).push(m);
  });
+ if(lastG) out+=`</details>`;                    /* close the last group's fold */
  function groupHead(g){
-   const ms=ordered.filter(o=>o.g.id===g.id).map(o=>o.m);
+   const ms=drawnIn[g.id]||[];
    const tot=ms.reduce((a,m)=>a+poolTotals(m.k).money,0);
+   const live=ms.filter(m=>mLive(m)).length;
    return `<div class="grouphd" style="--gc:${g.c}"><h3>${icon(g.ic)}${esc(g.n)}</h3>
      <span class="small">${esc(g.hint)}</span>
-     ${tot?`<span class="gpot">£${tot.toFixed(0)}</span>`:""}</div>`;
+     <span class="gcount">${ms.length} market${ms.length===1?"":"s"}${
+       live&&live<ms.length?`, ${live} open`:""}</span>
+     ${tot?`<span class="gpot">£${tot.toFixed(0)}</span>`:""}
+     <span class="gchev">&#9662;</span></div>`;
  }
  /* Headings are stamped as markers first and filled in afterwards, so a group whose markets
     were all filtered out never leaves an empty heading behind. */
@@ -4073,6 +4126,13 @@ function drawPools(){
  if(pc) pc.addEventListener("toggle",()=>{S.phaseOpen=pc.open;save();});
  /* Scoped to #poolWrap. Unscoped it also caught the 4 session cards on the Score tab, which
     carry no data-k: they collected a listener on every redraw and pushed nulls into S.openMk. */
+ /* A filter forced these open without anybody asking, so their toggles must not be recorded —
+    otherwise clearing the filter would leave all 6 groups open and undo the whole point. */
+ document.querySelectorAll("#poolWrap .gwrap").forEach(el=>el.addEventListener("toggle",()=>{
+  if(anyFilter) return;
+  const id=el.dataset.g, cur=new Set(S.openGrp||[]);
+  el.open?cur.add(id):cur.delete(id);
+  S.openGrp=[...cur]; save();}));
  document.querySelectorAll("#poolWrap .mkcard").forEach(el=>el.addEventListener("toggle",()=>{
   const k=el.dataset.k; if(!k) return;
   const cur=new Set(S.openMk||[]);
@@ -4893,12 +4953,18 @@ async function saveCard(){
 function trendCell(p){
  if(p.unknown) return '<span style="opacity:.5">no record</span>';
  if(p.trend==null) return '<span style="opacity:.5">too few rounds</span>';
+ /* Trending measures a man against HIMSELF — his last 10 rounds against his whole record — and
+    Form now measures him against the room. The two answer different questions and routinely
+    disagree: Jay France is the best golfer here and is also playing worse than his own standard,
+    which is exactly what "1st on form, struggling" means. The old wording said "struggling" and
+    "2.7 worse" with nothing to say worse than WHAT, so it read as a contradiction. Every label
+    now names the comparison. */
  const t=p.trend, s1=Math.abs(t).toFixed(1);
- if(t<=-2)  return `<b class="pos">&#9660; flying</b> <span class="small">${s1} shots better</span>`;
- if(t<=-0.8)return `<span class="pos">&#9660; improving</span> <span class="small">${s1} better</span>`;
- if(t>=2)   return `<b class="neg">&#9650; struggling</b> <span class="small">${s1} worse</span>`;
- if(t>=0.8) return `<span class="neg">&#9650; slipping</span> <span class="small">${s1} worse</span>`;
- return `<span style="opacity:.6">&#9644; steady</span>`;
+ if(t<=-2)  return `<b class="pos">&#9660; flying</b> <span class="small">${s1} better than his own record</span>`;
+ if(t<=-0.8)return `<span class="pos">&#9660; improving</span> <span class="small">${s1} on his own record</span>`;
+ if(t>=2)   return `<b class="neg">&#9650; off his own pace</b> <span class="small">${s1} worse than his record</span>`;
+ if(t>=0.8) return `<span class="neg">&#9650; slipping</span> <span class="small">${s1} off his own record</span>`;
+ return `<span style="opacity:.6">&#9644; steady</span> <span class="small">at his usual level</span>`;
 }
 /* Whole CALENDAR days between a round and today, counted on the phone's own clock.
    The old version subtracted timestamps and floored, so a round played at lunchtime yesterday
@@ -5076,6 +5142,45 @@ function drawKpis(){
     <b>${((H.holder==="Red"?TP.Blue:TP.Red)*100).toFixed(1)}%</b> above are the same number.</p>`
    : "";
 }
+/* =================== SORTING THE FORM BOOK =====================================================
+   One table drives both the Sort dropdown and the column headings, so the two can never disagree.
+   Each entry is: a label, the value to sort on, and which way round the FIRST click should go.
+   `first` matters — clicking "Player" should give you A to Z, but clicking "Trip record" should
+   give you the best record first, not the worst. Clicking the same heading again reverses it.
+   A null value always sinks to the bottom whichever way the arrow points: a man with no scoring
+   record is not the best golfer in the room and he is not the worst either, he is unknown, and
+   flipping the sort should not promote him to the top. */
+const GSORTS={
+ gap:  {lbl:"best value first", v:p=>p.form-p.hcp,           first:1},
+ mvp:  {lbl:"shortest price",   v:p=>((priceSrc()||{})[p.name]||{}).mvp??null, first:-1},
+ form: {lbl:"form now",         v:p=>p.form,                 first:1},
+ trip: {lbl:"trip record",      v:p=>{const t=tripOf(p.name); if(!t) return null;
+          const q=TRIP_YEARS.map(y=>t[y]||"").join("");
+          /* points per match, then matches, folded into one number so ties break the right way
+             without a second comparator: .0001 per match cannot outweigh any real rate gap. */
+          return q.length?wldPts(q)/q.length+q.length*1e-4:null;}, first:-1},
+ name: {lbl:"name",             v:p=>p.name.toLowerCase(),    first:1},
+ team: {lbl:"team",             v:p=>p.team||"",              first:1},
+ hcp:  {lbl:"handicap",         v:p=>p.hcp,                   first:1},
+ avg:  {lbl:"his average",      v:p=>p.avg??null,             first:1},
+ spain:{lbl:"likely in Spain",  v:p=>p.form,                  first:1},
+ trend:{lbl:"trending",         v:p=>p.trend??null,           first:1},
+ last: {lbl:"last played",      v:p=>p.last||null,            first:-1},
+ raw:  {lbl:"raw gap",          v:p=>p.rawGap??null,          first:1},
+ sd:   {lbl:"spread",           v:p=>p.sd,                    first:-1},
+ n:    {lbl:"rounds",           v:p=>p.n,                     first:-1},
+ word: {lbl:"the word on him",  v:p=>p.form-p.hcp,            first:1}};
+/* The dropdown only ever offered 6 of these. The other 9 are reachable by clicking their heading,
+   and when you do, the dropdown shows a "Table column" entry rather than lying about the order. */
+function gSortState(){
+ const k=GSORTS[S.gCol]?S.gCol:"gap";
+ return {k, dir:(S.gDir===1||S.gDir===-1)?S.gDir:GSORTS[k].first};
+}
+function setGSort(k,fromHeader){
+ if(!GSORTS[k]) return;
+ S.gDir = (fromHeader && S.gCol===k) ? -gSortState().dir : GSORTS[k].first;
+ S.gCol = k; save(); drawForm();
+}
 function gFiltered(){
  const t=$("#gTeam").value,hmin=parseFloat($("#gHmin").value),hmax=parseFloat($("#gHmax").value),d=$("#gData").value;
  let ps=S.players.filter(p=>p.in);
@@ -5084,23 +5189,14 @@ function gFiltered(){
  if(!isNaN(hmax))ps=ps.filter(p=>p.hcp<=hmax);
  if(d==="good")ps=ps.filter(p=>p.n>=10);
  if(d==="low")ps=ps.filter(p=>p.n<10);
- const s=$("#gSort").value;
- /* Sorting on the trip record needs a single comparable number per man. Points per match is the
-    only fair one — half this squad has 8 matches on record and half has 4, so raw points would
-    just sort by who has been on more trips. Ties go to the man with more matches behind the same
-    rate, and the 4 who have never played one sort to the bottom of THIS list rather than being
-    given a position in the column, which is a different question. */
- const tripKey=p=>{const t=tripOf(p.name); if(!t) return null;
-   const seq=TRIP_YEARS.map(y=>t[y]||"").join("");
-   return seq.length?{r:wldPts(seq)/seq.length,m:seq.length}:null;};
- ps.sort((a,b)=> s==="hcp"?a.hcp-b.hcp : s==="sd"?b.sd-a.sd : s==="name"?a.name.localeCompare(b.name)
-   : s==="form"?a.form-b.form                       /* lower over-par is the better golfer */
-   : s==="trip"?(()=>{const x=tripKey(a),y=tripKey(b);
-       if(!x&&!y) return a.name.localeCompare(b.name);
-       if(!x) return 1; if(!y) return -1;            /* first-timers last, never interleaved */
-       return (y.r-x.r)||(y.m-x.m)||a.name.localeCompare(b.name);})()
-   : s==="mvp"?(((priceSrc()||{})[b.name]||{}).mvp||0)-(((priceSrc()||{})[a.name]||{}).mvp||0)
-   : (a.form-a.hcp)-(b.form-b.hcp));
+ const {k,dir}=gSortState(), val=GSORTS[k].v;
+ ps.sort((a,b)=>{
+   const x=val(a), y=val(b);
+   if(x==null&&y==null) return a.name.localeCompare(b.name);
+   if(x==null) return 1; if(y==null) return -1;      /* unknowns always last, both directions */
+   const c = typeof x==="string" ? x.localeCompare(y) : x-y;
+   return c ? c*dir : a.name.localeCompare(b.name);  /* name is the tie-break, always A to Z */
+ });
  return ps;}
 /* X2. Everything a man has on, in one place. With 36 markets the only way to find your own
    position was to open every card in turn, which is how people lose track of what they have
@@ -5262,6 +5358,11 @@ function wldHtml(name){
 /* Table or List. An empty setting means "whatever the screen suggests", which is what everybody
    gets on their first visit; the moment a man picks one it sticks on that phone and the breakpoint
    stops having an opinion. Nothing is re-rendered — both views are always in the DOM, CSS decides. */
+function syncGSort(){
+ const so=$("#gSort"); if(!so) return;
+ const k=gSortState().k;
+ so.value = [...so.options].some(o=>o.value===k) ? k : "__col";
+}
 function applyFbView(){
  const w=$("#fbookWrap"); if(!w) return;
  w.classList.toggle("v-table",S.fbView==="table");
@@ -5281,11 +5382,18 @@ function drawForm(){
    return `<span class="rankcell"><span class="rk">${ord(r)}</span> <span class="tag">of ${RK.tr.total}</span></span><br>${w}`;};
  const TRIP={rating:69.7,slope:133.25};             /* average of the four courses we are playing */
  const typical=p=>Math.round(p.form*TRIP.slope/113+TRIP.rating);
- let h=`<tr><th>Player</th><th>Team</th><th class="num">Handicap</th>
-  <th class="num">His average</th><th class="num">Likely in Spain</th><th class="num">Form now</th>
-  <th>Trip record</th><th>Trending</th><th class="num">Last played</th>
-  ${nerd?`<th class="num">Form</th><th class="num">Raw</th><th class="num">Gap</th><th class="num">Spread</th><th class="num">Rounds</th>`:""}
-  <th>The word on him</th></tr>`;
+ /* Every heading sorts. First click uses the sensible direction for that column, second click
+    reverses it, and the arrow says which way you are looking. */
+ const G=gSortState();
+ const th=(k,label,cls)=>`<th${cls?` class="${cls} sortable"`:' class="sortable"'} data-sk="${k}"
+   aria-sort="${G.k===k?(G.dir===1?"ascending":"descending"):"none"}"
+   title="Sort by ${GSORTS[k].lbl}">${label}<i class="sar${G.k===k?" on":""}">${
+     G.k===k?(G.dir===1?"\u25B4":"\u25BE"):"\u25B4"}</i></th>`;
+ let h=`<tr>${th("name","Player")}${th("team","Team")}${th("hcp","Handicap","num")}
+  ${th("avg","His average","num")}${th("spain","Likely in Spain","num")}${th("form","Form now","num")}
+  ${th("trip","Trip record")}${th("trend","Trending")}${th("last","Last played","num")}
+  ${nerd?`${th("form","Form","num")}${th("raw","Raw","num")}${th("gap","Gap","num")}${th("sd","Spread","num")}${th("n","Rounds","num")}`:""}
+  ${th("word","The word on him")}</tr>`;
  gFiltered().forEach(p=>{const g=p.form-p.hcp;
   const read=p.unknown?"Complete unknown. Bet with your heart."
    :g<3.5?"Robbed by his own handicap. Back him."
@@ -5343,7 +5451,7 @@ function drawForm(){
      <div class="ftrend">${trendCell(p)}</div>
      <p class="note fword">${read}</p>
    </div>`;}).join("");
- applyFbView();
+ applyFbView(); syncGSort();
  /* A collapsed filter panel that is silently hiding half the squad is a trap, so the summary says
     what is on. "Sort" is not counted as a filter — it hides nobody. */
  (()=>{const sum=$("#gFoldSum"); if(!sum) return;
@@ -5352,11 +5460,11 @@ function drawForm(){
    if(t) on.push(t+" only");
    if(d==="good") on.push("solid samples"); if(d==="low") on.push("thin samples");
    if(lo||hi) on.push("handicap "+(lo||"any")+" to "+(hi||"any"));
-   const srt=so.options[so.selectedIndex].textContent;
+   const G=gSortState(), srt=GSORTS[G.k].lbl+(G.dir===GSORTS[G.k].first?"":", reversed");
    sum.innerHTML = on.length
      ? `Filter and sort &mdash; <span class="warn">${esc(on.join(", "))}</span>, ${gFiltered().length} of ${
-         S.players.filter(p=>p.in).length} shown, by ${esc(srt.toLowerCase())}`
-     : `Filter and sort &mdash; everyone, by ${esc(srt.toLowerCase())}`;})();
+         S.players.filter(p=>p.in).length} shown, by ${esc(srt)}`
+     : `Filter and sort &mdash; everyone, by ${esc(srt)}`;})();
  drawSquabAge();}
 function drawOdds(){
  const ctl=$("#simCtl"); if(ctl) ctl.style.display = ADMIN_TOKEN ? "flex" : "none";
@@ -6707,11 +6815,18 @@ document.querySelectorAll("#theme button").forEach(b=>b.addEventListener("click"
  const el=$("#"+id);el.addEventListener("change",drawPools);el.addEventListener("input",drawPools);});
 $("#fClear").addEventListener("click",()=>{["fMarket","fTeam","fRound","fType","fStatus","fValue","fHmin","fHmax"]
  .forEach(id=>$("#"+id).value="");drawPools();});
-["gTeam","gHmin","gHmax","gData","gSort"].forEach(id=>{
+["gTeam","gHmin","gHmax","gData"].forEach(id=>{
  const el=$("#"+id);el.addEventListener("change",()=>{drawForm();drawOdds();});
  el.addEventListener("input",()=>{drawForm();drawOdds();});});
+/* The dropdown always takes the column's own default direction. Only a second click on the same
+   heading reverses one, which is the behaviour everybody already expects from a table. */
+$("#gSort").addEventListener("change",()=>{setGSort($("#gSort").value,false);drawOdds();});
+/* Delegated, because the headings are rewritten on every draw and per-cell listeners would leak. */
+$("#formTbl").addEventListener("click",e=>{
+ const th=e.target.closest("th[data-sk]"); if(!th) return;
+ setGSort(th.dataset.sk,true); drawOdds();});
 $("#gClear").addEventListener("click",()=>{["gTeam","gHmin","gHmax","gData"].forEach(id=>$("#"+id).value="");
- $("#gSort").value="gap";drawForm();drawOdds();});
+ S.gCol="gap";S.gDir=0;save();drawForm();drawOdds();});
 $("#run").addEventListener("click",()=>{
  if(!ADMIN_TOKEN){$("#simStat").textContent="Organiser only.";return;}
  const N=+$("#nsim").value; $("#simStat").textContent="running…";
