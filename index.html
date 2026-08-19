@@ -1030,8 +1030,9 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li><b>25 points</b> at 10 a side: 5 foursomes, 5 fourball, 5 scramble, 10 singles. A win is
         one point, a half is a half. Change the squad size and the board recalculates; the numbers on this
         page follow the roster, not the other way round.</li>
-      <li><b>Red are the holders, and that makes the 2 targets different.</b> Red won it in 2024 and
-        retained it in 2025 on a 12 apiece tie. So this year <b>Blue need 13 to take it and Red need only
+      <li><b>Red are the holders, and that makes the 2 targets different.</b> Red won it in 2024 by
+        9.5 to 5.5 &mdash; under the old team names, but the same 2 sides &mdash; and retained it in
+        2025 on a 12 apiece tie. So this year <b>Blue need 13 to take it and Red need only
         12.5 to keep it</b>. Anyone quoting "13 to win" at both teams is giving Red half a point they do not
         need. The scoreboard shows the two targets separately for exactly this reason.</li>
       <li><b>A tie is its own outcome in the betting, whatever it does to the trophy.</b> Team Result settles
@@ -2599,16 +2600,18 @@ const MARKETS=[
       2024 singles. 2025's widest was 5&4. Both read off the leaderboard, not estimated. */
    d:"Which match is won by the widest margin. 5&4 beats 3&2 beats 1 up. A halved match has no margin "+
      "and cannot win it. The record is Luke Holland's 7&6 over Alex Mulvin in Portugal in 2024, and "+
-     "nothing in 2025 got wider than 5&4. Ties share the pool"},
+     "nothing in 2025 got wider than 5&4. Mulvin has never explained it. Ties share the pool"},
   {k:"swp"+R,n:"Clean Sweep "+R,type:"model",round:R,team:true,dyn:"sweep",
    /* Both recorded years checked session by session on Squabbit.
-      2024 (Rimmed It Roundup, Portugal, 12 men): R1 alternate shot 3-0 — a genuine clean sweep.
-      Then 1-2, 2-1, 3.5-2.5.
+      2024 (Rimmed It Roundup, Portugal, 12 men, teams named Mulvin and Lukey): R1 alternate shot
+      3-0 — a genuine clean sweep. Then 1-2, 2-1, 3.5-2.5, final 9.5-5.5.
       2025 (Chip & Sip Championship): R1 2-2, R2 2.5-1.5, R3 2.5-1.5, R4 5-3. Nothing swept.
-      So it HAS happened, once, in the opening session of 2024, off 3 matches rather than 5. */
+      TEAM CONTINUITY: Dom confirms the 2024 sides are the same 2 sides, just under different
+      names — Team Lukey is the side that is now Red, Team Mulvin the side that is now Blue. So
+      the sweep and the 2024 win are both Red's, and the copy says so. */
    d:"Does either side take every single match on "+dayOnly+"? All of them, no halves, no "+
-     "exceptions. It has happened once: the opening alternate shot in Portugal in 2024, when "+
-     "Luke Holland's lot took all 3. That was 3 matches though, and this is "+
+     "exceptions. Red have done it once, in the opening session in Portugal in 2024, and have "+
+     "brought it up roughly weekly ever since. That was 3 matches though, and this is "+
      (r===4?"10":"5")+" — one halved match anywhere and it is gone, which is why it pays what it pays"}
  );
  /* MATCH OUTRIGHTS. The bet most men actually want: back a match, not a statistic. One market per
