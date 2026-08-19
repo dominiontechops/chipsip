@@ -2018,7 +2018,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.22",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-18.23",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2595,6 +2595,21 @@ const MARKETS=[
    d:"Does either side take every single match on "+dayOnly+"? All of them, no halves, no "+
      "exceptions. One halved match anywhere and it is gone, which is why it pays what it pays"}
  );
+ /* MATCH OUTRIGHTS. The bet most men actually want: back a match, not a statistic. One market per
+    match, 25 across the week.
+    The outcomes are Blue, Red and Halved and they NEVER change — not when the draw goes up, not
+    when somebody drops out. A bet stores the outcome it was placed on as text, so a label that
+    changed on the Wednesday night would orphan every ante-post bet placed before it. The names
+    appear underneath the moment the pairing is entered, and before that the card says so. */
+ const slots=(r===4)?10:5;
+ for(let i=1;i<=slots;i++){
+  MARKETS.push({k:"mch"+R+"_"+i,n:dayOnly+" Match "+i,type:"model",round:R,team:true,
+   dyn:"outright",slot:i,
+   d:"Match "+i+" on "+day+". Blue, Red, or halved. Back it before the draw and you are backing a "+
+     "slot, not a pairing &mdash; the names go up on the Wednesday night and your bet rides on "+
+     "whoever fills it, which is either the purest bet on the board or the daftest depending on "+
+     "how it turns out. Settles off the card the moment the last putt drops"});
+ }
 });
 /* DROPPED for 2026, and worth recording why so nobody helpfully puts them back.
 
@@ -2787,7 +2802,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="31d55907";
-const DATA_V="2026-08-18.22"+"/"+MODEL_V;
+const DATA_V="2026-08-18.23"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3087,8 +3102,11 @@ function runSim(N){
  names.forEach(n=>{pts[n]=0;win[n]=0;per[n]=0;blank[n]=0;sing[n]=0;spoon[n]=0;});
  /* Per session: who wins the day, whether anybody sweeps it, which match goes furthest and
     which is the biggest hiding. Indexed 1..4 to match the way the rounds are named. */
- const day={},swp={},motd={},mrg={};
- [1,2,3,4].forEach(k=>{day[k]={Blue:0,Red:0,Tie:0};swp[k]={Blue:0,Red:0,No:0};motd[k]={};mrg[k]={};});
+ const day={},swp={},motd={},mrg={},mout={};
+ [1,2,3,4].forEach(k=>{day[k]={Blue:0,Red:0,Tie:0};swp[k]={Blue:0,Red:0,No:0};motd[k]={};mrg[k]={};
+   /* and every individual match, which is the bet most men actually want: Blue, Red or halved
+      in Day 1 Match 3. Tallied by slot, the same slot the card and the board count in. */
+   mout[k]={};});
  let bw=0,rw=0,tie=0,margin=0;
  const K=blue.length;
  const blind=!S.declared&&!S.closed;
@@ -3112,6 +3130,8 @@ function runSim(N){
      sB+=r; sN++;
      slot++;
      legs.push({slot, up:(typeof x==="object"?x.up:0), ended:(typeof x==="object"?x.ended:18), r});
+     const MO=mout[ci+1][slot]||(mout[ci+1][slot]={Blue:0,Red:0,Halved:0});
+     if(r===1) MO.Blue++; else if(r===0) MO.Red++; else MO.Halved++;
      if(single){ if(r===1)sing[bs[0].name]++; if(r===0)sing[rs[0].name]++; }
      /* A partnership is two men who actually played together. Both orders map to one key. */
      if(!single&&bs.length===2){const k=pairKey(bs[0].name,bs[1].name); prs[k]=(prs[k]||0)+r;}
@@ -3183,12 +3203,15 @@ function runSim(N){
  names.forEach(n=>{ODDS[n].spoon=(spoon[n]||0)/N;});
  TEAMP={Blue:bw/N,Red:rw/N,Tie:tie/N,margin:margin/N};
  /* Everything that is not about one player. Published alongside the player prices. */
- EXTRA={day:{},sweep:{},motd:{},margin:{},pairs:{}};
+ EXTRA={day:{},sweep:{},motd:{},margin:{},pairs:{},match:{}};
  [1,2,3,4].forEach(k=>{
    EXTRA.day[k]  ={Blue:day[k].Blue/N,Red:day[k].Red/N,Tie:day[k].Tie/N};
    EXTRA.sweep[k]={Blue:swp[k].Blue/N,Red:swp[k].Red/N,No:swp[k].No/N};
    EXTRA.motd[k]={};   Object.keys(motd[k]).forEach(sl=>EXTRA.motd[k][sl]=motd[k][sl]/N);
    EXTRA.margin[k]={}; Object.keys(mrg[k]).forEach(sl=>EXTRA.margin[k][sl]=mrg[k][sl]/N);
+   EXTRA.match[k]={};
+   Object.keys(mout[k]).forEach(sl=>{const o=mout[k][sl], t=o.Blue+o.Red+o.Halved||1;
+     EXTRA.match[k][sl]={Blue:o.Blue/t,Red:o.Red/t,Halved:o.Halved/t};});
  });
  const pt=Object.values(prs).reduce((a,b)=>a+b,0);
  if(pt>0){
@@ -3419,6 +3442,13 @@ function cardOutcome(m){
    return {outcomes:[allB?"Blue win them all":allR?"Red win them all":"No sweep"],
      why:allB||allR?"every match":"somebody dropped one"};
  }
+ if(m.dyn==="outright"){
+   const mt=ms.find(x=>+x.slot===+m.slot);
+   if(!mt||!mt.result) return null;
+   return {outcomes:[mt.result==="blue"?"Blue":mt.result==="red"?"Red":"Halved"],
+     why:(mt.blue||[]).length?sideName(mt.blue)+" v "+sideName(mt.red)+(byStr(mt)?", "+byStr(mt):"")
+        :(byStr(mt)||"off the card")};
+ }
  if(m.dyn==="match"){
    const isMotd=m.k.slice(0,4)==="motd";
    /* Match of the day is the highest hole anybody reached; biggest hiding is the widest margin,
@@ -3463,6 +3493,17 @@ function dynOutcomes(m){
        pending:!known});
    }
    return out;
+ }
+ if(m.dyn==="outright"){
+   const src=E&&E.match&&E.match[r]&&E.match[r][m.slot];
+   const mt=(DB.matches||[]).find(x=>+x.session===r&&+x.slot===+m.slot);
+   const known=mt&&(mt.blue||[]).length&&(mt.red||[]).length;
+   /* The sub-line is where the names live. It fills itself in the moment the pairing is entered,
+      and until then it says so rather than pretending the match has runners. */
+   const sub=known?sideName(mt.blue)+" v "+sideName(mt.red):"drawn on the night";
+   return [{label:"Blue",  prob:src?src.Blue  :null,player:null,sub:known?sideName(mt.blue):sub,pending:!known},
+           {label:"Red",   prob:src?src.Red   :null,player:null,sub:known?sideName(mt.red) :sub,pending:!known},
+           {label:"Halved",prob:src?src.Halved:null,player:null,sub:"all square after 18",pending:false}];
  }
  if(m.dyn==="pairs"){
    /* Only partnerships that have actually been drawn. Before the first card goes in there is
@@ -6039,7 +6080,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-18.22</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-18.23</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
