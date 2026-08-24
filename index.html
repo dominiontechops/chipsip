@@ -2299,12 +2299,24 @@ function blockReason(m,label){
    nothing secret ever reaches his browser and a screenshot of his screen gives nobody anything. */
 const OWNER_SENTINEL="__owner__";
 let ADMIN_TOKEN=null;
+let CAN_SCORE=false;      /* captains and vices may enter the card, and nothing else */
+/* Declared up here beside the other two rather than next to the curtain code that uses it,
+   because authClear() below resets all three and a `let` read before its own declaration throws
+   rather than reading undefined. */
+let GATE_PASS=false;
 const AUTH={tok:null,refresh:null,email:null,name:null,exp:0};
 function authLoad(){try{const a=JSON.parse(localStorage.getItem("chipsip_auth")||"null");
  if(a){Object.assign(AUTH,a);} }catch(e){}}
 function authSave(){try{localStorage.setItem("chipsip_auth",JSON.stringify(
  {tok:AUTH.tok,refresh:AUTH.refresh,email:AUTH.email,name:AUTH.name,exp:AUTH.exp}));}catch(e){}}
+/* SIGNING OUT DROPS EVERYTHING SIGNING IN GAVE YOU. This was done in the sign-out button handler
+   first, which was wrong: there are FOUR ways out of an account — the button in the account card,
+   the Drop it control, the one on the launch curtain, and the session simply expiring — and only
+   one of them had the line. Sign out on the curtain and the organiser's door was still sitting
+   there, which is exactly how it was caught: signed out, pressed it, walked straight through.
+   Here it cannot be forgotten, because everything that ends a session comes through here. */
 function authClear(){AUTH.tok=AUTH.refresh=AUTH.email=AUTH.name=null;AUTH.exp=0;
+ ADMIN_TOKEN=null; CAN_SCORE=false; GATE_PASS=false; GATE_LIFTED=false; GATE_LAST={};
  try{localStorage.removeItem("chipsip_auth");}catch(e){}}
 /* Supabase drops the session in the URL fragment when the emailed link is opened */
 function authFromHash(){
@@ -2368,7 +2380,6 @@ async function sendMagicLink(email,claim){
    cleanly that this account has claimed no name — is grounds for asking him who he is. A failed
    call must leave the name he already had alone, because wiping it puts a signed-in man in front
    of the name picker and invites him to claim a name he already owns. */
-let CAN_SCORE=false;      /* captains and vices may enter the card, and nothing else */
 let NAME_STATE="unknown";                   /* unknown | ok | empty | fail — drives which card shows */
 async function loadMyName(){
  if(!AUTH.tok) return "fail";
@@ -4732,7 +4743,6 @@ function drawAuth(){
       session: press Sign out to check the curtain and you sail straight past it, which is exactly
       what it looked like when it was tested. */
    $("#signout").addEventListener("click",()=>{authClear();S.me="";S.slip=[];S.acctOpen=false;
-     ADMIN_TOKEN=null;CAN_SCORE=false;GATE_PASS=false;GATE_LIFTED=false;GATE_LAST={};
      save();drawAll();});
    return;
  }
@@ -5221,7 +5231,6 @@ const LAUNCH_UK = d => d.toLocaleString("en-GB",{weekday:"long",timeZone:"Europe
    one man who could check the curtain was the one man who never looked at it. He lands on it like
    the other nineteen and steps through by hand, for this tab only — never remembered, so every
    fresh load puts him back in front of it. */
-let GATE_PASS=false;
 const gateWanted = () => !!(S.launchAt && srvNow() < S.launchAt);
 const gateUp     = () => gateWanted() && !GATE_PASS;
 
@@ -7704,8 +7713,14 @@ const clrGo=$("#clrGo"); if(clrGo) clrGo.addEventListener("click",async e=>{
 let INSTALL_EVT=null;
 const isStandalone=()=>window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
 const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();INSTALL_EVT=e;drawInstall();});
-window.addEventListener("appinstalled",()=>{INSTALL_EVT=null;S.installDone=true;save();drawInstall();});
+/* Both of these have to redraw the CURTAIN's install card as well as the one inside the app.
+   beforeinstallprompt lands a beat after load — often after the last drawAll — so a curtain drawn
+   before it arrived would sit there with no Install button on the one screen where a man has five
+   spare minutes to press it. */
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();INSTALL_EVT=e;
+  drawInstall();gateInstall();});
+window.addEventListener("appinstalled",()=>{INSTALL_EVT=null;S.installDone=true;save();
+  drawInstall();gateInstall();});
 function drawInstall(){
  const el=$("#installWrap"); if(!el) return;
  if(isStandalone()||S.installHide||S.installDone){ el.innerHTML=""; return; }
