@@ -940,6 +940,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <p class="gateopen" id="gateOpen">The app launches shortly</p>
     <div class="gateact" id="gateAct"></div>
     <div id="gateInstall"></div>
+    <div id="gateDoor"></div>
     <div id="gateAuth"></div>
   </div>
 </div>
@@ -2243,7 +2244,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-19.1",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-24.1",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -3073,7 +3074,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="b600bf6a";
-const DATA_V="2026-08-19.1"+"/"+MODEL_V;
+const DATA_V="2026-08-24.1"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -4712,7 +4713,13 @@ function drawAuth(){
        <div class="sliplist" style="max-height:none">${lines}</div>
        <p class="note">Only you can see these. Everyone else sees the size of each pot, never whose money
        is in it.</p></details>`:""}</div>`;
-   $("#signout").addEventListener("click",()=>{authClear();S.me="";S.slip=[];S.acctOpen=false;save();drawAll();});
+   /* Signing out has to drop what being signed IN gave you. ADMIN_TOKEN is set from am_i_owner on
+      load and lives in a variable, so without this it survived the sign-out for the rest of the
+      session: press Sign out to check the curtain and you sail straight past it, which is exactly
+      what it looked like when it was tested. */
+   $("#signout").addEventListener("click",()=>{authClear();S.me="";S.slip=[];S.acctOpen=false;
+     ADMIN_TOKEN=null;CAN_SCORE=false;GATE_PASS=false;GATE_LIFTED=false;GATE_LAST={};
+     save();drawAll();});
    return;
  }
  /* Holding a session but unable to confirm the name is a CONNECTION problem, not a sign-in
@@ -5196,8 +5203,13 @@ const agoStr=d=>{
    locales and puts the day after the time in others. Always UK time, always said so. */
 const LAUNCH_UK = d => d.toLocaleString("en-GB",{weekday:"long",timeZone:"Europe/London"})
   + " at " + d.toLocaleString("en-GB",{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Europe/London"});
+/* THE ORGANISER SEES WHAT EVERYBODY SEES. He used to be waved straight past this, which meant the
+   one man who could check the curtain was the one man who never looked at it. He lands on it like
+   the other nineteen and steps through by hand, for this tab only — never remembered, so every
+   fresh load puts him back in front of it. */
+let GATE_PASS=false;
 const gateWanted = () => !!(S.launchAt && srvNow() < S.launchAt);
-const gateUp     = () => gateWanted() && !ADMIN_TOKEN;
+const gateUp     = () => gateWanted() && !GATE_PASS;
 
 /* The sky. A slow dusk over a fairway horizon, drawn rather than photographed — a stock golf
    photo behind a countdown looks like every other holding page, and this is the one screen the
@@ -5309,11 +5321,14 @@ function drawGate(){
   /* The organiser walks through it — he has to be able to work on Friday night — but a banner
      across the top stops him ever forgetting that nobody else can see any of this. */
   const bar=$("#gateBar");
-  if(bar) bar.innerHTML = (ADMIN_TOKEN && gateWanted())
-    ? `The board is behind the launch curtain for everybody else. It lifts
-       <b>${esc(LAUNCH_UK(new Date(S.launchAt)))}</b> UK &mdash; in
-       <b>${esc(untilStr(new Date(S.launchAt)))}</b>. You are seeing it because you are the organiser.`
+  if(bar) bar.innerHTML = (GATE_PASS && gateWanted())
+    ? `The launch curtain is up. It lifts <b>${esc(LAUNCH_UK(new Date(S.launchAt)))}</b> UK
+       &mdash; in <b>${esc(untilStr(new Date(S.launchAt)))}</b>. You stepped through it for this
+       tab; nobody else can.
+       <button class="ghost" id="gateBack" style="padding:2px 9px;font-size:12px">Back behind it</button>`
     : "";
+  const bk=$("#gateBack");
+  if(bk) bk.addEventListener("click",()=>{ GATE_PASS=false; GATE_LIFTED=false; GATE_LAST={}; drawAll(); });
   if(!gateUp()){
     if(!el.hidden && !GATE_LIFTED){ el.hidden=true; document.body.classList.remove("gated"); }
     if(GATE_TICK){clearInterval(GATE_TICK);GATE_TICK=null;}
@@ -5327,6 +5342,14 @@ function drawGate(){
   gateDigits();
   gateAct();
   gateInstall();
+  /* The organiser's door. Only rendered for an owner, and it only lasts the tab. */
+  const door=$("#gateDoor");
+  if(door){
+    door.innerHTML = ADMIN_TOKEN
+      ? `<button class="gateplain" id="gateThru">Organiser &mdash; open the board</button>` : "";
+    const th=$("#gateThru");
+    if(th) th.addEventListener("click",()=>{ GATE_PASS=true; drawAll(); });
+  }
   if(!GATE_TICK) GATE_TICK=setInterval(gateDigits,1000);
 }
 /* Installing it while you wait is the single most useful thing a man can do on this screen: the
@@ -6847,7 +6870,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-19.1</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-24.1</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -6998,7 +7021,11 @@ function shapeOf(){
    (DB.matches||[]).map(m=>[m.session,m.slot,(m.blue||[]).join("/"),(m.red||[]).join("/"),m.result,m.margin]),
    (DB.roster||[]).map(r=>[r.name,r.team,r.playing,r.role]),
    (DB.claimed||[]),
-   [!!st.declared,!!st.closed,(st.suspended||[]).join("/"),st.hcpModelV||"",
+   /* launchAt belongs here. Without it, setting or lifting the curtain changed nothing that this
+      fingerprint could see, so twenty phones already sitting open would poll, find "no change",
+      and carry on showing the board — the curtain only appearing for whoever happened to reload.
+      Same in reverse at 10:00 on the Saturday. */
+   [!!st.declared,!!st.closed,+st.launchAt||0,(st.suspended||[]).join("/"),st.hcpModelV||"",
     (st.prices&&st.prices.at)||0,st.payLink||"",st.apBonus,st.blindScale,
     st.bonusPts,st.bonusB,st.bonusR,st.holder],
    DB.stand?[DB.stand.blue,DB.stand.red,DB.stand.played,DB.stand.scheduled]:null,
