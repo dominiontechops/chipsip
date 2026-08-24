@@ -2188,7 +2188,7 @@ const MODEL=[
   "unknown": false
  },
  {
-  "name": "Theo Smith-Harris",
+  "name": "Theo Sims-Harris",
   "hcp": 15.0,
   "n": 0,
   "form": 20.35,
@@ -2953,7 +2953,7 @@ const DEF_NOV=[
     "here are only a starting shape and the room will move them soon enough — 4 days is a long "+
     "time, and every year somebody arrives an outsider and leaves as the story of the trip",
   round:"",opts:[],
-  wts:{"Alex Mulvin":4.6,"Rob Parfitt":3.4,"Theo Smith-Harris":2.4,"Ben West":1.9,
+  wts:{"Alex Mulvin":4.6,"Rob Parfitt":3.4,"Theo Sims-Harris":2.4,"Ben West":1.9,
    "Josh Menzies":1.6,"Josh Evans":1.55,"Luke Usher":1.35,"Gabe Hills":1.3,"Matt Petty":1.3,
    "Eamonn Brady":1.2,"Tom Bucknall":1.2,"Jack Mulroy":0.95,"Dave Huddleston":0.9,
    "Matt Holland":0.9,"Mark Sturgess":0.9,"Luke Holland":0.85,"Dom Mills":0.7,
@@ -2980,7 +2980,7 @@ const DEF_NOV=[
     "Sturgess is there for the same reason, and Ben West is a price because he would rather tell "+
     "you the number than the name. Somebody always does it before the bags are off the carousel",
   round:"",opts:[],
-  wts:{"Chris Best":6.0,"Theo Smith-Harris":2.6,"Mark Sturgess":1.9,"Gabe Hills":1.8,
+  wts:{"Chris Best":6.0,"Theo Sims-Harris":2.6,"Mark Sturgess":1.9,"Gabe Hills":1.8,
    "Eamonn Brady":1.5,"Ben West":1.4,"Josh Menzies":1.2,"Tom Bucknall":1.15,"Matt Petty":0.8,
    "Jay France":0.8,"Dong Ming Lau":0.7}},
 
@@ -3004,7 +3004,7 @@ const DEF_NOV=[
     "birthday to defend, and Theo is there on volume alone. At the other end sit Matt Petty and "+
     "Dong Ming Lau, and neither of those prices is an insult",
   round:"",opts:[],
-  wts:{"Alex Mulvin":4.5,"Rob Parfitt":3.2,"Theo Smith-Harris":2.3,"Josh Evans":1.9,
+  wts:{"Alex Mulvin":4.5,"Rob Parfitt":3.2,"Theo Sims-Harris":2.3,"Josh Evans":1.9,
    "Josh Menzies":1.5,"Ben West":1.3,"Eamonn Brady":1.3,"Gabe Hills":1.25,"Tom Bucknall":1.1,
    "Matt Holland":0.95,"Dom Mills":0.9,"Chris Best":0.9,"Mark Sturgess":0.9,"Jay France":0.85,
    "Luke Usher":0.8,"Luke Holland":0.8,"Matt Petty":0.3,"Dong Ming Lau":0.25}},
@@ -3110,7 +3110,7 @@ let S=null;
    and every phone sees a version it already has, keeps its stale roster, and re-runs the model on
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
-const MODEL_V="b600bf6a";
+const MODEL_V="7b5a7070";
 const DATA_V="2026-08-24.1"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
@@ -5467,9 +5467,16 @@ function gateInstall(){
       ?`<p>It opens full screen, loads instantly, and still opens when the signal goes. Nothing to
          download and no app store.</p>
         <button class="gatebtn" id="gateInstGo" style="margin-top:12px">Install it</button>`
+      /* Safari on an iPhone does not put Share in the same place twice. On the standard bottom tab
+         bar it is a square with an arrow out of the top; with the compact address bar, or on an
+         iPad, or in landscape, there is no Share icon on screen at all and it lives inside the
+         three dots. Naming one icon and one position was simply wrong for half the group, so this
+         names both and the destination they share. */
       :`<p>Out there the wifi comes and goes. Installed, the board still opens.</p>
-        <ol><li>Press <b>Share</b> at the bottom of Safari &mdash; the square with the arrow out of it.</li>
-        <li>Scroll down to <b>Add to Home Screen</b>.</li>
+        <ol><li>At the bottom of Safari press <b>&middot;&middot;&middot;</b>, or the
+          <b>Share</b> icon &mdash; a square with an arrow coming out of the top &mdash; if yours
+          shows one instead.</li>
+        <li>Scroll the menu down to <b>Add to Home Screen</b>.</li>
         <li>Press <b>Add</b>.</li></ol>
         <p class="tiny">It has to be Safari. Chrome on an iPhone cannot do it.</p>`}
   </div>`;
@@ -5825,7 +5832,7 @@ function drawMine(){
    Side games are excluded: 2025 ran a "Minigame Player" as a 5th match each session and no
    individual is named on it, so it cannot be attributed to anybody.
    4 of the 2026 squad have never played one of these: Mark Sturgess, Matt Petty, Josh Evans and
-   Theo Smith-Harris. They are shown as first-timers, NOT ranked last — no record is not a bad
+   Theo Sims-Harris. They are shown as first-timers, NOT ranked last — no record is not a bad
    record, and burying them at 20th would say something the data does not.
    Marcus Enderson, Declan Ward and Jake Walsh played but are not on the 2026 roster, so they are
    left out entirely rather than kept as ghosts.
@@ -7754,8 +7761,10 @@ function drawInstall(){
    ${INSTALL_EVT
      ?`<div class="row" style="margin:10px 0 0"><button class="go" id="instGo">Install it</button></div>`
      :`<ol>
-        <li>Press the <b>Share</b> button at the bottom of Safari &mdash; the square with the arrow out of it.</li>
-        <li>Scroll down and press <b>Add to Home Screen</b>.</li>
+        <li>At the bottom of Safari press <b>&middot;&middot;&middot;</b>, or the <b>Share</b> icon
+          &mdash; a square with an arrow coming out of the top &mdash; if yours shows one instead.
+          Which one you get depends on your Safari settings, so look for either.</li>
+        <li>Scroll the menu down and press <b>Add to Home Screen</b>.</li>
         <li>Press <b>Add</b>. The badge appears with your other apps.</li>
       </ol>
       <p class="note" style="margin-top:6px">It has to be Safari &mdash; Chrome on an iPhone cannot do it.</p>`}
