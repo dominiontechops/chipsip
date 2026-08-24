@@ -269,8 +269,10 @@ tr:last-child td{border-bottom:0}
 /* Football-style form guide. Green won, red lost, grey halved. The letter is never the only
    signal — each carries a title so a colour-blind reader gets the word, and the aggregate
    position sits next to it in plain text. */
-.wld{display:inline-flex;gap:2px;align-items:center;vertical-align:middle}
+.wldrow{display:inline-flex;align-items:center;vertical-align:middle}
+.wld{display:inline-flex;gap:2px;align-items:center;vertical-align:middle;flex:0 0 auto}
 .wld+.wld{margin-left:7px;padding-left:7px;border-left:1px solid var(--line)}
+.wld.miss em{font-style:normal;color:var(--dim);opacity:.5;font-family:var(--mono);font-size:11px}
 .wld i{font-style:normal;font-family:var(--mono);font-size:10px;line-height:1;
   width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;
   border-radius:3px;border:1px solid transparent;font-weight:700}
@@ -2032,12 +2034,12 @@ const MODEL=[
   "gap": 5.35,
   "rawGap": null,
   "probs": [
-   0.555,
-   1.7,
-   3.881,
-   4.333,
-   3.712,
-   3.819
+   0.0002,
+   0.0254,
+   0.2292,
+   0.3802,
+   0.2383,
+   0.1267
   ],
   "dropped": 0,
   "lowSample": true,
@@ -2058,12 +2060,12 @@ const MODEL=[
   "gap": 5.35,
   "rawGap": null,
   "probs": [
-   0.555,
-   1.7,
-   3.881,
-   4.333,
-   3.712,
-   3.819
+   0.0002,
+   0.0254,
+   0.2292,
+   0.3802,
+   0.2383,
+   0.1267
   ],
   "dropped": 0,
   "lowSample": true,
@@ -2907,7 +2909,7 @@ let S=null;
    and every phone sees a version it already has, keeps its stale roster, and re-runs the model on
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
-const MODEL_V="31d55907";
+const MODEL_V="b600bf6a";
 const DATA_V="2026-08-19.1"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
@@ -2915,7 +2917,7 @@ function freshState(){return{ v:DATA_V,
  admPane:"settle",poView:"market",fbView:"",fbHow:false,gFold:null,gCol:"gap",gDir:0,openGrp:[],poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,paidClaim:0,
  onboarded:false,onbStep:0,rulesV:0,rulesAt:0,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
- players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:p.probs,n:p.n,
+ players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:normProbs(p.probs,p.name),n:p.n,
    low:p.lowSample,unknown:!!p.unknown,rawGap:p.rawGap,team:p.team,role:p.role||null,avg:p.avg||null,
    last:p.last||null,trend:(p.trend==null?null:p.trend),
    base:{hcp:p.hcp,form:p.form},in:true})),
@@ -2931,6 +2933,9 @@ function load(){
    /* A saved roster from before the hole rule existed has no `dec` on its courses. Fill it from
       the defaults rather than letting every round quietly fall back to strokes. */
    (S.courses||[]).forEach((c,i)=>{ if(!c.dec) c.dec=(DEF_COURSES[i]||{}).dec||"strokes"; });
+   /* And a saved roster can carry a bad hole distribution forward past a model fix, because the
+      state only refreshes when the model fingerprint changes. Repair on the way in as well. */
+   (S.players||[]).forEach(p=>{ p.probs=normProbs(p.probs,p.name); });
    return; }
  /* Newer data has shipped. Keep only what belongs to this person and take everything
     else fresh, otherwise a stale roster in one browser outlives every correction. */
@@ -3121,6 +3126,25 @@ function strokeMap(ph,c){
    :[...Array(18).keys()].sort((a,b)=>(c.pars?c.pars[b]-c.pars[a]:0)||a-b);
  const base=Math.floor(n/18),rem=n-base*18;m.fill(base);
  for(let i=0;i<rem;i++)m[rank[i%18]]++;return m;}
+/* SAFETY NET ON THE HOLE DISTRIBUTION. drawVsPar walks a cumulative probability, so it only works
+   if the 6 numbers are a distribution. Two players shipped with the RAW COUNTS instead — summing
+   to 18, not 1 — and because the walk returns the moment the running total passes a 0-to-1 random
+   number, the first entry alone (0.555) was cleared 55% of the time. Both men were simulated
+   making an eagle or a birdie on every hole of every round. playerHoles then bends the total back
+   to his expected score, so his SCORE looked sane while his card was nonsense — and since match
+   play is won hole by hole, it made 2 men with no scoring record whatsoever the 2 shortest prices
+   in a 20-man MVP market. Normalised once at load, and loudly, because a silent repair of a bad
+   model is how the same thing happens again unnoticed. */
+function normProbs(pr,who){
+ if(!Array.isArray(pr)||pr.length<6) return [0.0002,0.0254,0.2292,0.3802,0.2383,0.1267];
+ const t=pr.reduce((a,b)=>a+(+b||0),0);
+ if(t>0&&Math.abs(t-1)>0.02){
+   console.warn("Hole distribution for "+(who||"a player")+" summed to "+t.toFixed(3)+
+     ", not 1 — normalised. Check model.json.");
+   return pr.map(x=>(+x||0)/t);
+ }
+ return pr;
+}
 function drawVsPar(pr){const r=Math.random();let a=0;const v=[-2,-1,0,1,2];
  for(let i=0;i<5;i++){a+=pr[i];if(r<a)return v[i];}
  let t=3;if(Math.random()<0.35)t++;if(Math.random()<0.15)t++;return t;}
@@ -5363,13 +5387,32 @@ function formRanks(){
    (a,b)=>(a[0]-b[0])||(a[1]-b[1]));
  return {fr,tr,squad:squad.length};
 }
+/* How wide each year's slot is, measured from the longest run anybody played that year rather than
+   hard-coded — 2024 was 4 matches a man, 2025 was 4, and a future year with 10 singles would want
+   a wider slot without anybody remembering to change a number. 14px per letter plus its 2px gap,
+   plus room for the year label. */
+function tripWidths(){
+ const w={};
+ TRIP_YEARS.forEach(y=>{ let n=0;
+   Object.values(TRIP_FORM).forEach(t=>{ if(t[y]&&t[y].length>n) n=t[y].length; });
+   w[y]=n?n*16-2+22:0; });
+ return w;
+}
 function wldHtml(name){
  const t=tripOf(name); if(!t) return "";
- /* Each trip is labelled. Without the year a man with 2 blocks reads as one 8-match run, and when
-    2026 is added there would be 3 unlabelled blocks and nobody would know which was which. */
- return TRIP_YEARS.filter(y=>t[y]).map(y=>`<span class="wld" title="${y}: `+
-   [...t[y]].map(c=>c==="W"?"won":c==="L"?"lost":"halved").join(", ")+`"><u>'${String(y).slice(2)}</u>`+
-   [...t[y]].map(c=>`<i class="${c.toLowerCase()}">${c}</i>`).join("")+`</span>`).join("");
+ /* EVERY YEAR GETS ITS OWN FIXED SLOT, in the same order on every row, so '24 sits above '24 and
+    '25 above '25 and the column can be read down. A man who missed a trip gets an empty slot of
+    the same width rather than having his one block slide left into the previous year's position,
+    which is what made year-on-year comparison impossible. The year is still labelled, because
+    once 2026 lands there will be 3 slots and position alone is not enough. */
+ const W=tripWidths();
+ return `<span class="wldrow">`+TRIP_YEARS.map(y=>{
+   const yl=`<u>'${String(y).slice(2)}</u>`;
+   if(!t[y]) return `<span class="wld miss" style="width:${W[y]}px" title="Not on the ${y} trip">${yl}<em>&mdash;</em></span>`;
+   return `<span class="wld" style="width:${W[y]}px" title="${y}: `+
+     [...t[y]].map(c=>c==="W"?"won":c==="L"?"lost":"halved").join(", ")+`">${yl}`+
+     [...t[y]].map(c=>`<i class="${c.toLowerCase()}">${c}</i>`).join("")+`</span>`;
+ }).join("")+`</span>`;
 }
 /* Table or List. An empty setting means "whatever the screen suggests", which is what everybody
    gets on their first visit; the moment a man picks one it sticks on that phone and the breakpoint
