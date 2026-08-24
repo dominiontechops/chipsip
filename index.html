@@ -266,6 +266,99 @@ tr:last-child td{border-bottom:0}
 .wrap table{min-width:520px}
 @media(max-width:719px){ .wrap{margin:0 -12px;padding:0 12px} }
 .pos{color:var(--acc2)}.neg{color:var(--negtx)}.warn{color:var(--warn)}
+
+/* ================= THE LAUNCH CURTAIN =========================================================
+   Its own visual world: full bleed, dark whatever the theme, one thing on the screen. It sits
+   above everything and body.gated stops the rest of the app rendering at all, so there is nothing
+   behind it to catch a stray tap. */
+#gate{position:fixed;inset:0;z-index:9000;overflow:auto;
+  background:#08110C;color:#E9F2EA;
+  display:flex;align-items:center;justify-content:center;
+  padding:40px 22px;text-align:center;
+  opacity:1;transition:opacity .9s ease, transform .9s ease}
+#gate[hidden]{display:none}
+#gate.lifting{opacity:0;transform:scale(1.06)}
+#gateSky{position:absolute;inset:0;width:100%;height:100%;display:block}
+.gatein{position:relative;z-index:1;max-width:520px;width:100%;
+  display:flex;flex-direction:column;align-items:center;gap:0}
+.gatelogo{width:112px;height:auto;filter:drop-shadow(0 8px 26px rgba(0,0,0,.55));
+  animation:gateRise .9s cubic-bezier(.2,.8,.3,1) both}
+.gatewords{font-size:clamp(28px,7.4vw,42px);font-weight:800;letter-spacing:.12em;
+  margin:20px 0 0;line-height:1.05;color:#F2F8F2;
+  animation:gateRise .9s .08s cubic-bezier(.2,.8,.3,1) both}
+.gatewords em{font-style:normal;color:#6FD39A;margin:0 .1em}
+.gatewords span{display:block;font-size:.52em;letter-spacing:.42em;color:#9BB5A4;margin-top:8px;
+  text-indent:.42em}
+.gatewhere{margin:14px 0 0;font-size:12.5px;letter-spacing:.19em;text-transform:uppercase;
+  color:#7C9686;animation:gateRise .9s .16s cubic-bezier(.2,.8,.3,1) both}
+
+.clock{display:flex;gap:10px;margin:36px 0 0;justify-content:center;
+  animation:gateRise .9s .24s cubic-bezier(.2,.8,.3,1) both}
+.clock .unit{flex:1 1 0;min-width:0;max-width:96px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(140,200,165,.16);
+  border-radius:10px;padding:14px 6px 11px;backdrop-filter:blur(3px)}
+.clock b{display:block;font-family:var(--mono);font-size:clamp(26px,8vw,38px);font-weight:700;
+  line-height:1;font-variant-numeric:tabular-nums;color:#F2F8F2}
+.clock b.tick{animation:gateTick .42s ease}
+.clock span{display:block;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:#7C9686;margin-top:9px}
+.gateopen{margin:26px 0 0;font-size:16px;color:#BFD4C6;line-height:1.5;
+  animation:gateRise .9s .32s cubic-bezier(.2,.8,.3,1) both}
+.gateopen b{color:#6FD39A}
+.gateact{margin:30px 0 0;width:100%;animation:gateRise .9s .4s cubic-bezier(.2,.8,.3,1) both}
+.gatebtn{font:600 15px/1 inherit;font-family:inherit;
+  background:#2F7D4B;color:#F2F8F2;border:0;border-radius:99px;padding:14px 26px;cursor:pointer;
+  transition:background .15s, transform .15s}
+.gatebtn:hover{background:#3f9e63;transform:translateY(-1px)}
+.gatebtn:focus-visible{outline:2px solid #6FD39A;outline-offset:3px}
+.gatewelcome{margin:0;font-size:20px;color:#F2F8F2;line-height:1.3}
+.gatewelcome b{color:#6FD39A}
+.gateinst{margin:26px 0 0;text-align:left;background:rgba(255,255,255,.045);
+  border:1px solid rgba(140,200,165,.16);border-radius:12px;padding:16px 18px;
+  animation:gateRise .9s .48s cubic-bezier(.2,.8,.3,1) both}
+.gateinst .gihd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.gateinst b{color:#F2F8F2;font-size:15px}
+.gateinst p{margin:8px 0 0;font-size:13.5px;color:#9BB5A4;line-height:1.55}
+.gateinst p.tiny{font-size:12px;margin-top:8px}
+.gateinst ol{margin:10px 0 0;padding-left:20px;font-size:13.5px;color:#BFD4C6;line-height:1.7}
+.gateinst ol b{font-size:inherit}
+.gateinst .gix{background:none;border:0;color:#7C9686;font:inherit;font-size:14px;
+  cursor:pointer;padding:0 2px;line-height:1}
+.gateinst .gix:hover{color:#E9F2EA}
+.gateinst .gix:focus-visible{outline:2px solid #6FD39A;outline-offset:3px}
+.gateplain{margin:16px 0 0;background:none;border:0;border-bottom:1px solid rgba(140,200,165,.3);
+  color:#7C9686;font:inherit;font-size:13px;padding:0 0 2px;cursor:pointer}
+.gateplain:hover{color:#BFD4C6;border-color:#6FD39A}
+.gateplain:focus-visible{outline:2px solid #6FD39A;outline-offset:3px}
+.gatehint{margin:14px auto 0;font-size:13px;color:#7C9686;max-width:38ch;line-height:1.5}
+#gateAuth{width:100%;margin-top:22px;text-align:left}
+#gateAuth:empty{margin:0}
+#gateAuth .card{background:rgba(255,255,255,.05);border-color:rgba(140,200,165,.18);color:#E9F2EA}
+#gateAuth input,#gateAuth select{background:rgba(0,0,0,.3);color:#E9F2EA;
+  border-color:rgba(140,200,165,.25)}
+#gateAuth .note,#gateAuth .small{color:#9BB5A4}
+#gateAuth h2,#gateAuth h3,#gateAuth b{color:#F2F8F2}
+
+@keyframes gateRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes gateTick{0%{transform:translateY(-6px);opacity:.25}60%{opacity:1}100%{transform:none}}
+body.gated > header,body.gated > nav,body.gated > main,body.gated > footer,
+body.gated > #acctPanel,body.gated > #installWrap,body.gated > #sinceWrap,body.gated > #onbWrap,
+body.gated > #slipBar{display:none!important}
+body.gated{overflow:hidden}
+
+/* The organiser is not held behind it, but he is told it is up. */
+.gatebar:empty{display:none}
+.gatebar{position:sticky;top:0;z-index:80;background:var(--warnbd);color:var(--ink);
+  border-bottom:1px solid var(--warn);padding:8px 14px;font-size:13px;
+  display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.gatebar b{font-family:var(--mono)}
+
+@media(max-width:400px){ .clock{gap:6px} .clock .unit{padding:11px 3px 9px} }
+@media(prefers-reduced-motion:reduce){
+  #gate,.gatelogo,.gatewords,.gatewhere,.clock,.gateopen,.gateact{animation:none;transition:none}
+  .clock b.tick{animation:none}
+}
+
 /* Football-style form guide. Green won, red lost, grey halved. The letter is never the only
    signal — each carries a title so a colour-blind reader gets the word, and the aggregate
    position sits next to it in plain text. */
@@ -826,6 +919,31 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
   <button data-t="admin">Admin</button>
 </nav>
 
+<!-- THE LAUNCH CURTAIN. Until the moment on settings.launchAt passes, this is the entire app for
+     everybody except the organiser: no markets, no prices, no form book. It lifts itself on the
+     tick that passes the moment, so nobody has to reload and twenty men do not all refresh at
+     once. Signing up IS allowed through it, deliberately — twenty sign-in emails spread across a
+     morning is a very different thing from twenty inside one minute. -->
+<div class="gatebar" id="gateBar"></div>
+<div id="gate" hidden>
+  <canvas id="gateSky" aria-hidden="true"></canvas>
+  <div class="gatein">
+    <img class="gatelogo" alt="Chip &amp; Sip Championship" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAzt0lEQVR42u1dK9Sqztee76wTiEQikUgkEo1Go9FoNBqNRiPRaDQSiUQjkUik8YX/3j8e95mB4aLyniNrsc57UGGY2ZdnX+f/mqZR32PyESilXHF64m8H/q/g/0opVYuzEmdJp7zGf3+Pkcf/fRlg0OEQMQd0+nR6gvhfeVTEJCWchVLqQWdBn3+PLwPMJt0DpVSolIpA2js9v6uBWFGyKyDQWjCXI7SDA6dr+byHUiqnk5niyxBfBrA+XCLyFRE9S3odwbEkfgiJXAHxm5jApGF0pwsMwRrHE9pHx5AlMEKulMro2pchvgzwdHgk3SMh5SXBF0BMDyD8T+BwRwPJ8HQMGiJXSt2VUimN/8sA/7Ckj0jSRyTtJcGwdM+A6IsZiLYPykyR0GyXhPBenua5Bb3XDTTDlwH+EUy/UkqtiTgcYWAyfk5BwteWhNflCXI1uJ5PE1SqNN4f9ArZjMuj94zBlvE0mu1G75yrf8iz9K8wgEPScEOE4GuIPiVJmFrcywVi8gUutzGQpxwlMAFCskL1u0UdGnMIAsAVzJARRLpN1HZfBlgIto+B8JEwH7DQjw7CccAQDsBG8DoIve4xhGsBdbqMX2kE93mAMvXsEq0sjP2VBgKyVmCI9GWAH0b4Gw3MqWgxr/RvYWEUBx2eoAoI7yGkcKVhgqFaSzKAC5omAEZ0DZqCx5WClugSFMwMrrhPqpRKLLTjlwEWQPhrpdRWSLSCpP21Q5oxpGGjWCfhSyB0NoxLIPJPvK+n0UyBwaDPgBlywz1DEh4rcZ+KtEHyN2mEv4UBHCL8HRECwpwrwBwdASEE8DUSnmFFBph7yX50XeDO08AbtntuBg8Qw6ONECYl/eai/gI36t/AALFSak+LhQuc0Klb3Ag8QYGBOFhaFj/YK8KBs1i1LlHd+94B69cGOLkVvy2ICZKf7DX6yQwQkMTfAGYtSeInBum0AvUucS57PzL19waIEObF6k93aErzd9cQtU9MsBW/y5RSZ2KgLwO8SaptlFIHgCwVqOVc4+1gwo+A8CsBA/61qGgAhm8kBEJGQuSu0aABady1mMsrMULxZYDXHSER/goM1DtNfGppFzCGZWlfqe8R01ytNdI9ofmqNL/ZibV4KKVOxAxfBphZ6u/o9MVk3zS4lT1BMSwOY92kwwPyrx8hzd1GOARS0AiSEVgbBwClWBssX6s2TbP0M2ia5to0TU1n1TTNpWkaX/PdqGmahL7D3380TXNsmib8Ae+6pDk/NE2Ti3m/N02z1nzfpzXBec8N313UufSF2IhFyOmabgFOTdMU4rsHWswvUY87fQMjXJumiS3WqyTh434ZYNjpEkFXFlJfN+nnL+HPzghSwPA8exba4L5UDbxU9XsTknxr+J6c6BvBoL8Fhmybptk3TbPSENonTh3EzAxQZ0vwE6Ho+ssA3edKSHOT5NBN7q5pGueNY3VI2q2ISPczMl8A8/AgaXszaMBPnFsNLNJpAynMSoJUXwbQnDuaIJ6sswY7snrFiU/eDHccggM5QYIHQINyJim3pfsxfmapGywMFkkNnGpsA5fWsu5Z23+WARjvo5TYa763JnWLUn/7QeO8oLFuSEvtQWvNcf+ahAJDj6V6VHQ2mG799kLAXZfA0J+ePI+kWxdOdEht4uS9SuozpDlZEBxLZR8YOaV38CZqmCMwk0sMdpwZZs1tr0jbINFI+bWArtmnjeNPE780dqMeyPMAqfgKTYTxhj4GOIjvRcSk6URb5ACYv6L/RwCzzjO9a/ACGCJts7tGUMUa13b0rzGAT5OD2DHUeBxS8Z1XTxQvTmkhmdawyAkRaEEaZIpQKIj4UTvuSVreZyDaFd2rpGddZpbCct1yzZyEGjgb/ysMEIgJ0nk3pKpMZvKAOBbQaQ9E1/W9kCR0Re9zmoGQAiLMC4z3Dgb/dob357k/EawqXiCFPaG5C00AUwrBjzDBp4n/qsHLW8D7FS2UM8PCr2jCr5aEfbfQYg8inrncr0zwFRFnLGDZbiYGy2DM7ICYW7uyLYPBzL2GUa6fZIJPEv9Fo873MGGlhRS2PdfAVBdLIuyDQfy9gph2LqM8JKIoQcMkRLTVRG8QG+oVMBPHMV4VQ5HubSnQXI0jJPrbGECqu4tmwo89KnMM1l3D87cg/TxLGLTruX8J492/QGCsgAnDmfB6DAb1YcBvpkDQjUijkHEAHROEfwsDeIL4de6xk3j51UQj7Ar5Q7rn2OB79sS4HQxwIcaKF5Kq0Dcv6LFiT8zGYv1SEhzbCZpiJey6i4YJrsJ4Dn46A0jOvmsI5SReeioGRGlzFAt5guf4PYued4z5p51s/N41XqzEYg3vM8ET6QK9CibwNN5B7yczwFm8jN9D/OGMOPoBqnRH968s1T97oW6kLdwfzgAeuHd3JFlPGiFhmosKEg2dGdYm69AEgfj8+sr5f+Wk73uI+wAG7ysigkfA5xVkLXLA6tGhYj36zPnhhC8hELpUed4DS6M5mtm+yTpswkBoivOr5uVVJZEbKlB3qAZ3o56bKe2VUkf6PKdSx7nLFH0q4fPpWRco5ztSGd8ra1hd9dzDH7dJwvaHXEaoa4xb0Fmq6V2jeUxrKn3kQvaussUdlTYm9Pfc5ZcJlFJeiC6w5jiBGuUDjWXxJZEhGDu67MgNSKAx1r5HatxGIh0MRu+xJ5d9jJcrpudcSNLmoH3qkWcFGacp4fUDGZSvTo32IdM1sJDoyYi1jISkP2hiQugWXy1dA7gkVWID166Iq12DZug71nTPkCTXpkeCeaQFXNAyJUiz68iuENxlGZtN6TalUELC4w4ypvvadpnGjTq4TeNcHS4CairAmvrU8/0ImhPsB/YIikn6+/D7BD4/0Bj4ndeztl55odF70WiGfELe/ArSDvYdlWKmMZUzxBY47TkVwR2MX2RkMJ5IU7Ev3yft5RLe5dMVf3v03ZB+uyWNldBzC81zOb5xmMFQ9SFg+bDUNAcYx5iil7WIqaw0mbcvMYrnzgQ0uTs9YYDtRrrx0H1p6yO+EnHsRrrUXGKcREN8bFyf6P2jF3uMHGKMLT1Tx4glvfNuggsxJia2gagMaTmf6GgZa9FFjCtDDMATWQSHpTFACMShm7SLCIWPuX858rdjo5gBZGFKKX+nhY5GEhlKe9QKY9ybERHETQSamJDGtoRxLAJ8IdgJsUgReYyY96MQoq6wFwpYg3gpNoDE/XvCdDoMdydsWY3wGPDGblv15/aie2W3u4st/t1omkPlqt1GyMZuwZ0cfYHrXY0XqBJeoFJ4gUrLeeIub7Ib3pXOubxtHq3zCtalpOs31Xbefgy0rRIav84zhN7DjNao/LQNcBRpDiZsNzW0zf5oXc1pZhHdtZH4JyFFOSu0D05wgcma7nGHYvYpXqAaYhYp2TNcgun2jGcLmaWovabmE7kkjc8Q4GTbZw9Q9zLBBskMcNkR9sDp0xqArX9XY6H79FlAEm1LUnxKbCEhzt8JyXKh+69HPMNVbddjbO/HG2qkBo3FTXfZCxSqP/vwoxeoBGleGXz6njhdw/0q9bz/790gCR3VbhGFHbELNb61OfrnWQoHpOkj8K6dJnhrpLdwDZoroPszXW0maf6JkuAGnLrpsNwPMxmAF/Dfb0gSXSZEC2NRlsmpxysDJnfpNydIrZD2QUpjOtAYY9IOnqWBjJ6giO6xp/e7G7xAD3pmV/+gmL5TimKkMVh6A7UQgTDQ54oYHzrsAYwPTMrVmprnbQpl74Tbaq6UAtliowK3mzPQeDwLYkg7XLPcIvCuIfqc7vUOL5ACL9AZagRqUWjeVZ22EglnY9sXhiQsXpW77wrhdBTC8DqHgJ2Clx8gfQLDZ8WL8rq5iGM3MvqYCqltIgBdb0wk+k93bPNAI2UarXA2zI9L81c0y25fGIqeS7Hhs2IsI44d2KmjTC+Z4O9/9SkX3dRK0SemyA0Gsb+w92Jm2EI3CWRwEyNEmpLEzcLea9cBhfYdDpiXMUAE0OEmoAfm+VwXRhyX5s8Wfa5GMu40jZ4Sgkc/IS3aMeB91nSe5vsoGLgO213Q+yAU2muyVeux5aJjBnQ1JCd5oIaLBalTWYucGZKqJDZmgzj+AUTfJawuGltnYzCSM6EdgwW9R2GgrTUI3XQo446x/iuD1+Vo4NJPY0hZXOFPNIh/4mli7lAD/RIhLKIFwVdTnlkytnPGUKv8bmH4pgtRn1h+VxkM3VhjEB/ebNiuSbC8+pls+Nq0LD+KlPXVAtYT4U6XQZwNmcuhyW6Vwe10noLDXiTxsCZhZzCuCqEdPiHtbkBoCTFD8GJIeLWwh3YiQ3MJxnGXjXkag0DGcJ9MOYhhopKFED+6zrYjDeJ3nXdDYOsK6c2vMCx1HjFfI/TQON4uYH2vBmGLWsA6LWaMK+pgwF/FAvBiJCS/jvhvFgbxJzRA3ZFq7b8QJkoHQaCRuuWMNRVzjBm9kK5BCxzmYgDE/pKzsDnUufm8tyfvIH7ZnGsR/elFnQTDoP2boso8L7IfT9TBBMUChEZiSMFBW9RKCwypxJJc5Qjp/0m3py8MpG3H5/XC/Nw3gmRx87kAm0wx0fXo3ArDOP6wpi8NwbHTEI/QEG6Tnp94IdLfFVJ035Nee2yW5aK8LCjWgK1qdEUn+46qrU/MGxP6xsAcvR7JIQGIs2EA5Yex/7kD93kiUrhfGPGrBQbb0Puj6wSHTHL7oCaVtoAJIq2nMMDRQORocX/S84NqOdFohuvCiX+JDNBXnysDT5/UqLi+sQG2J2MZAKXn1cAY1QcXD/sPZQI/Y+3Akol/qQwg4Y5sa4mwcq6dMccGEXWE7orOFkb79FdPtRdX+KSiamkFNb6pev/hUsWRT1VBB1F9dKAKL64WO6vvMfQ4Q213BLW4XFF2oLl36bPgA2O8Q312TFV5XDF3g8rEyHSDXz1NqLgZ0U2UxIVU0ncbOOBAFJqPPfY0jpoYIRWlk1xIfbNo6vQ9zMcJ1nhDRK9AKJ5gXQ8fGF8NbS1RMPP4Chi7O6QkEv2pJwPuykYYQOcZbIZIRJ4dS1j0hUDTG9nqjMprR1nsFAPXFlb5EP+RNInG8GoIBIqhVd3dAIvuAwuqud3IGlTVmJaEB+LmgiRQrYFFpQYWfY9xx4MgTknzL+EOF79zexpvhmfuYJ37jgIQQADteZhGaxrbaggEiqEXTi6ue0T4Nt0XfCL2NU2cC5O4ImYaAok28CJn0RniAOM+f8g2+VuPO9hRgbAHcrAVQjW9i3QMMHtt+ZsbEDr+JoNuGfquHR1d2CT8cYVXqK8InXcALBt9H80S2vj5lqouM0T/MCXj+gNgz0+CQKZC9K2BNobmhHGnjQ15FzNNXfOWvuM23a0zdW7bSxcM+mXw/rgaKR8AdMlUf6/6kqRGaVBlLnynsJT+bHyfAX65JHUYFh2/AvtlBucR1moP2ruiNalJyg7VAlvqA3QQ8Nine116IBFC9UDcIwX4HNlAoBiwVS6aFfGGF7bNpzJ6uYcBu22VXZtBnxiA1d3dEhZ9j/ntgQsQ2l7AkDvQSmx5z0r92RJdHil9p+ihtUrQMF9/wLjcLgbwwMBJ4YYO3DQbSGSFYeClsu9TuVZtJ7BEMMYecGrypdGXHwlI1Y0gtgvEBtYD7lmRhE8NTLezoLkM6CkG7YSC3Jc25y+D90eJwYTAGGNaDwZA9CUwm40B7Kk2qCUDbzvVBsMuavoWQt/DjljPQOg7IanvILSGePtMW0DZbg1VA5rwxLMzoMWoiwFCkvaF4LgQ7IJ84IRxj8uEJmUNktqGAVj610LCByBlbmpa39HvMdwrdAehiS7GK9gC24F0gkL2ZpLaPVCp1uB9RDNGBkBJnQnYEoLLqxg4WbwV0g7cqjs6+1pbu4D9U/VnxNfXwKLv8Z6DCR3XiGknE8LLFikw3NnAmSu7eICkz1A9p248QHB6OgZAtfEQODuCB1QDJ6owYLvUAtfFMKZEjHUN0iL70uNHtcAKaKQC6S3TE/roZEfrXINmH7KPXAXfRW9Qbbj+xADMGbWAOT5AkHcTWqzarVQzIf11sOh7fE4LbIVHqNB4ZPqItzRcHyJ0M4ONmYNDx9cxQGjwzoQwkPyNk+vD5GH/exekSvqV/h89cP5j4ey4A+aO3zimBzBMKDRMCcLeyAAPwYkh3KB444vwhFbqT49UBJLm6/n5rEfophFYLLRYO7yTARDvh2A/PIB+Odj7HwOgusgNhnH+5sldwXNTcZ1h0dfzswxboBBro9RzHtlqgCE79ShhPAE8twLG8NkQ/iUvCMMULeb0jZOKhspdGL8If8ov/X38QCdHJKC01vB8EwySAlwBY/x3HRnAJZVVCBzuaa6/+ghV6+LMBCzyNYzxPT5vC9TCPsPr2jycFx45PFcyQA20/QSBmGtLwQD8w+qNL4CwCzVSpNotMn9Kzk+f6jfZMOytcH4IAxRijXj9Co1B+g6tVEuDVxjIvtQAOkL3NRb0OwhGF3fAOEX+Q+CPq7oLRJwOAnfo3W1TRj55oOcwUM/eILzuv3E8pRDufP0PBnANDCCv1yMJeWixtC8IXQkGqH8Q/OmT3l15LhWdrAmihb8j+t9xzTNY12AE/YzRHNLg9eE6utO9X/QCHnxBaRjAVtp68Nuzav3EnK+/Vf/L3gx64I9Lz9TBn/oHwAJfwBcTlInBQHQ7pFn2AUPS9qg1QjIUsEOHx+WxVu1ew55qs07vqg2yuQPWvtBoYbRlPaWU91t8oRSc7VkygKfakkSeiDXc50gvEcLLbg2GNXoRHoJY+IW49jd5s20ylChqmEf5rhv1vwxWBzTlziAQHkQMK3rfYkHv6qi2E4cDa+WCxC16GHin2pJZhikBrPcRtAEXRN0sYBD/3jVc/48BXME1TNSOpQdoA4sXGNRZKKS5b7ivDnah9KjpOyciiPPCIJEjxvlQbT1FKqDBWbXNB24GwVIIaRqr5aR/RET4a80aesCsBdgArkZoxUCDnsZukpmlJ9WfmFnCepgYwP0F6rkSkt4TWNTGa3NTbST5bjGwLhj10DCj/B0Tw3lBhqIDi1yBBnAEtCxAM+4M88W4uRJzEi/AuD+o/+UCrQ1zgLCj1KyjCbvroAxHla90L99ivUsQoJ6G/hTbAC4MtNIQYm0BgVIa3BE4/gQL9qDzTt+pO7CzjgFYcvAkPMRi7Ij5tgsgfjbAXNV20cjVc24MwkGXNFmoMfhz0hQspNir8kmDeEVzfdQQVgqwz+/B43LeMtW2X0mB5q4k5Bx6LjNeHypBevYEk/3HGL8FA9QGBqgsHlaA5GMsx5NUwkS4Pcajq+FUvs5S0yGiX8M4A9IEMf2bfwj7hzTejBasEu/ApXsI7/izXDgCCtAkDA1qwSDvNOz3xLyOIChum8JEKhmgFO+aG+buBpKbtUUqtCDTUZ8xjITuajxvjlLK/d1B6K7mRl1SYUsDTYBAY8B/Lr0MT5BjgD+uRut4Qq0Vqi2kZkZwwSBjJninkezCxLIfOqS5uYKxW6i2SCikMV6E/ZMCwazVc0CQ7x28iQHQyA0EId1p7CmsUyU8iLhuTgd0YTvpAFqzBmfBjr5zBmHxsNQArua6ywzgWjCAzn3H2O8uGIEJYaVxibH6PBsG72rwm2QAHE9OE3MFhmM1+04jOYD5yzSQyFN/Rq85oc8DyMSVVYlqO7HVwgXIjPQOV7DOyK2J4BON4V4ZYEcpPGLyuNNnITBZLNY/V627uAYhG9H8JUJoSg2Adtl/1393ELrpuk9cyqVviMVu4O5K6bcswXLSEhv1XEKn86BIrdOnjVJwE25Vm5UY01iuyr7/0JgjpPd0wEVbqOfyQJakrCUTeLc1ff+injucPYB5OcDkdcCIuQ4PjHNPzHOi2oa0XVLXMRCdjnEvNIecWZrS8yt6FrfUTMBlzAValWqb3x40UEc+80kz/BqJBblf5F1ItRwWJofFL9RzRFANYABHXO86OGiyVc8JWq82kn1iukCj+UL13GysEkZsDBCxAu0pIUdF7+So16YVrMGh4YHLlmt1rxbYW7ofTXhcB3/RmK7Vc0E7GsdcuXjVGOQ6ZsTr/9Hbb9Wdi2K6bhMZdoTr0tEMwPTM2nAfGzzPxtSdFmwLUuPyIiO5BrvFAczPAUJuInUDpjiCu/imceHtVVsQvgMBsnmRXaMzcnPwwtg+szLQT9VDV7WB9hwLuqwMNKnTAAjTnN8WBN810CGMY2twdV13BhIl49QNuB43xBCJBjeOPVjCReC9cIm4D6pN7ZaQDqUk2y0ZGMXoIkzpc8bDczEB2x470DgPInwbd2MXAzg90ngoPTgW3697GODp+u8RBOv0/EamAYxhACkB3AnMVRFBISNwh2M2km8TiQi9UwyHPMCwBUjvQLV+dPlObFOFqo0c5+o5XcIDLTP1iEnqrwCqssQvJggDHQPUI4VYPYCRbcbyBwP0DUynylZg4NUdRFwP0Bw22sCZSKRnsAW2oAluE2EREynXnXpEvDG4hWXzVoQ3ETEpS/4teDu4Vz76xh01rR7Cp/vic670/KnQ0ARlqg5JPQVNeKrNQ6oHohX1e8QLZqDaix5JVI8kXmekFLA5CjDgsQlTTAQwBhaV4IXKVBu0YmL1VRsTSFTbPJa1RgU2Q6TaLhi8uDzvGzD+xjCAA94d7AF7VvO7iuuO9a9HMJPSeAZ34KI9jWGg3yMx/VG10ctS/eknlhMwpL/jGANKjWRkxtY7MEzHwqKrat2vTNQxEWoO2oAT2jjldw+G8ZUYIKUzgntHqg0OXUfYADq4cx55Lxt6MTFAPZDouyD2HYRBNWAs/93rt8bdWPcQI0pSnWr14G8H1JRvQcR9+NF9gfcjAW0gYdFF2fcdugPsKQQTFIDjQ/UcI2Gjdg0Gr6ue9znYqefGZEOYUwd3Enq3V5SVugbc38cAMlnQEX/zu/hwn8LSVjHB9PpXD/SwlbqY8+0BDg5h8ZkQHpZSxGRAvYIJOG9pDS5M9nkflP2+VwlI8zW8R6Ax8FP6d63afbdSAUUYWrFg4kh6aUmIHP/Yg1eK0xpeVVPtGmjI7WGASj1nu7I9tYLPGDY+BtoQpu/Wv20sZUvpV4rfDtEc8pmuQTO46rVHTpLyTkSCsOhi4XnhpLCjahO5QviMoQ9uIFHD3GNBDEeBQ/hOouxqASTcecD4qxfPoWuAHa7GGJZ0cdYQraOhxXqAIO3UAJIBXCBkeb2yMHjqDiufF7GygECuIHZ5/dWLeFVtOH4H0GVl4S06q3ZHTM6EDWncN9VGjDmgeIP3WgkhsAIIkKn+7Z98IvwNzNOr00AkYenytlzVH8zEJDUTfBlqUyLT1RraqnQMgOrXlgFyNU9k1ZQ0VcICu+o9R0mehTsQ1QaM2YsyRx/ZsN3AtTUs3FW1Rd8+EScndWWqzQVigcRtw8uOhZbBLNZGqXrfYSqjxUKYokP43WYci2S6Wnf9t/rTP6uDQO8qQmfDUbYC6csmfAcsYiwdqbb+mQNstWYxd6pt+c2E7AJB1IBx8VkRLBJK8GqBcEengVwNoWOae/FGZtTBLrxeDtEA75K6pYYBTIzxzuOm2k3/JCzSeYt4V8UMNIejnvdb48XJ1XMLENYSV2X2z0vvzrvhju4IDAwQwLu+s7+Uq9FGjtQAJulaCLfUO9qQV8CQgWCMSv2599O7DwmL1qo/iMYbSUSqbRUeqGe3M8YOMmC2JcMdEwPwOhaCWeX6fooBXKkBunD3J2AHBoo80AqFeu469smDYdEaYFGft4gDb2fQZI56Tm2w2TEH4U4OMKxawLzoNkN01WdabLoGCIT2SPkbcFkoCJ3Te99peCogAi4AKWGxV3B9Cb1BbwBx9iDl+7xF5UAowD2D0LvDhnihlnHIFvu63UBt/fdzjUendZ68VL/EF9BClu0s3ilduZAFpX0qGGMpByfZrVW7v9VG6TsnjDHkOJjFxjQHsw5qWQ2yfPW8ySJe94VwezcDmNr9lL/EF3yBmwrN9Xd4gh4aO4CvT2m17RIhnZX95m1DGJelNCfEHVSbhj30wPppn959S/eaG+uHZNvsJzBsqJ7bwuB1pqf8w3DMEfZI+UsDOzwNHPHfqAVwohCWFeK6O4L4EyB+LqWb+7irts8lQ8tEtfWsNgt3pvHFqt2Yeq3aTenmPHZCq9xGalh0wyKhR3D9XRrAFQxQaRjgPwikBNRxBTHOoQF8pe8g1mcHyNrXHCZ1yCI5hJe5KdWKJN5BPRdSz+nNGgqLXNWWTXILkNuL4c6W5uGm2oYCLs3VEIGHfT9lD/7gA/jfFYJTaQT8/643TaOaplk1TVM1TVM3TbOja6ppmrhpmpKub+D60PPYNM2jaRrP8vv43D1cD5qmKej6ccDzD/SbtWZcVdM02wnvZnOumqa50xjqpmkyMZ+rpmlums+dF46J5/giroc0x5cB99rRuCt6F76+AboaSj9h0zT+hPnWPRevb5umUUhYD/rgDD/wm6bJ6fpp5GA8uMfB8jcuEUFNhIOfXYFIXIt7RbTQJ/p+RCf/NqEFD1/MBC4x8wMI/UrPZ2YviSn9F4+F1yQlJnPo/WMa55YIZW15vxusCQq5C10vRrzTbQC9mAReKdZ1D4waIQMomgwdwbHkSgdy74okwxUW/EGD29Bkez1agycvElJFJ21MJxP4hia1ojOlBfZo4bIBGmrK6RNhVDAvNY0tesPzcU4CWoc7zEtG85IBg9gIGKmVAxB8yUgJno9ck4Sem/cx5C+DwavD3f4A3M1G5llgf58wcELY0+0xJivCbLEIKBWqTRjrsz1W4KFZqefualfC3Zzzf3wDPg2Uvkuy9yZHwwGM9DXh/xjmJaR5eKjnPZm71ppjE6kwfjFS3WejcbwgVG2NL7eTCQY4YtBNnouAHNojJdoAUrKuLa73qfuzkHC10AQri3vcQPsg3DnDfYKOe6xp3IVG4uJ5Jm31SnsgoOdUIIWOpBElLIpeiPsreG7dcRYam7AL3t6FtjDBItPc3EmT6NapEjDWViPtNbbNk6aSGqBSf25lk8P1cIAXZK/a4o1aeJZ2FlIBJYqURJzp2Odd8tSf/flNrkCf7ntS8+YbcezhqvHuHOl5a9W2RVyDt8ifOVB1hiDVwUKSqh4tvQZaQRdtBOuVWkS9uQ+RKfOYc6VsMlzZRS6LZlCD/Hf9lyDMQhOAKif433WbYQzp8nA3wJ0MGGjTQSjlgGftINh2ninwt4LYQ6DabNKNiJY+VFtzkKrnDSg2atjeWKbjqNrCmt2A+1UdDLKF9bjBZxsgQttuE4lqa591DLKzDKRFmoAqXi+7GEDnZ6/EdVup5AjfMO/y4Q+4xwO0gNxEgiVOoMw9P233E+akvy2N01f6/bpsJS0mxa1UW3Pc11sTa3YxiHbRvP+QYwOR5ZWy37u47Ig6b2A8N/WcxbsC6T8ki/hu0BaZJfF76nmL3QK0mDYg90vzIJ3Bm8ONbBeB1Q0bwmsisHygsZeAMYxaIBVaIDRogJOF2sSuAzEEo4akXLCx7tK4uGkYbyN0UnYJcBURPMMiTi24AUTyBzLkgcZku9Mkz8fJIEB8EDoPwdSokYdGrgOlT2ILLDUyZg5k4r5oGNcmBkCrWed5kdf7FvIgopg3wLi2B6rXjXreLC8BW8AksZmYbbMvY8CPB2XXjzICT4oHEVXOr8nV8INh0VG1FWbcFjxWzxvL9Xl9uN7WNv+JyzovHXAxAAGFGQMbEFC3ge/sCwHAGtlTdpCNvXyVYIAIINmzRtNY0XdDoOkKnhf/Tf5qXWRYRoAvEPRY9fiWHz2eD/SAcNBq1+O92JF35wr3r8gX7c8UtDoJ79GNnrnv8RjxO5/AA9J3lj2esBjuJb1z6Fka400LNQFJxyJmpCCewx4pE+0+3acrAFXSg6U7tH5D6oDuxJcIBRE+4MW9ngm+WxLCjQgn1yyKT4ud0rPRdZe+KI0hFukSFT07I2YINQSR0rzZvnPWI0QcGIMUOLgO6ZuCiqb0B+n+fJgCcl2+Yilt/a4bvVkLyOfvYREPFvGFY09cAOMDFyKgDZ1H8H3L2MbeMj1j7OmQ8MkMzz/T52si/CsxsQ3x22isvZgbnSauPiQgT4bMgW2X4DYRSGpQJRhKDj7wkmeY5I0Y892gubokRtZDFAxlTjAnOshwfvN8eMToRYckZ+Yte96xD+bpoI+EwSh9ry9O4usLyN06kENgwwAIgyoNDNKpmXedmJyXiUWIYIEyS/zta/BxZSByXZTyasls6oXRZV1eUWVB+BX9NrAksNQgfPCz4o35TMog5XeG7GEtahlqdGKWZvqhRd/By546PhsC0yIiZhtYVJG2WX+Q8HXabMj4b5aJhFLz6+b82PHZJ+xD3wDZtkMYwAGult6g48BszFfg4HtHflIywB7QEVJigBYFfbb5gIq3nZcVEatp/DcihCHj3wvHgGsQlNkHDF+Z+3MxGOxGz6XNi0uVFxoe+G6D2AR3fNBS5UhJHdI7H0iq7T6k2seeIY35SOd2ZL3DBtY6F3CpCxZ9wviVwhDtEqNm6sOXJq9PAlIl/CAUMhle0mD7ScS7lDOC9dfFWC4LgD6+cL26BsZYjWEA9LpIQl8bXKXvPi8dcEdKry8TDNMgmcGw7INF7zwPhjF6IjbkjmWAlYHQEV/lH4gM69SwDu6glsg+qK1+MvEfNTUWpSEo+am1l5Vf6Azp9FYOMTjlQ7YTjE3Ts9wRhhQaYjo3HEqrrybohz1I/JcOWDQU90cESw4zrcHWwKQYx+ormFK2hpBJzaQzaQGOXOY0aFv/NE4GeiMCQ/cH22q0f/Fci1ypRECHQDDHfiDxF8IjNcVodkXsITDQay88H/owaWjsRk4ISv2D8K9foTjbH2kU6367Fwuw/RK9VoCw5HeFsZkOISyNoGSi39Gzsgm2g0n6IzS3ylYYE3zaGJhjTAX/GRgr1kiM8wijqALjx+9gkmom6PaTT0eTF3USHjVfJNMNXZOjJj3lMiGdBrM+pX8fnTNW4xzzUKkFtiMlQwztSfyOiRs6SSeRmelbSDv/HyT+QAQNK836ScmfDAyiraDdyk4UzI/VAPsO7H8z9AOazACy+9fWkIg2JC7AL7Lq8EGXIwwmRzDBXcNEMhEu/2Ag5xPnRmS06iBhIIj/OoJg93QP7A+0nwBBsddQPlX6D2UAqQU8g7v0MmARKgPDhDThU/JtULXrvD++RgJePhTOf2fgSCbP3TVzEwsGuYyU1i6dcq4ZLrsD3aiYDbzrEMLRKxhAqp/9yMosmdl5hv/PveB7UUm1MRjhZfNnX073LyJ8bneYC4Y/axh+K7xB5xlznzYgRLkt5M3y/uhJkr/ZjpH+Yxigy8c6pDJLGq1Xuu8rfPQ7IPDK0FxJVlvVkPHp/HDC32gqwlKNMHBF6WX1oii/L5qmbS3f42ao90BkMtiwHsvFJrgzpDKLJfC5QxrpMOAYTSF93DdD7alOSjIUc/8CwuferJ4Gct6ETbAbSdwrC6Hh0DzbpqwfOrxQxykB2bGus5uhYEZWZkWW9wsHYMCx9aZykR8G6WMqkrkTg3sLx/hseFaioOfSwfQPoR3ikUzH3h3HUigFlutWWBZBee9gAJl+cO/IEb/PKDkDUarpjVyko8D8SYchftbk1ud0j3gh8MglqXtu/ux6wYQfdTga5nICnBu7rhJD3+1qSL1whEAb9cw58rB1quc4MjbQRfwZwK6pPfTXAup0FbSH9K464roDM3hvlvQrenaqqQQrOgjfb9oNS2QbmKm2Fs9TNVPJ7L4jL2k3R0bq1Gy8zOD/90YUqdtkJx41jOFNNMZKjeFrYsI9TXapKTN8kDbZ0fvO5dVy6Nm438LDUAfMDBka1muvsXGSmTM6Y2Cuw8T7FIZiHIwHTKpJ+b+maaY0XN1QFy8Huh/X0GHtSh25eC/dcuD9Q7p/SPe9iK7GCXRfLke+w4q6oMXQFS2lsd81bRW5z3xMv9W17eO9lwvV7lJYQru/2tCb1FHtBs8+7BmAG2vL7nsFjTOFTt6yZeOK5igUHffOI7q32RwR3Tukf8+iWbJNm8kEuvTtRPvFBDrQHeD+w4+Zi1L2HVBoSBh9TdI5A0lyEloAGx5NLcpwSbpmGnfhrkPLOFB+eKHv93VjqCE9QJ42v8sgohp3vDcbxJnBE+TOYHc4TX/P/xo8Pu4Imjq/AvrMAYF0NbgyCucKQ8VWJa4MXSnQZSptAm9GL4okmoyeEVjAwgjqibmpFqd19BE6f17Sb1IiHK7r7YNWLhTG5wbjPZhhjm6WXhcsWdwNwP2mrF4UerO0YJkKgXCjhAT6zyPcCUh9BdDk9WYJTbi5bAqNaBPoEs0bTMx9eNDROgLowe3CGW7YNL11ofGrK2COKzoh19DItjDAJRPkiGi8oYBKOc3/TU3fatWFxrUFrXPfHCTU6NdmnRA2l9QcN4VnJ9Dgdxr0mREC6bxC5w6Jng8wWgKh4iIBi95RdsfFOoUGStygwsl7o9vTI21wpDEUGg8Vt0CZc1zcqPYARrdrMYeO5VrnHdVmJ5GYN8s7zaUBmENv0FNfttfeEsc6sFOKrUTi/v8x/TsP9w87ApJ8sdAKaPTmsDGDNHzHzqkHRrFP7x8aWobnZBDfZR/8iQfvbXAW13iN9zNo3CvQjtTsG9i1x1bzWB1zMgCr4iu9kFRh/GIH0be/smSAZKDqc2lhsgHb9NgSZQR7AviGDT8qwQQIbyr4G70/jgEmeYa9ABgqZbAbSznju/qq3cPsDGvn0/9XBmE3FlYxZNqr5/3GmKaGQOi3QyBdZp40YhyRFnsZ4BnaDzR8vJmDMl0++i3BvrvBRz/HWYFhfCGjMnxxjlIMgTb2xUf0N2/qnUNHDm/E/F06vDq+cEjMDnvn1gBSPfK+T1uQ9B7seaXAt2+jrmOFe7x2q9QjSRXeYXA1s3Q0STMfpLYH0MUF6a7bDbHWaAmMJbBGKSZAqrHvtKP5zEET7WltY+EA2Q+AtmfY2Uc6T6TDQ8aZFqsBZA6HziiWpXbnGZ/NhjLX/OZzGk0T58QFIzZo2h1RAigQcUkyLi0N+2KIvHLrnKGa9iRctEHH50MbJLw1DtDlA047gmSyzcZ5JvhVQAUYN07dL4yYllgsk/QUMnkAh2Q11mFg9d6pp1fTXlTzvaz51ju6jOUdWYKhhgncEa7KlSiyuIiCm/hL6J3RWuyp5Pas56Npd7lfjWC2s3Alxx1NC4pX93B6xySvwE9davy7oabzwBAmwB6gFyhx5GLsvvz0kCSO/w9K/jvNUUyEZ1P7O7YjoKupC4471nLOtOqPMoDsJ6nr4Sk7ENwGeBRc6HKwA+9FZlmkv4LUg/U/xADxyHR1zvbcDbBTfJES00f8Q1InfgQDyBcsNMQmJ+k+MG/FBynuA87cWsC04o3R5U80kfUM782Mf2zarV6vpBGdjvuFA2FwKgzasIM2qnfabJ/oR1N2dGnwhJrMRiQ8ec2w9njnprvF+r75mV2lMSnuYFFrWwsJPEefJNlsVyfUJPG/VQh9ug9laehOIA2l9Qg1fbcoxuFN1B4ab5FsAx7/AEnvC08Lj3/dM1cbYpgQMP5tBmEnm+16TXeXvrdr4E92JuszdvYayeAMNLp2PRrgBPfGskA03IuOYvgVvcurI7J9hM+9NjPBqNwL1caYdEBqT004k/1Gdd693Scl/6cZQBKZqQeNbGcyZx9PnxbgCvGCLdgEGbRF6YNPvGP7ZWa3nWPRCsYVBIdaFd+xDwZeQWqPLWOVHeBKjTHraMa7+xQdLsETIVvw6XrW3IUHYSqR4f66MRB9ApHjvQUWXkPlGHeQ6DLiViTpdj2wxIXCnArybro04BU0FgYer/R73yIwxYX+Y4hfNhrINPfxNAyy/SQNLgG72hhKnkiaKi0baZmkaiLC+tjKhV2wXAPgN/0Ng7fNc3e8h2FsmCiY9PjLuYvdFoz6g4V//gjvdwJDd9MDo3YjW734UKmHeD/oEWSLcDsvLSLZJ+U3GimzGqmq9/TMFTRYSpu2mWtpEUNgLYKeqqyDcXj/5S7GWjd/7rzown29jjksIaPyDFmcVfOafCgp9QuDC3UlvpcvxamwNC/Gtelvz6dr6HQeaRvIarOATiaePphyB7gRA5ToIras6d5MhO8RG1yWXWPili2BxpHQu1/WQIElpb6pt+teeHrSJbmVlxieP2k8CJ5Gku6FgZzN5Lu22l8WCr4ryI+pLBb40ZNzw1Av0kjRvsjtThP8W4Nhu5rBKJf9U9k+cXtg69TOc/8EA5h8yCbpEgBexnrRaKIm2pA03fXYLmy4h0RcfR3iXAsGMEl6m9SFCBhyL7RmPNFVGzX6DtpxRyENMskiM3KXHNiJhF1gwpcslTIx4aeJKt/tgQC3Rr+nVh9zFfReToenSLf7+tbCmN2DLbOfcR1kB73ckAvkwBim2mn/PAPomtlWRHimnpeH5s/tOM8vwJxs/BXNsFbiPhiqfS0nEbLE4F3yexhzrqa9UfNnc+Cyw97SaYhk6Vm2PyWvRedtOHQkeV2ExGJGiGZmTp/GFlri5yMYpFHT3xezEo2g3rGPWayZP+4h2tVst2im7y/w9vNVNcGvakuyp7pRB9qAnAxdAmKqRV7D9yuqY01Et4p3HFynHNB4LtDpwtQXlbtOPGi8jxeNzYH5ikUHihuN827o1rGHnqM1fe80V9uSVx8/iQFw0nfQQ6amRTobJn2lWdiKirBvRFjFG8fPBfHVQoRKrOmAV9P8XIiga037mx00qFXEnJcJ7VG+DDBQmrI28KBtYUJnYdAIG2IITywc9w6au6/OUucuhtMXfYbu1IEh1RB+QMIE572i719eqKG+DNABE3YkwVwg6CudheE3G+gyJ7u7pQA3Hn8J0QcAqWJNVzmGWFcSArrfb2ieAwF3kpkbj30ZYMQREyOsYGEfBHGuBkL2QP3Hms5rD9AOGf1d/ZD5cAHehHT6mq5yrPlM9gUT/gZ+j/Do9tMJ529hAD7WpKJXcK0ERsh6DM6og1gKsjEyaM5VLOS9uflWIAheMnUJ75Aqc/9QE1zMSOLffpAw+KcYgI1MZoRI4wFiw7fqYIYQpGeg+Q4zBJ8PYIpKtR3eXmE8u0SUTOweEL+j+V0pCN5E9F0aMSfCv/4thP83MwDCgBjwvgsq/KHaLspZj2QNVbsVkq/0jXCVem54iy0Maw1j1DAWBYSLbRO5Ia4DRO4JRlAGgi+EPVMaiN4hIbGi0xeeILYL7n8b4f8LDCBV+hoWWScd0x6j1xUwI9AQ5ZCjFgww9vel0EIP1fYTNWmSgOaCu1y7Yk7uABnrv5kw/hUGQInOjBBqFp6NQoYKfZCEJTRicNzYzlXmZri2BI7NckthfxTKvPGejuhD1e4iIzVZDoT/+FcI4l9jAJTmrPpjDc5nZshBM1QjmM1Vf/b9tyX+SkP89cB3DIUnSBI9wqRU/f0xkC8DGIy/CCCBLwgVJS96gMoFEYwnjOEQtJG0FR7A2OmCPFlfBlgIRApUu/tLYDA2C8DZhcDdQyX1UM3lAuRC2GUy0CuQ9AztHt+l/jKADbH5YCj6A7xA6BKtLHG6zr7gEwnc7YFTaB/k6ucF8b4MsNDDAc+PL/724DvvOnA71Yd6jkkUX4L/MsC7tISEJD7YEdIDJP+WBC3/lWcpCB034fseI47/B/H7xCbjxmq2AAAAAElFTkSuQmCC">
+    <h1 class="gatewords">CHIP <em>&amp;</em> SIP <span>2026</span></h1>
+    <p class="gatewhere">Costa del Sol &middot; 24&ndash;27 September</p>
+    <div class="clock" id="gateClock" role="timer" aria-live="off">
+      <div class="unit"><b id="gD">--</b><span>days</span></div>
+      <div class="unit"><b id="gH">--</b><span>hrs</span></div>
+      <div class="unit"><b id="gM">--</b><span>min</span></div>
+      <div class="unit"><b id="gS">--</b><span>sec</span></div>
+    </div>
+    <p class="gateopen" id="gateOpen">The app launches shortly</p>
+    <div class="gateact" id="gateAct"></div>
+    <div id="gateInstall"></div>
+    <div id="gateAuth"></div>
+  </div>
+</div>
+
 <div id="acctPanel"><div id="authWrap"></div></div>
 <div id="installWrap"></div>
 <div id="sinceWrap"></div>
@@ -1349,6 +1467,23 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       switches below ask you to confirm, and both can be put straight back.</p>
       <div id="swDeclared" class="switch"></div>
       <div id="swClosed" class="switch"></div>
+      <!-- THE LAUNCH CURTAIN. One field, because the whole point is that it needs no attention on
+           the day: set it once and it lifts itself. -->
+      <div class="card" id="launchCard" style="margin:12px 0">
+        <h3 style="margin:0 0 6px">Launch curtain</h3>
+        <p class="note" id="launchNow" style="margin:0 0 10px"></p>
+        <div class="row">
+          <label class="small">Opens (your local time)
+            <input type="datetime-local" id="launchAt" style="min-width:210px"></label>
+          <button class="go" id="launchSave">Set it</button>
+          <button class="ghost" id="launchLift">Lift it now</button>
+          <button class="ghost" id="launchClear">No curtain</button>
+        </div>
+        <div class="ok" id="launchMsg"></div>
+        <p class="note" style="margin:10px 0 0">Until this moment passes, everybody but you sees a
+          countdown and nothing else. They can sign in and create accounts through it; the database
+          refuses any bet placed before it, so the screen is not the only thing holding them.</p>
+      </div>
       <div class="row">
         <label class="small">Ante-post share multiplier
           <input type="number" id="apBonus" min="1" max="3" step="0.05" value="1.25"></label>
@@ -2240,11 +2375,33 @@ function errText(body,status){
    return msg+(j.hint?" — "+j.hint:"")+(j.code?" ("+j.code+")":"");
  }catch(e){ return raw||("HTTP "+status); }
 }
+/* THE CLOCK THAT COUNTS IS THE DATABASE'S, NOT THE PHONE'S. A launch countdown run off
+   Date.now() opens early on a phone that is fast and stays shut on one that is slow, and there is
+   always one of each in twenty. Every response from Supabase carries a Date header, so the
+   difference between that and the handset is measured on each call and carried as an offset.
+   No extra request, and it self-corrects all week. If the header is ever missing the offset stays
+   where it was, which is the phone's own clock on a first load — the server refuses early bets
+   regardless, so the worst case is a cosmetic countdown, not an open book. */
+let SRV_SKEW=0, SRV_SEEN=false;
+/* The database sends its own clock back inside board_state, and the offset from this handset is
+   remeasured on every poll. Not the HTTP Date header: that is not a CORS-safelisted response
+   header, so a browser on another origin cannot read it at all — which is how this was written
+   the first time and why it silently measured an offset of exactly zero on every phone. */
+function noteServerNow(ms){
+  if(!isFinite(ms)||ms<=0) return;
+  SRV_SKEW=ms-Date.now(); SRV_SEEN=true;
+}
+function noteServerClock(r){
+  try{ const h=r.headers && r.headers.get("date"); if(!h||SRV_SEEN) return;
+       const t=Date.parse(h); if(isFinite(t)) noteServerNow(t); }catch(e){}
+}
+const srvNow=()=>Date.now()+SRV_SKEW;
 async function sbFetch(path,opts={}){
   if(AUTH.tok && AUTH.exp && Date.now()>AUTH.exp-60000) await authRefresh();
   const r=await fetch(SB.url+"/rest/v1/"+path,{...opts,headers:{
     apikey:SB.key,Authorization:"Bearer "+(AUTH.tok||SB.key),"Content-Type":"application/json",
     Prefer:opts.prefer||"return=representation"}});
+  noteServerClock(r);
   if(!r.ok) throw new Error(errText(await r.text(), r.status));
   const txt=await r.text(); return txt?JSON.parse(txt):null;
 }
@@ -2267,6 +2424,7 @@ async function readBoard(){
       const s=await rpc("board_state",{});
       if(s&&typeof s==="object"&&!Array.isArray(s)&&"v" in s){
         ONEFAIL=0;
+        if(s.now) noteServerNow(+s.now);
         return {ver:+s.v||0, settings:s.settings||{}, totals:s.totals||[], mine:s.mine||[],
           roster:s.roster||[], claimed:s.claimed||[], results:s.results||[], matches:s.matches||[],
           stand:s.stand||null, detail:s.detail||[], myledger:s.myledger||[]};}
@@ -2282,6 +2440,9 @@ async function readBoard(){
       }
     }
   }
+  /* The ten-query road needs the clock too, and it is one cheap call. Failure is fine: the
+     countdown then runs on the handset, and the database still refuses an early bet. */
+  rpc("server_now",{}).then(n=>{ if(n) noteServerNow(+n); }).catch(()=>{});
   const [st,tot,mine,ros,clm,res,mat,stand,detail,myled]=await Promise.all([
     sbFetch("settings?select=data&id=eq.1"),
     sbFetch("pool_totals?select=*"),                       /* aggregates, no names */
@@ -2326,6 +2487,7 @@ async function refresh(){
     } else { DB.ledger=[]; DB.bets=DB.mine; }
     DB.online=true; DB.err="";
     S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
+    S.launchAt=DB.settings.launchAt?+DB.settings.launchAt:null;
     if(DB.settings.apBonus!=null)   S.apBonus=DB.settings.apBonus;
     if(DB.settings.blindScale!=null)S.blindScale=DB.settings.blindScale;
     if(DB.settings.payLink!=null)   S.payLink=DB.settings.payLink;
@@ -2358,6 +2520,7 @@ async function refresh(){
         DB.stand=c.stand||null; DB.cachedAt=c.at;
         PUB = DB.settings.prices || null;
         S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
+        S.launchAt=DB.settings.launchAt?+DB.settings.launchAt:null;
         if(DB.settings.apBonus!=null) S.apBonus=DB.settings.apBonus;
         if(DB.settings.payLink!=null) S.payLink=DB.settings.payLink;
         applyPublishedHcp();
@@ -2913,7 +3076,7 @@ const MODEL_V="b600bf6a";
 const DATA_V="2026-08-19.1"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
- declared:false,closed:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
+ declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
  admPane:"settle",poView:"market",fbView:"",fbHow:false,gFold:null,gCol:"gap",gDir:0,openGrp:[],poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,paidClaim:0,
  onboarded:false,onbStep:0,rulesV:0,rulesAt:0,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
@@ -4613,6 +4776,12 @@ function drawAuth(){
       placeholder="you@example.com" style="min-width:210px;flex:1" value="${esc(AUTH.email||"")}">
      <button class="go" id="authGo">Send me a link</button>
      <button class="ghost" id="authBack">Back</button></div>
+   <!-- Said BEFORE the button, not just after it. Twenty sign-in links leaving one address inside
+        a few minutes is exactly the pattern hotmail and icloud treat as suspicious, and a man who
+        has already been told where to look does not message the organiser. -->
+   <p class="note warn" style="margin-top:10px"><b>Check your junk folder.</b> The link comes from
+     <b>${esc(MAIL_FROM)}</b> and lands in spam more often than it should &mdash; hotmail and iCloud
+     especially. Search that address if nothing shows up within a minute.</p>
    <div class="err" id="authErr"></div><div class="ok" id="authOk"></div></div>`;
  $("#authBack").addEventListener("click",()=>{S.authMode="";save();drawAuth();});
  $("#authGo").addEventListener("click",async()=>{
@@ -4625,8 +4794,10 @@ function drawAuth(){
       back on the old broken path. Guarded above, and again here. */
    if(isNew && !$("#newName").value){ er.textContent="Pick your name off the list first."; $("#authGo").disabled=false; return; }
    try{ await sendMagicLink(em, isNew?$("#newName").value:"");
-     $("#authOk").innerHTML=`Link sent to <b>${esc(em)}</b>. Open it on this phone and you will land back here
-       signed in. Check the junk folder before blaming the organiser.`;
+     $("#authOk").innerHTML=`Link sent to <b>${esc(em)}</b>. Open it <b>on this phone</b> and you will
+       land back here signed in.<br><b>Not there? Look in junk.</b> It comes from ${esc(MAIL_FROM)},
+       so search that. The link is good once and it expires, so if it has been sitting a while just
+       ask for another.`;
    }catch(e){ $("#authGo").disabled=false;
      er.textContent=String(e.message||e).replace(/.*"msg":"|".*/g,"").slice(0,180); }});
 }
@@ -4686,6 +4857,9 @@ const ONB=[
 /* Bumped from 1: a £10 line cap and a £50 outstanding cap are terms, not tweaks, and 20 people
    agreed to a version that had neither. Everyone reads them again. */
 const RULES_V=2;
+/* The address the sign-in links actually leave from. Named on screen so a man can search his junk
+   folder for it rather than scrolling it. One place, because it appears in three. */
+const MAIL_FROM="dom@dominiontechops.com";
 const rulesAccepted=()=>+S.rulesV>=RULES_V;
 function drawOnboarding(){
  const el=$("#onbWrap"); if(!el) return;
@@ -5015,6 +5189,212 @@ const agoStr=d=>{
  if(n==null) return "&mdash;";
  return n<=0?"today":n===1?"yesterday":n<14?n+" days":n<70?Math.round(n/7)+" wks":Math.round(n/30)+" mths";
 };
+/* ================= THE LAUNCH CURTAIN, THE WORKING PARTS ======================================
+   Three jobs: draw the sky, run the clock off SERVER time, and lift itself the second the moment
+   passes. It never needs a reload and it never needs the organiser to do anything on the day. */
+/* "Saturday at 12:00", built rather than left to toLocaleString, which drops the comma in some
+   locales and puts the day after the time in others. Always UK time, always said so. */
+const LAUNCH_UK = d => d.toLocaleString("en-GB",{weekday:"long",timeZone:"Europe/London"})
+  + " at " + d.toLocaleString("en-GB",{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Europe/London"});
+const gateWanted = () => !!(S.launchAt && srvNow() < S.launchAt);
+const gateUp     = () => gateWanted() && !ADMIN_TOKEN;
+
+/* The sky. A slow dusk over a fairway horizon, drawn rather than photographed — a stock golf
+   photo behind a countdown looks like every other holding page, and this is the one screen the
+   whole group sees first. Canvas because the alternative is a wall of hand-written SVG.
+   It parks itself when the tab is hidden; nobody's battery pays for a countdown in a pocket. */
+let GSKY=null;
+function gateSky(){
+  const cv=$("#gateSky"); if(!cv||GSKY) return;
+  const ctx=cv.getContext("2d");
+  const still=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  let w=0,h=0,t=0,raf=0;
+  const stars=[...Array(70)].map((_,i)=>({x:Math.random(),y:Math.random()*0.55,
+    r:0.4+Math.random()*1.1,p:Math.random()*6.283,s:0.4+Math.random()*0.8}));
+  /* One ridge per layer, generated once so the hills do not swim about between frames. */
+  const ridge=(seed,amp)=>{const pts=[];let v=0;
+    for(let i=0;i<=40;i++){ v=Math.sin(i*0.31+seed)*0.55+Math.sin(i*0.13+seed*2)*0.45;
+      pts.push(v*amp); } return pts;};
+  const hills=[{c:"#0d2018",y:0.62,r:ridge(1.0,0.055),o:0.06},
+               {c:"#0b1a13",y:0.72,r:ridge(2.7,0.045),o:0.03},
+               {c:"#081410",y:0.84,r:ridge(4.4,0.03), o:0.015}];
+  function size(){ const d=Math.min(devicePixelRatio||1,2);
+    w=cv.clientWidth; h=cv.clientHeight;
+    cv.width=Math.max(1,w*d); cv.height=Math.max(1,h*d); ctx.setTransform(d,0,0,d,0,0); }
+  function frame(){
+    size();
+    const g=ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,"#050C08"); g.addColorStop(0.42,"#0A1710");
+    g.addColorStop(0.72,"#123024"); g.addColorStop(1,"#1B4630");
+    ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+    /* a low glow where the sun has just gone */
+    const gl=ctx.createRadialGradient(w*0.5,h*0.78,0,w*0.5,h*0.78,Math.max(w,h)*0.55);
+    gl.addColorStop(0,"rgba(90,190,130,.16)"); gl.addColorStop(1,"rgba(90,190,130,0)");
+    ctx.fillStyle=gl; ctx.fillRect(0,0,w,h);
+    stars.forEach(st=>{
+      const tw=still?0.6:0.45+0.55*Math.abs(Math.sin(t*st.s+st.p));
+      ctx.globalAlpha=tw*0.5; ctx.fillStyle="#CFE6D6";
+      ctx.beginPath(); ctx.arc(st.x*w,st.y*h,st.r,0,6.283); ctx.fill(); });
+    ctx.globalAlpha=1;
+    hills.forEach((hl,li)=>{
+      const drift=still?0:Math.sin(t*0.06+li)*w*0.012;
+      ctx.fillStyle=hl.c; ctx.beginPath(); ctx.moveTo(-40,h);
+      hl.r.forEach((v,i)=>{ const x=-40+drift+(i/40)*(w+80);
+        ctx.lineTo(x,h*hl.y+v*h); });
+      ctx.lineTo(w+40,h); ctx.closePath(); ctx.fill();
+    });
+    /* The flag on the last ridge, because it is a golf trip and not a music festival. Only where
+       there is margin to put it in: on a phone the copy runs the full width and a pin planted
+       through the middle of a sentence is worse than no pin at all. */
+    if(w>620){
+      const fx=w*0.88, fy=h*0.9, ph=h*0.085;
+      ctx.strokeStyle="rgba(210,232,216,.45)"; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(fx,fy-ph); ctx.stroke();
+      const wave=still?0:Math.sin(t*2.2)*3;
+      ctx.fillStyle="rgba(200,80,63,.8)"; ctx.beginPath();
+      ctx.moveTo(fx,fy-ph); ctx.lineTo(fx+22+wave,fy-ph+7);
+      ctx.lineTo(fx,fy-ph+15); ctx.closePath(); ctx.fill();
+    }
+    if(!still && !document.hidden){ t+=1/60; raf=requestAnimationFrame(frame); }
+  }
+  GSKY={stop(){ if(raf) cancelAnimationFrame(raf); raf=0; },
+        start(){ if(!raf) frame(); }};
+  frame();
+  addEventListener("resize",()=>{ if(!raf) frame(); },{passive:true});
+  document.addEventListener("visibilitychange",()=>{ document.hidden?GSKY.stop():GSKY.start(); });
+}
+
+let GATE_TICK=null, GATE_LAST={};
+function gateDigits(){
+  const el=$("#gate"); if(!el||el.hidden) return;
+  let ms=S.launchAt-srvNow(); if(ms<0) ms=0;
+  const s=Math.floor(ms/1000);
+  const v={gD:Math.floor(s/86400), gH:Math.floor(s/3600)%24,
+           gM:Math.floor(s/60)%60,  gS:s%60};
+  Object.keys(v).forEach(k=>{
+    const n=$("#"+k); if(!n) return;
+    const txt=k==="gD"?String(v[k]):String(v[k]).padStart(2,"0");
+    if(GATE_LAST[k]===txt) return;
+    GATE_LAST[k]=txt; n.textContent=txt;
+    n.classList.remove("tick"); void n.offsetWidth; n.classList.add("tick");
+  });
+  if(ms<=0) gateLift();
+}
+/* Lifting is a one-way door within a session: once it is up, it does not come back down under
+   somebody mid-bet because a poll returned a stale settings row. */
+let GATE_LIFTED=false;
+function gateLift(){
+  if(GATE_LIFTED) return; GATE_LIFTED=true;
+  const el=$("#gate"); if(!el) return;
+  if(GATE_TICK){clearInterval(GATE_TICK);GATE_TICK=null;}
+  el.classList.add("lifting");
+  setTimeout(()=>{ el.hidden=true; document.body.classList.remove("gated");
+    if(GSKY) GSKY.stop();
+    refresh().then(drawAll).catch(()=>drawAll()); }, 900);
+}
+/* The sign-up card is the SAME one the app uses, moved into the curtain rather than rebuilt.
+   Two copies of an auth flow is two places for it to go wrong, and this one has already had a
+   man's account deleted over a missing name. */
+function gateAuthOpen(){
+  const host=$("#gateAuth"), wrap=$("#authWrap"); if(!host||!wrap) return;
+  if(host.contains(wrap)){ host.innerHTML=""; $("#acctPanel").appendChild(wrap); }
+  else { host.appendChild(wrap); S.authMode=""; }   /* always land on Sign in / Create account */
+  S.acctOpen=true; save(); drawAuth();
+  const showing=host.contains(wrap);
+  gateAct();
+  if(showing) host.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function drawGate(){
+  const el=$("#gate"); if(!el) return;
+  /* The organiser walks through it — he has to be able to work on Friday night — but a banner
+     across the top stops him ever forgetting that nobody else can see any of this. */
+  const bar=$("#gateBar");
+  if(bar) bar.innerHTML = (ADMIN_TOKEN && gateWanted())
+    ? `The board is behind the launch curtain for everybody else. It lifts
+       <b>${esc(LAUNCH_UK(new Date(S.launchAt)))}</b> UK &mdash; in
+       <b>${esc(untilStr(new Date(S.launchAt)))}</b>. You are seeing it because you are the organiser.`
+    : "";
+  if(!gateUp()){
+    if(!el.hidden && !GATE_LIFTED){ el.hidden=true; document.body.classList.remove("gated"); }
+    if(GATE_TICK){clearInterval(GATE_TICK);GATE_TICK=null;}
+    return;
+  }
+  el.hidden=false; document.body.classList.add("gated");
+  gateSky();
+  const when=new Date(S.launchAt);
+  const o=$("#gateOpen");
+  if(o) o.innerHTML="The app launches and betting markets open <b>"+esc(LAUNCH_UK(when))+"</b>, UK time";
+  gateDigits();
+  gateAct();
+  gateInstall();
+  if(!GATE_TICK) GATE_TICK=setInterval(gateDigits,1000);
+}
+/* Installing it while you wait is the single most useful thing a man can do on this screen: the
+   board opens full screen with no address bar, and — more to the point on a Spanish balcony — it
+   opens at all when the signal goes. Same two routes as the card inside the app: a real prompt on
+   Android and Chrome, the Safari share-sheet instructions on an iPhone, which cannot do better. */
+function gateInstall(){
+  const w=$("#gateInstall"); if(!w) return;
+  if(isStandalone()||S.installDone||(!INSTALL_EVT&&!isIOS())){ w.innerHTML=""; return; }
+  if(S.gateInstHide){
+    w.innerHTML=`<button class="gateplain" id="gateInstShow">Add it to your home screen</button>`;
+    const b=$("#gateInstShow");
+    if(b) b.addEventListener("click",()=>{S.gateInstHide=false;save();gateInstall();});
+    return;
+  }
+  w.innerHTML=`<div class="gateinst">
+    <div class="gihd"><b>Put it on your home screen</b>
+      <button class="gix" id="gateInstX" title="Not now">&#10005;</button></div>
+    ${INSTALL_EVT
+      ?`<p>It opens full screen, loads instantly, and still opens when the signal goes. Nothing to
+         download and no app store.</p>
+        <button class="gatebtn" id="gateInstGo" style="margin-top:12px">Install it</button>`
+      :`<p>Out there the wifi comes and goes. Installed, the board still opens.</p>
+        <ol><li>Press <b>Share</b> at the bottom of Safari &mdash; the square with the arrow out of it.</li>
+        <li>Scroll down to <b>Add to Home Screen</b>.</li>
+        <li>Press <b>Add</b>.</li></ol>
+        <p class="tiny">It has to be Safari. Chrome on an iPhone cannot do it.</p>`}
+  </div>`;
+  const x=$("#gateInstX");
+  if(x) x.addEventListener("click",()=>{S.gateInstHide=true;save();gateInstall();});
+  const g=$("#gateInstGo");
+  if(g) g.addEventListener("click",async()=>{
+    if(!INSTALL_EVT) return;
+    INSTALL_EVT.prompt();
+    try{ const r=await INSTALL_EVT.userChoice; if(r&&r.outcome==="accepted"){S.installDone=true;save();} }catch(e){}
+    INSTALL_EVT=null; gateInstall();});
+}
+/* A man who has already signed up should not be asked to sign up again, and should be told by
+   name that he is on the list — half of them will open this once, see their own name, and shut it
+   again happy. Everyone else gets the sign-up route. */
+function gateAct(){
+  const w=$("#gateAct"); if(!w) return;
+  const signedIn=!!(AUTH.tok&&AUTH.name);
+  const wrap=$("#authWrap"), host=$("#gateAuth");
+  const authShowing=!!(host&&wrap&&host.contains(wrap));
+  if(signedIn){
+    if(authShowing){ host.innerHTML=""; $("#acctPanel").appendChild(wrap); }
+    const first=String(AUTH.name).trim().split(/\s+/)[0];
+    const hr=new Date().getHours();
+    const hail=hr<12?"Morning":hr<18?"Afternoon":"Evening";
+    w.innerHTML=`<p class="gatewelcome">${hail}, <b>${esc(first)}</b>.</p>
+      <p class="gatehint">You are signed in and on the list. Nothing more to do &mdash; when the
+        clock hits zero the board opens on this screen by itself.</p>
+      <button class="gateplain" id="gateOut">Not you? Sign out</button>`;
+    const o=$("#gateOut");
+    if(o) o.addEventListener("click",()=>{authClear();S.me="";S.slip=[];S.acctOpen=false;save();
+      GATE_LAST={}; drawAll();});
+    return;
+  }
+  /* Both routes, not just sign-up. Four men already have accounts from testing and the rest do
+     not, and neither group should have to work out which button is theirs. The card behind this
+     is the app's own, which opens on its Sign in / Create account chooser. */
+  w.innerHTML=`<button class="gatebtn" id="gateJoin">${authShowing?"Hide":"Sign in or create an account"}</button>
+    <p class="gatehint">Get it done now and you are straight in when the clock hits zero. Nothing
+      can be staked until it does, whoever you are. <b>The link often lands in junk</b> &mdash;
+      check there before giving up on it.</p>`;
+  const b=$("#gateJoin"); if(b) b.addEventListener("click",gateAuthOpen);
+}
 function drawSquabAge(){
  const el=$("#squabAge"); if(!el) return;
  const withDates=S.players.filter(p=>p.in&&p.last);
@@ -6216,6 +6596,26 @@ function drawLedger(){
   try{ await rpc("void_bet",{p_id:e.target.dataset.id,p_reason:"voided in admin",p_token:ADMIN_TOKEN});
     await refresh(); drawAll(); drawAdmin(); }
   catch(err){ e.target.disabled=false; alert("Could not void it: "+err.message); }}));}
+/* datetime-local speaks the organiser's own wall clock, so both directions convert through it
+   rather than through UTC strings a man would have to reason about at midnight. */
+const toLocalField=ms=>{const d=new Date(ms-new Date(ms).getTimezoneOffset()*60000);
+  return d.toISOString().slice(0,16);};
+function drawLaunch(){
+ const f=$("#launchAt"), n=$("#launchNow"); if(!f||!n) return;
+ if(document.activeElement!==f) f.value = S.launchAt ? toLocalField(S.launchAt) : "";
+ if(!S.launchAt){ n.innerHTML='<b>No curtain.</b> The board is open to anybody with the link.'; return; }
+ const d=new Date(S.launchAt), gone=srvNow()>=S.launchAt;
+ n.innerHTML = gone
+   ? `<b class="pos">Lifted.</b> It opened ${esc(d.toLocaleString("en-GB",{weekday:"long",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))}.`
+   : `<b class="warn">Up.</b> Lifts ${esc(d.toLocaleString("en-GB",{weekday:"long",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))}
+      &mdash; in <b>${esc(untilStr(d))}</b>. Everybody else is looking at a countdown.`;
+}
+async function setLaunch(ms,msg){
+ const el=$("#launchMsg"); if(el) el.textContent="saving…";
+ try{ await pushSettings({launchAt:ms}); S.launchAt=ms; save();
+      if(el) el.textContent=msg; GATE_LIFTED=false; GATE_LAST={}; drawAll(); }
+ catch(e){ if(el) el.textContent=String(e.message||e).slice(0,140); }
+}
 function drawAdmin(){
  let h=`<tr><th>In</th><th>Player</th><th>Team</th><th class="num">Hcp</th><th class="num">Form</th>
   <th class="num">Spread</th><th class="num">Rounds</th><th></th></tr>`;
@@ -6359,7 +6759,7 @@ function drawAdmin(){
  const bA=bonusAwarded(), cap=bonusPts();
  [["#bonusB",bA.blue],["#bonusR",bA.red]].forEach(([sel,v])=>{
   const el=$(sel); if(!el) return; el.value=v; el.max=cap||0; el.disabled=!cap;});
- drawSwitches();
+ drawSwitches(); drawLaunch();
  $("#blindScale").value=S.blindScale==null?1:S.blindScale;
  drawLedger(); drawAccounts(); drawSettle();
 }
@@ -6454,6 +6854,9 @@ function drawStrip(){
    in drawKpis and take every panel after it down with it — including the betting board, which
    is the only screen that actually matters. A broken panel should be a broken panel. */
 function drawAll(){
+ drawGate();
+ /* Nothing below matters while the curtain is up, but it all still runs: the moment it lifts the
+    board has to be there already rather than assembling itself in front of twenty people. */
  const steps=[["header",drawHeader],["account",drawAuth],["score",drawScore],["figures",drawKpis],
    ["my bets",drawMine],["form book",drawForm],["model prices",drawOdds],["filters",fillMarketFilter],
    ["pools",drawPools],["schedule",drawSched],
@@ -6832,6 +7235,16 @@ $("#bkGo").addEventListener("click",async e=>{
    $("#bkMsg").innerHTML='<span class="pos">Done. The book as it stands is safe.</span>'; }
  catch(err){ $("#bkMsg").innerHTML=`<span class="neg">${esc(String(err.message||err).slice(0,140))}</span>`; }
  b.disabled=false;});
+(()=>{
+ const sv=$("#launchSave"), lf=$("#launchLift"), cl=$("#launchClear");
+ if(sv) sv.addEventListener("click",()=>{
+   const v=$("#launchAt").value; if(!v){ $("#launchMsg").textContent="Pick a date and time first."; return; }
+   const ms=new Date(v).getTime();
+   if(!isFinite(ms)){ $("#launchMsg").textContent="That date did not parse."; return; }
+   setLaunch(ms,"Set. Everybody else now sees the countdown.");});
+ if(lf) lf.addEventListener("click",()=>setLaunch(srvNow()-1000,"Lifted. The board is open."));
+ if(cl) cl.addEventListener("click",()=>setLaunch(null,"Curtain removed."));
+})();
 $("#acctChip").addEventListener("click",()=>{
  S.acctOpen=!S.acctOpen; save(); drawAuth();
  if(S.acctOpen){const p=$("#acctPanel"); if(p) p.scrollIntoView({behavior:"smooth",block:"nearest"});}});
