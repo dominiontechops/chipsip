@@ -271,17 +271,24 @@ tr:last-child td{border-bottom:0}
    Its own visual world: full bleed, dark whatever the theme, one thing on the screen. It sits
    above everything and body.gated stops the rest of the app rendering at all, so there is nothing
    behind it to catch a stray tap. */
-#gate{position:fixed;inset:0;z-index:9000;overflow:auto;
+/* align-items:center on a scrolling flex container clips the TOP of anything taller than the
+   viewport — the browser centres it and there is no way to scroll back up to what it pushed off.
+   On a phone with the install card open that took the top off the crest. Start-aligned with auto
+   block margins instead: the margins centre it when there is room and collapse to nothing when
+   there is not, so it scrolls properly rather than losing the top of the page. */
+#gate{position:fixed;inset:0;z-index:9000;overflow:auto;-webkit-overflow-scrolling:touch;
   background:#08110C;color:#E9F2EA;
-  display:flex;align-items:center;justify-content:center;
-  padding:40px 22px;text-align:center;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:32px 22px;text-align:center;
   opacity:1;transition:opacity .9s ease, transform .9s ease}
 #gate[hidden]{display:none}
 #gate.lifting{opacity:0;transform:scale(1.06)}
-#gateSky{position:absolute;inset:0;width:100%;height:100%;display:block}
-.gatein{position:relative;z-index:1;max-width:520px;width:100%;
+/* fixed, not absolute: the sky belongs to the viewport, otherwise it stretches to the full
+   scroll height and the horizon slides off the bottom of the screen. */
+#gateSky{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+.gatein{position:relative;z-index:1;max-width:520px;width:100%;margin-block:auto;
   display:flex;flex-direction:column;align-items:center;gap:0}
-.gatelogo{width:112px;height:auto;filter:drop-shadow(0 8px 26px rgba(0,0,0,.55));
+.gatelogo{width:96px;height:auto;filter:drop-shadow(0 8px 26px rgba(0,0,0,.55));
   animation:gateRise .9s cubic-bezier(.2,.8,.3,1) both}
 .gatewords{font-size:clamp(28px,7.4vw,42px);font-weight:800;letter-spacing:.12em;
   margin:20px 0 0;line-height:1.05;color:#F2F8F2;
@@ -305,14 +312,18 @@ tr:last-child td{border-bottom:0}
 .clock b.tick{animation:gateTick .42s ease}
 .clock span{display:block;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
   color:#7C9686;margin-top:9px}
-.gateopen{margin:26px 0 0;font-size:16px;color:#BFD4C6;line-height:1.5;
+.gateopen{margin:18px 0 0;font-size:17px;color:#BFD4C6;line-height:1.45;
   animation:gateRise .9s .32s cubic-bezier(.2,.8,.3,1) both}
-.gateopen b{color:#6FD39A}
+.gateopen b{color:#6FD39A;font-weight:600}
+.gateopen span{color:#7C9686;font-size:13px}
+.gatesmall{margin:20px auto 0;max-width:38ch;font-size:13px;color:#7C9686;line-height:1.55;
+  animation:gateRise .9s .56s cubic-bezier(.2,.8,.3,1) both}
+.gatesmall b{color:#9BB5A4}
 /* The teasers. One line at a time, held long enough to read and swapped with a fade rather than a
    jump — a line that snaps over reads as a bug. A fixed min-height so the button below it does not
    shuffle up and down as the lines change length, which is the thing that makes a rotator feel
    cheap. */
-.gatetease{margin:18px auto 0;max-width:34ch;min-height:3.1em;
+.gatetease{margin:22px auto 0;max-width:34ch;min-height:3.1em;
   display:flex;align-items:center;justify-content:center;
   font-size:17px;line-height:1.45;color:#8FB39C;font-style:italic;
   transition:opacity .55s ease;opacity:1}
@@ -323,9 +334,9 @@ tr:last-child td{border-bottom:0}
   transition:background .15s, transform .15s}
 .gatebtn:hover{background:#3f9e63;transform:translateY(-1px)}
 .gatebtn:focus-visible{outline:2px solid #6FD39A;outline-offset:3px}
-.gatewelcome{margin:0;font-size:20px;color:#F2F8F2;line-height:1.3}
+.gatewelcome{margin:0 0 4px;font-size:19px;color:#F2F8F2;line-height:1.35}
 .gatewelcome b{color:#6FD39A}
-.gateinst{margin:26px 0 0;text-align:left;background:rgba(255,255,255,.045);
+.gateinst{margin:22px 0 0;text-align:left;background:rgba(255,255,255,.045);
   border:1px solid rgba(140,200,165,.16);border-radius:12px;padding:16px 18px;
   animation:gateRise .9s .48s cubic-bezier(.2,.8,.3,1) both}
 .gateinst .gihd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -954,6 +965,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <p class="gatetease" id="gateTease"></p>
     <div class="gateact" id="gateAct"></div>
     <div id="gateInstall"></div>
+    <p class="gatesmall" id="gateSmall"></p>
     <div id="gateDoor"></div>
     <div id="gateAuth"></div>
   </div>
@@ -5408,11 +5420,23 @@ function drawGate(){
   gateSky();
   const when=new Date(S.launchAt);
   const o=$("#gateOpen");
-  if(o) o.innerHTML="The app launches and betting markets open <b>"+esc(LAUNCH_UK(when))+"</b>, UK time";
+  /* The clock and the label above it have already said what is being waited for. Repeating it in
+     a full sentence pushed the hook and the button most of a screen further down, so this is now
+     just the moment itself. */
+  if(o) o.innerHTML="<b>"+esc(when.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",timeZone:"Europe/London"}))
+    +"</b> at <b>"+esc(when.toLocaleString("en-GB",{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Europe/London"}))
+    +"</b> <span>UK time</span>";
   gateDigits();
   gateTease();
   gateAct();
   gateInstall();
+  const sm=$("#gateSmall");
+  if(sm) sm.innerHTML = (AUTH.tok&&AUTH.name)
+    ? `Nothing to do. When the clock hits zero the board opens on this screen by itself &mdash;
+       no need to come back and refresh it.`
+    : `Sign up now and you are straight in when the clock hits zero. Nothing can be staked until
+       it does, whoever you are. <b>The link often lands in junk</b> &mdash; look there before
+       giving up on it.`;
   /* The organiser's door. Only rendered for an owner, and it only lasts the tab. */
   const door=$("#gateDoor");
   if(door){
@@ -5471,9 +5495,7 @@ function gateAct(){
     const first=String(AUTH.name).trim().split(/\s+/)[0];
     const hr=new Date().getHours();
     const hail=hr<12?"Morning":hr<18?"Afternoon":"Evening";
-    w.innerHTML=`<p class="gatewelcome">${hail}, <b>${esc(first)}</b>.</p>
-      <p class="gatehint">You are signed in and on the list. Nothing more to do &mdash; when the
-        clock hits zero the board opens on this screen by itself.</p>
+    w.innerHTML=`<p class="gatewelcome">${hail}, <b>${esc(first)}</b>. You are on the list.</p>
       <button class="gateplain" id="gateOut">Not you? Sign out</button>`;
     const o=$("#gateOut");
     if(o) o.addEventListener("click",()=>{authClear();S.me="";S.slip=[];S.acctOpen=false;save();
@@ -5483,10 +5505,7 @@ function gateAct(){
   /* Both routes, not just sign-up. Four men already have accounts from testing and the rest do
      not, and neither group should have to work out which button is theirs. The card behind this
      is the app's own, which opens on its Sign in / Create account chooser. */
-  w.innerHTML=`<button class="gatebtn" id="gateJoin">${authShowing?"Hide":"Sign in or create an account"}</button>
-    <p class="gatehint">Get it done now and you are straight in when the clock hits zero. Nothing
-      can be staked until it does, whoever you are. <b>The link often lands in junk</b> &mdash;
-      check there before giving up on it.</p>`;
+  w.innerHTML=`<button class="gatebtn" id="gateJoin">${authShowing?"Hide":"Sign in or create an account"}</button>`;
   const b=$("#gateJoin"); if(b) b.addEventListener("click",gateAuthOpen);
 }
 function drawSquabAge(){
