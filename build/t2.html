@@ -863,7 +863,17 @@ details.gwrap>summary.gsum:hover .grouphd h3{filter:brightness(1.25)}
 details.gwrap[open]>summary.gsum .grouphd .gchev{transform:rotate(180deg)}
 details.gwrap>summary.gsum .grouphd{margin-bottom:0}
 details.gwrap[open]>summary.gsum .grouphd{margin-bottom:9px}
-@media(max-width:719px){ .grouphd .gcount{font-size:10px} }
+/* "ROUND 1 — ALTERNATE SHOT" is the longest heading on the board and it wraps to two lines on a
+   phone, which used to squeeze the date beside it into a two-line block of its own and leave the
+   row looking broken. Below 720px the heading takes the width it needs and the date drops
+   underneath it, where there is room for it on one line. */
+@media(max-width:719px){
+  .grouphd .gcount{font-size:10px}
+  .grouphd{flex-wrap:wrap;row-gap:2px}
+  .grouphd h3{flex:1 1 100%;min-width:0}
+  .grouphd .small{flex:1 1 auto;white-space:nowrap;font-size:11px}
+  .grouphd .gcount{margin-left:auto}
+}
 /* the little glyph that runs through the heading, the card and the market filter */
 .mico{width:17px;height:17px;flex:0 0 auto;display:inline-block;vertical-align:-3px}
 .mico path,.mico circle,.mico line{stroke:currentColor;stroke-width:1.7;fill:none;
@@ -1110,7 +1120,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <details class="how" id="fbHow"><summary>How these numbers are worked out, and the arguments they settle</summary>
       <p class="note"><b>His average</b> is exactly that: every 18-hole round he has ever logged on Squabbit,
       on a par-72 basis. Not the last 20 &mdash; all of them, right back to his first. Pairs formats are
-      thrown out, because in foursomes and scrambles two men share one ball and the score says nothing about
+      thrown out, because in alternate shot and scrambles two men share one ball and the score says nothing about
       either of them on his own.</p>
       <p class="note"><b>"Isn't it the best 8 of the last 20?"</b> That is the <b>handicap</b>, and yes it is
       &mdash; that is how a WHS index is built. It is deliberately <em>not</em> how these two columns are built.
@@ -1137,7 +1147,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       they are marked as first-timers rather than dumped at the bottom &mdash; no record is not a bad
       record. <b>The 2 columns are measuring different things and are supposed to disagree.</b> These
       matches are played off handicap, so a man can score badly and still win: Tom Bucknall went
-      4 from 4 last year off the highest mark in the field. That is the point of the format.</p>
+      4 from 4 last year off one of the highest marks in the field. That is the point of the format.</p>
       <p class="note"><b>Form is not the same as being good.</b> Form here means what it means when
       somebody says a player is in form: how he is going <em>right now</em> against his own standard. It is
       his last 10 rounds measured against everything he has ever logged, in shots per 18. A man off 9 who
@@ -1264,7 +1274,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     </ul>
     <h3>Scoring</h3>
     <ul>
-      <li><b>25 points</b> at 10 a side: 5 foursomes, 5 fourball, 5 scramble, 10 singles. A win is
+      <li><b>25 points</b> at 10 a side: 5 alternate shot, 5 best ball, 5 scramble, 10 singles. A win is
         one point, a half is a half. Change the squad size and the board recalculates; the numbers on this
         page follow the roster, not the other way round.</li>
       <li><b>Red are the holders, and that makes the 2 targets different.</b> Red won it in 2024 by
@@ -1554,7 +1564,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 
   <div class="card">
     <h2>Model prices</h2>
-    <p class="note">Monte Carlo of the full Ryder Cup: foursomes, fourball, scramble and singles, hole by hole,
+    <p class="note">Monte Carlo of the full Ryder Cup: alternate shot, best ball, scramble and singles, hole by hole,
     with any announced pairing played as it stands and the rest redrawn every simulation, so an undrawn price
     averages over who might end up with whom instead of guessing at it.</p>
     <div id="pubInfo" class="note"></div>
@@ -1743,7 +1753,13 @@ function reportError(kind,msg,extra){
 }
 window.addEventListener("error",e=>{
  if(e&&e.target&&e.target!==window&&e.target.tagName) return;   /* a 404 on an asset, not a crash */
- reportError("onerror",e.message,{src:e.filename,line:e.lineno,col:e.colno,
+ /* Masked: no file, no line, no stack, and the browser's stock wording. That combination only
+    happens when the throw came from a script the browser treats as foreign, and this page has no
+    foreign scripts — so it is somebody's content blocker, not the board. Tag it as its own kind
+    so it can be told apart at a glance from a real fault. */
+ const masked = !e.filename && !e.lineno && !(e.error&&e.error.stack)
+                && /^script error\.?$/i.test(String(e.message||"").trim());
+ reportError(masked?"onerror:masked":"onerror",e.message,{src:e.filename,line:e.lineno,col:e.colno,
    stack:e.error&&e.error.stack});});
 window.addEventListener("unhandledrejection",e=>{
  const r=e&&e.reason;
@@ -2228,9 +2244,9 @@ const SCHEDULE=[
  {d:"Wed 23 Sep",t:"Arrival",pick:"23:50",travel:"25 min",tee:null,coll:null,
   course:"Late flight group transfer",note:"Rob's 30th. The Tactical Black Hole."},
  {d:"Thu 24 Sep",t:"Round 1",pick:"12:00",travel:"35 min",tee:"13:50",coll:"20:50",
-  course:"Marbella Golf & Country Club",note:"Alternate Shot (Foursomes)"},
+  course:"Marbella Golf & Country Club",note:"Alternate Shot"},
  {d:"Fri 25 Sep",t:"Round 2",pick:"09:30",travel:"30 min",tee:"11:10",coll:"18:10",
-  course:"Cabopino Golf Club",note:"Best Ball (Fourball)"},
+  course:"Cabopino Golf Club",note:"Best Ball"},
  {d:"Sat 26 Sep",t:"Round 3",pick:"10:00",travel:"35 min",tee:"11:40",coll:"18:40",
   course:"La Cala Golf, Asia course",note:"2v2 Scramble"},
  {d:"Sun 27 Sep",t:"Round 4",pick:"08:30",travel:"30 min",tee:"10:10",coll:"16:30",
@@ -2279,7 +2295,11 @@ DEF_COURSES.forEach(c=>{
    (siOk?"":" — stroke indexes are not 1 to 18")+
    (prOk?"":" — pars sum to "+pr.reduce((a,b)=>a+b,0)+", not "+c.par));
 });
-const FMT={foursomes:"Foursomes",fourball:"Fourball",scramble:"Scramble",singles:"Singles"};
+/* Display names only. The keys below them — "foursomes", "fourball" — are what the scoring
+   branches on (fourball takes 90% of each man's mark, foursomes half the pair's combined)
+   and must not be touched. The group kept reading the schedule and asking which one was
+   which, so the board now calls them what everybody says out loud. */
+const FMT={foursomes:"Alternate Shot",fourball:"Best Ball",scramble:"Scramble",singles:"Singles"};
 const DEC={strokes:"Net strokes",stableford:"Stableford points"};
 
 const MARKETS=[
@@ -2416,7 +2436,7 @@ const DEF_NOV=[
  {k:"nov_rob",n:"Rob's 30th",
   d:"He turns 30 on the Wednesday, the day we fly, and he is the one driving to the airport — so "+
     "he spends his own 30th birthday stone cold sober behind a wheel, which is a bet in itself. "+
-    "Then he tees off in a foursomes at 13:50 on Thursday. He is 21.5 off the stick and playing "+
+    "Then he tees off in the alternate shot at 13:50 on Thursday. He is 21.5 off the stick and playing "+
     "alternate shot, so his partner is on this bet too whether he likes it or not. Rob cannot back "+
     "it — he has too much say in the outcome, and not in a good way",
   round:"1",opts:["Wins his Thursday match","Halves it","Loses it","Does not make the tee at all"],
@@ -2446,7 +2466,7 @@ const DEF_NOV=[
     "that pays for the night out, and 6 or more is the one they will still be telling in ten years. "+
     "Back 2 down or less if you fancy a week where everybody behaves themselves. Jack Mulroy is the "+
     "shortest man in the field and knows more about climbing out of holes than anybody here, "+
-    "though Dom Mills has spent 3 trips demonstrating how you get into one",
+    "though Dom Mills has spent 2 trips demonstrating how you get into one",
   round:"",keepOrder:true,opts:["2 down or less","3 down","4 down","5 down","6 or more"],
   /* Measured, not guessed. Every match in 20,000 simulated weeks was played hole by hole and the
      deepest deficit any side recovered from was recorded. Counting halves is what keeps this a
@@ -2477,7 +2497,12 @@ const DEF_NOV=[
     "It is the Costa del Sol in September and the man has never knowingly been seen on a golf "+
     "course in anything but long trousers, so that is 2 habits to break rather than 1. Somebody "+
     "will spend the whole week working on him",
-  round:"",opts:["Yes","No"],oprobs:{"Yes":0.06,"No":0.94},subject:"Dong Ming Lau"},
+  /* 16/1 and 1/16 was a market with nothing to argue about. Dom wanted them closer: 7/2 the Yes.
+     The No is 2/7 rather than the 1/2 he asked for because the two sides of a no-rake tote have
+     to add to 100% — 1/2 needs 66.7% and 7/2 needs 22.2%, which is 88.9% between them and a book
+     that pays out more than it takes. The Yes is the side anybody actually backs, so that is the
+     one held exactly. */
+  round:"",opts:["Yes","No"],oprobs:{"Yes":0.2222,"No":0.7778},subject:"Dong Ming Lau"},
 
  {k:"nov_last",n:"Last Man Standing",
   d:"Last to bed wins the night. Whoever does it on the most nights of the 4 takes the pool, and a "+
@@ -3575,8 +3600,8 @@ function drawPools(){
     green-blue, so nothing here can be mistaken for a team. */
  const GROUPS=[
   {id:"trip", c:"var(--gTrip)", ic:"trophy", n:"The whole trip",  hint:"Settle on Sunday night", pick:m=>m.type!=="novelty"&&!m.round},
-  {id:"r1",   c:"var(--gR1)",   ic:"pair",   n:"Round 1 — Foursomes", hint:"Thu 24 Sep", pick:m=>m.type!=="novelty"&&m.round==="1"},
-  {id:"r2",   c:"var(--gR2)",   ic:"pair",   n:"Round 2 — Fourball",  hint:"Fri 25 Sep", pick:m=>m.type!=="novelty"&&m.round==="2"},
+  {id:"r1",   c:"var(--gR1)",   ic:"pair",   n:"Round 1 — Alternate Shot", hint:"Thu 24 Sep", pick:m=>m.type!=="novelty"&&m.round==="1"},
+  {id:"r2",   c:"var(--gR2)",   ic:"pair",   n:"Round 2 — Best Ball",  hint:"Fri 25 Sep", pick:m=>m.type!=="novelty"&&m.round==="2"},
   {id:"r3",   c:"var(--gR3)",   ic:"pair",   n:"Round 3 — Scramble",  hint:"Sat 26 Sep", pick:m=>m.type!=="novelty"&&m.round==="3"},
   {id:"r4",   c:"var(--gR4)",   ic:"flag",   n:"Round 4 — Singles",   hint:"Sun 27 Sep", pick:m=>m.type!=="novelty"&&m.round==="4"},
   {id:"nov",  c:"var(--gNov)",  ic:"pint",   n:"Novelty",  hint:"Settled on the evidence, video beats testimony", pick:m=>m.type==="novelty"}];
@@ -3890,7 +3915,7 @@ function drawPools(){
  const si=$("#simInfo");
  if(si) si.innerHTML = PUB
   ? `Every model price on this page comes from <b>${(PUB.n||0).toLocaleString("en-GB")} simulated trips</b>. The
-     whole Ryder Cup is played out hole by hole each time — foursomes, fourball, scramble and singles — off
+     whole Ryder Cup is played out hole by hole each time — alternate shot, best ball, scramble and singles — off
      each man's declared handicap and his actual scoring record from Squabbit, ${
      (S.players.filter(p=>p.in&&!p.unknown).length)} of the ${S.players.filter(p=>p.in).length} having one
      Pairings nobody has drawn yet are redrawn every single time, so no price assumes a draw that does not
@@ -4439,8 +4464,8 @@ function wireCode(){
    stored total is a total that can disagree with the card it came from, and the one thing
    that must never be in doubt on Sunday afternoon is the score. */
 const SESSIONS=[
- {s:1,n:"Foursomes",d:"Thu 24 Sep",c:"Marbella Golf & Country Club",pairs:true,slots:5},
- {s:2,n:"Fourball", d:"Fri 25 Sep",c:"Cabopino Golf Club",pairs:true,slots:5},
+ {s:1,n:"Alternate Shot",d:"Thu 24 Sep",c:"Marbella Golf & Country Club",pairs:true,slots:5},
+ {s:2,n:"Best Ball",     d:"Fri 25 Sep",c:"Cabopino Golf Club",pairs:true,slots:5},
  {s:3,n:"Scramble", d:"Sat 26 Sep",c:"La Cala Golf, Asia",pairs:true,slots:5},
  {s:4,n:"Singles",  d:"Sun 27 Sep",c:"Santa Maria Golf Club",pairs:false,slots:10}];
 /* Red won 2024 and retained on a tie in 2025, so they arrive holding it. That is not
@@ -4791,17 +4816,24 @@ async function saveCard(){
 function trendCell(p){
  if(p.unknown) return '<span style="opacity:.5">no record</span>';
  if(p.trend==null) return '<span style="opacity:.5">too few rounds</span>';
- /* Trending measures a man against HIMSELF — his last 10 rounds against his whole record — and
-    Form now measures him against the room. The two answer different questions and routinely
+ /* Trending measures a man against HIMSELF — his last 10 rounds against the rounds BEFORE them —
+    and Form now measures him against the room. The two answer different questions and routinely
     disagree: Jay France is the best golfer here and is also playing worse than his own standard,
     which is exactly what "1st on form, struggling" means. The old wording said "struggling" and
     "2.7 worse" with nothing to say worse than WHAT, so it read as a contradiction. Every label
-    now names the comparison. */
+    now names the comparison.
+    The comparison used to be the last 10 against the WHOLE record, which contains the last 10 —
+    so a man with 10 rounds or fewer was measured against himself and came out at exactly 0.0,
+    every time, and was then labelled steady and ranked on it. Two disjoint sets, or nothing.
+    The bands moved with the measure. Taking the last 10 out of the baseline stops it being
+    diluted, so the same golf now reads roughly half again as large: the squad's spread runs
+    about -3.5 to +4, not -2 to +3, and these sit where it actually clusters. The basis is
+    printed on the page so the number can be argued with. */
  const t=p.trend, s1=Math.abs(t).toFixed(1);
- if(t<=-2)  return `<b class="pos">&#9660; flying</b> <span class="small">${s1} better than his own record</span>`;
- if(t<=-0.8)return `<span class="pos">&#9660; improving</span> <span class="small">${s1} on his own record</span>`;
- if(t>=2)   return `<b class="neg">&#9650; off his own pace</b> <span class="small">${s1} worse than his record</span>`;
- if(t>=0.8) return `<span class="neg">&#9650; slipping</span> <span class="small">${s1} off his own record</span>`;
+ if(t<=-3)  return `<b class="pos">&#9660; flying</b> <span class="small">${s1} better than his earlier rounds</span>`;
+ if(t<=-1)  return `<span class="pos">&#9660; improving</span> <span class="small">${s1} on his earlier rounds</span>`;
+ if(t>=3)   return `<b class="neg">&#9650; off his own pace</b> <span class="small">${s1} worse than his earlier rounds</span>`;
+ if(t>=1)   return `<span class="neg">&#9650; slipping</span> <span class="small">${s1} off his earlier rounds</span>`;
  return `<span style="opacity:.6">&#9644; steady</span> <span class="small">at his usual level</span>`;
 }
 /* Whole CALENDAR days between a round and today, counted on the phone's own clock.
@@ -5543,7 +5575,12 @@ function drawForm(){
  let h=`<tr>${th("name","Player")}${th("team","Team")}${th("hcp","Handicap","num")}
   ${th("avg","His average","num")}${th("spain","Likely in Spain","num")}${th("form","Form")}
   ${th("trip","Trip record")}${th("last","Last played","num")}
-  ${nerd?`${th("form","Form","num")}${th("raw","Raw","num")}${th("gap","Gap","num")}${th("sd","Spread","num")}${th("n","Rounds","num")}`:""}
+  ${/* This column prints p.form — strokes over par — but its heading used to be wired to
+        th("form"), which sorts by TREND. So clicking the number reordered the table by a
+        quantity that is not in the column, and two headings claimed the same sort key, which
+        lit both arrows at once. GSORTS.class is the one that means "scoring level", and the
+        label now says what the figure is rather than repeating the column six along. */""
+   }${nerd?`${th("class","Over par","num")}${th("raw","Raw","num")}${th("gap","Gap","num")}${th("sd","Spread","num")}${th("n","Rounds","num")}`:""}
   ${th("word","The word on him")}</tr>`;
  gFiltered().forEach(p=>{const g=p.form-p.hcp;
   const read=p.unknown?"Complete unknown. Bet with your heart."

@@ -4,10 +4,28 @@
 # field. Everything else is a straight recompute so a rerun is always reproducible.
 import json, statistics as st
 
-TREND = {}   # ovpL10 - ovpAll, from the same pull; the board's "form now" measure
+LAST = {}    # date of the most recent round, straight off the pull
 for r in json.load(open('squabbit_pull.json')):
-    if r.get('ovpL10') is not None and r.get('ovpAll') is not None:
-        TREND[r['n'].lower()] = (round(r['ovpL10'] - r['ovpAll'], 1), r['last'])
+    LAST[r['n'].lower()] = r['last']
+
+# TREND: the last 10 rounds against the ones BEFORE them.
+#
+# It used to be the last 10 against the whole record — but the whole record contains the last 10,
+# so a man with 10 rounds or fewer was being compared against himself and came out at exactly
+# 0.0 every time. Four men sat on the Form Book reading "steady at his usual level, 6th of 20"
+# purely because the arithmetic could not return anything else. That is a claim the data cannot
+# support dressed up as a measurement.
+#
+# Two disjoint sets fixes it: recent golf on one side, earlier golf on the other. It is undefined
+# when there is nothing on the earlier side, which is the honest answer, and it needs at least 5
+# rounds back there before it will say anything — 10 against 1 is a rounding error with an opinion.
+# Everyone who had a trend before keeps the same direction; the figures are simply bigger, because
+# the baseline is no longer diluted by the very rounds being tested against it.
+TREND_MIN_EARLIER = 5
+def trend_of(clean):
+    earlier = clean[:-10]
+    if len(earlier) < TREND_MIN_EARLIER: return None
+    return round(st.mean(clean[-10:]) - st.mean(earlier), 1)
 
 rows = []
 for line in open('players.txt'):
@@ -34,6 +52,7 @@ for r in rows:
     out.append(dict(name=r['name'], hcp=r['hcp'], n=r['n'], form=round(form, 2),
                     sd=round(sd, 2), gap=round(form - r['hcp'], 2),
                     probs=[round(x, 4) for x in probs],
+                    trend=trend_of(clean),
                     dropped=dropped, lowSample=r['n'] < 10))
 
 K = 12.0
@@ -46,8 +65,7 @@ for p in out:
     p['form'] = round(p['hcp'] + p['gap'], 2)
     p['sd'] = round(w * p['sd'] + (1 - w) * meansd, 2)
     p['avg'] = round(72 + p['form'])
-    t = TREND.get(p['name'].lower())
-    p['trend'], p['last'] = (t if t else (None, None))
+    p['last'] = LAST.get(p['name'].lower())
     p['unknown'] = False
 
 # team and role live only in model.json — carry them across
