@@ -256,6 +256,7 @@ html[data-theme="light"] .mkcard{box-shadow:0 1px 2px rgba(19,32,24,.05),0 6px 1
 .card h2{margin:0 0 4px;font-size:15px}
 .card h3{margin:14px 0 6px;font-size:12px;color:var(--acc2);text-transform:uppercase;letter-spacing:.6px}
 .note{color:var(--dim);font-size:12.5px;margin:6px 0 0}
+option.optgone{color:#9aa3a0}   /* iOS Safari does not always grey a disabled option on its own */
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
 padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -2274,7 +2275,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-25.1",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-25.2",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2604,11 +2605,16 @@ function applyPublishedHcp(){
       a word. Anything typed on this phone now survives until it is published, exactly like a
       handicap. */
    if(p.edited) return;                 /* typed in on this phone and not yet published */
-   if(h.s!=null) p.sd=h.s;
-   if(h.t!==undefined) p.trend=(h.t==null?null:h.t);
-   if(h.r!=null) p.n=h.r;
    if(!flagged){ if(h.h!=null) p.hcp=h.h; return; }
-   if(h.m){ p.hcp=h.h; if(h.f!=null) p.form=h.f; }
+   /* Everything the published block carries is now behind the same flag. Spread, trend and round
+      count used to be applied above it, unconditionally, on the reasoning that a fresh scrape must
+      not leave them stranded at whatever the last build carried. That had it backwards: a scrape
+      arrives AS a build, so the build is the fresher source, and a blanket override meant a refit
+      could move a man's handicap and form while his spread and round count stayed at whatever was
+      published weeks earlier. Theo Sims-Harris read 18.3 off 13 rounds and "0 rounds, spread 5.5"
+      in the same row. The rule is now one rule: the build owns everything measured, the published
+      block owns only what somebody typed. */
+   if(h.m){ p.hcp=h.h; if(h.f!=null) p.form=h.f; if(h.s!=null) p.sd=h.s; }
  });
 }
 /* True when the live board was priced off different form figures than this build carries, which
@@ -3128,7 +3134,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="c13e86a9";
-const DATA_V="2026-08-25.1"+"/"+MODEL_V;
+const DATA_V="2026-08-25.2"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -4797,13 +4803,28 @@ function drawAuth(){
    $("#authDrop").addEventListener("click",()=>{authClear();S.me="";S.slip=[];save();drawAll();});
    return;
  }
+/* The name picker used to list only the free names. A man whose name had already been claimed —
+   because he signed up twice, or because somebody picked the wrong name off the list — simply could
+   not find himself, with nothing on screen to say why. Show the whole roster and grey out the ones
+   already spoken for, so "my name is not there" becomes "my name is taken", which is a thing he can
+   actually tell the organiser. This is presentation only: claim_name refuses a taken name and
+   profiles.name carries a unique index, so two men cannot end up as the same player whatever the
+   dropdown does. */
+function rosterOpts(sel){
+ const taken=new Set((DB.claimed||[]).map(n=>String(n)));
+ return (DB.roster||[]).map(r=>{
+   const t=taken.has(r.name);
+   return `<option value="${esc(r.name)}"${t?" disabled":""}${(!t&&sel===r.name)?" selected":""}
+     class="${t?"optgone":""}">${esc(r.name)}${t?" — taken":""}</option>`;
+ }).join("");
+}
  if(AUTH.tok && !AUTH.name){                       /* signed in but no name claimed yet */
    const free=(DB.roster.length?DB.roster:[]).filter(r=>!DB.claimed.includes(r.name));
    el.innerHTML=`<div class="card" style="border-color:var(--warn)"><h2>Nearly there</h2>
      <p class="note">Signed in as ${esc(AUTH.email||"you")}. Now say which one of this lot you are.</p>
      ${S.claimErr?`<p class="err">${esc(S.claimErr)}</p>`:""}
      <div class="row"><select id="claimSel" style="min-width:190px"><option value="">Choose your name…</option>
-       ${free.map(r=>`<option>${esc(r.name)}</option>`).join("")}</select>
+       ${rosterOpts("")}</select>
        <button class="go" id="claimGo">That's me</button></div>
      <div class="err" id="claimErr"></div></div>`;
    $("#claimGo").addEventListener("click",async()=>{
@@ -4831,8 +4852,9 @@ function drawAuth(){
    ${isNew?`<p class="note">Pick yourself off the list, then give us an email. We will send you a
      code to type in &mdash; no password to forget on a Spanish balcony.</p>
      <div class="row"><select id="newName" style="min-width:190px"><option value="">Who are you?</option>
-       ${free.map(r=>`<option${S.pendingName===r.name?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
-     ${free.length<3?'<p class="note warn">Most names are taken already. If yours is gone, speak to the organiser.</p>':""}`
+       ${rosterOpts(S.pendingName||"")}</select></div>
+     ${free.length?(free.length<3?'<p class="note warn">Nearly everybody is signed up already. The greyed-out names are taken.</p>':'<p class="note">Greyed-out names are already signed up.</p>')
+       :'<p class="note warn">Every name on the list is taken. If one of them is yours, speak to the organiser.</p>'}`
     :`<p class="note">Enter the email you signed up with and we will send you a code.</p>`}
    <div class="row"><input id="authEmail" type="email" inputmode="email" autocomplete="email"
       placeholder="you@example.com" style="min-width:210px;flex:1" value="${esc(AUTH.email||"")}">
@@ -7075,7 +7097,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-25.1</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-25.2</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -7604,7 +7626,10 @@ $("#admRun").addEventListener("click",async e=>{
         entirely a form market, would not have moved a penny after a weekend's golf. */
      hcp:S.players.map(p=>({n:p.name,h:p.hcp,f:p.form,s:p.sd,t:p.trend,r:p.n,
        m:!!(p.base&&(Math.abs(p.hcp-p.base.hcp)>0.001
-                  || (p.base.form!=null&&Math.abs(p.form-p.base.form)>0.001)))})),
+                  || (p.base.form!=null&&Math.abs(p.form-p.base.form)>0.001)
+                  /* Spread is a box in the bar too. Left out of this test it would publish as an
+                     unflagged figure and be discarded by the very next build. */
+                  || (p.base.sd!=null&&Math.abs(p.sd-p.base.sd)>0.001)))})),
      blindScale:S.blindScale,
      prices:{odds:ODDS,team:TEAMP,extra:EXTRA,at:Date.now(),n:N,plan:SIMPLAN}});
    S.players.forEach(p=>{ delete p.edited; });   /* now published, so no longer a local edit */
