@@ -1,0 +1,7 @@
+# GitHub Pages only serves a robots.txt from the DOMAIN root, and this site lives at
+# dominiontechops.github.io/chipsip/ — so crawlers will never read this file where it sits.
+# The meta robots tag in index.html and in each day guide is what actually keeps the board out
+# of search results. This is here so that it is already right if the site ever moves to a
+# custom domain or to the root of a user Pages site, where it WOULD be read.
+User-agent: *
+Disallow: /

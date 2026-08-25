@@ -195,7 +195,9 @@ def maps_placeholder(day):
     return "".join(out)
 
 for day in d["days"]:
-    html=f"""<!doctype html><html><head><meta charset="utf-8"><style>{CSS}</style></head><body>
+    # Same reasoning as the board itself: these are for the 20 men, not for search engines.
+    html=f"""<!doctype html><html><head><meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow"><style>{CSS}</style></head><body>
 {page1(day)}{page2(day)}{maps_placeholder(day)}
 </body></html>"""
     (D/f"day{day['n']}.html").write_text(html)
