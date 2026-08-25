@@ -402,6 +402,8 @@ th.sortable .sar{font-style:normal;font-size:9px;margin-left:4px;opacity:0;trans
 th.sortable:hover .sar{opacity:.5}
 th.sortable .sar.on{opacity:1;color:var(--acc2)}
 @media(max-width:719px){ th.sortable .sar{opacity:.5} }
+.codebox{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+#gateAuth .codebox{border-top-color:rgba(140,200,165,.2)}
 .rankcell{white-space:nowrap}
 .rankcell .rk{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
@@ -2384,6 +2386,15 @@ async function sendMagicLink(email,claim){
    const t=(await r.text()).slice(0,300);
    if(/signup|not.*allowed|otp_disabled|user.*not.*found/i.test(t))
      throw new Error("No account on that email yet. Go back and press Create account, and pick your name off the list.");
+   /* GoTrue rate-limits repeat requests per address and says so in its own words:
+      "For security purposes, you can only request this after 8 seconds." A man who has just asked
+      for a link, not received it, and pressed again reads that as the app being broken — which is
+      exactly what happened the first morning. Say what it means and what to do instead. */
+   const wait=(t.match(/after (\d+) seconds?/i)||[])[1];
+   if(wait) throw new Error("__WAIT__"+wait);
+   if(/rate limit|too many/i.test(t))
+     throw new Error("Too many sign-in emails have gone out in the last hour. Give it a few "
+       +"minutes and try again, or use a link already sitting in your inbox.");
    throw new Error(t);
  }
  AUTH.email=email; authSave(); return true;
@@ -4837,12 +4848,78 @@ function drawAuth(){
       back on the old broken path. Guarded above, and again here. */
    if(isNew && !$("#newName").value){ er.textContent="Pick your name off the list first."; $("#authGo").disabled=false; return; }
    try{ await sendMagicLink(em, isNew?$("#newName").value:"");
-     $("#authOk").innerHTML=`Link sent to <b>${esc(em)}</b>. Open it <b>on this phone</b> and you will
-       land back here signed in.<br><b>Not there? Look in junk.</b> It comes from ${esc(MAIL_FROM)},
-       so search that. The link is good once and it expires, so if it has been sitting a while just
-       ask for another.`;
+     $("#authOk").innerHTML=`Sent to <b>${esc(em)}</b>. <b>Not there? Look in junk</b> &mdash; it
+       comes from ${esc(MAIL_FROM)}, so search that address.
+       <div class="codebox">
+         <p class="note" style="margin:0 0 8px">The email has a <b>6-digit code</b> as well as a
+           link. <b>On an iPhone, type the code</b> &mdash; it works whether you are in Safari or
+           the installed app, and the link only signs you in wherever it happens to open.</p>
+         <div class="row" style="margin:0">
+           <input id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8"
+             placeholder="123456" style="width:120px;letter-spacing:.28em;text-align:center;font-family:var(--mono)">
+           <button class="go" id="authCodeGo">Sign me in</button>
+         </div>
+         <div class="err" id="codeErr"></div>
+       </div>`;
+     wireCode(em);
    }catch(e){ $("#authGo").disabled=false;
-     er.textContent=String(e.message||e).replace(/.*"msg":"|".*/g,"").slice(0,180); }});
+     const m=String(e.message||e);
+     const w=(m.match(/^__WAIT__(\d+)$/)||[])[1];
+     if(w){ er.innerHTML=`A link went out moments ago &mdash; <b>look in your inbox and your junk `
+       +`folder first</b>, it is probably already there. If you really do need another, you can `
+       +`ask again in <b id="waitN">${w}</b> seconds.`;
+       countdownRetry(+w); }
+     else er.textContent=m.replace(/.*"msg":"|".*/g,"").slice(0,180); }});
+}
+/* The button comes back on by itself when the cooldown is up, so nobody sits there pressing a
+   dead control wondering whether it registered. */
+function countdownRetry(n){
+ const go=$("#authGo"); if(go) go.disabled=true;
+ const tick=setInterval(()=>{
+   n--; const el=$("#waitN");
+   if(el) el.textContent=n>0?n:0;
+   if(n<=0){ clearInterval(tick);
+     const g=$("#authGo"); if(g) g.disabled=false;
+     const e=$("#authErr"); if(e) e.innerHTML="You can ask for another link now.";
+   }
+ },1000);
+}
+/* THE CODE PATH. A magic link signs in whichever browser happens to open it, and on an iPhone the
+   installed app and Safari keep completely separate storage — so a man can click his link, land
+   signed in inside Safari, open the app off his home screen and still be signed out. He then asks
+   for another link, gets the rate limit, and concludes the thing is broken. That is exactly what
+   happened on the first morning. A 6-digit code has no such problem: it signs in wherever it is
+   typed. Needs {{ .Token }} in the Supabase email template — without it the field simply goes
+   unused and the link still works. */
+function wireCode(email){
+ const btn=$("#authCodeGo"), inp=$("#authCode"), err=$("#codeErr");
+ if(!btn||!inp) return;
+ const go=async()=>{
+   const token=inp.value.replace(/\D/g,"");
+   if(token.length<6){ err.textContent="That should be 6 digits."; return; }
+   btn.disabled=true; err.textContent="";
+   try{
+     const r=await fetch(SB.url+"/auth/v1/verify",{method:"POST",
+       headers:{apikey:SB.key,"Content-Type":"application/json"},
+       body:JSON.stringify({email,token,type:"email"})});
+     const j=await r.json().catch(()=>({}));
+     if(!r.ok||!j.access_token){
+       btn.disabled=false;
+       err.textContent=/expired|invalid/i.test(JSON.stringify(j))
+         ? "That code has expired or was already used. Ask for a fresh one."
+         : "That code was not accepted. Check the digits, or use the link in the same email.";
+       return; }
+     AUTH.tok=j.access_token; AUTH.refresh=j.refresh_token;
+     AUTH.exp=Date.now()+((j.expires_in||3600)*1000); AUTH.email=email;
+     authSave();
+     NAME_STATE=await loadMyName();
+     S.acctOpen=false; save();
+     await refresh(); drawAll();
+     toast("Signed in.");
+   }catch(e){ btn.disabled=false; err.textContent="Could not reach the server. Try again."; }
+ };
+ btn.addEventListener("click",go);
+ inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
 }
 
 /* ================= SCORE ==================================================================
