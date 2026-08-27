@@ -2,7 +2,7 @@ import json,datetime,re
 t=open('build/t2.html').read()
 model=open('model.json').read()
 logo=open('logo_b64.txt').read().strip()
-build="2026-08-25.4"
+build="2026-08-27.1"
 # The Squabbit read date comes off the raw pull file itself, so a rebuild that does not re-pull
 # cannot quietly claim fresh form. Nothing to remember to update: the file's own timestamp is the
 # only honest record of when the scoring history was actually read.

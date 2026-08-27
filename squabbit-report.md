@@ -1,4 +1,4 @@
-# Squabbit refresh — 2026-08-25
+# Squabbit refresh — 2026-08-27
 
 Pulled from app.squabbitgolf.com against the accounts the board is actually using. Accounts are matched by the courses they play, not by name: several of these names have half a dozen namesakes on Squabbit and picking the wrong one has already nearly happened once.
 
@@ -27,7 +27,7 @@ The board's count is individual rounds after pairs formats are stripped out, so 
 | Dom Mills | 22 | 22 | 8 |
 | Eamonn Brady | 91 | 91 | 32 |
 | Gabe Hills | 18 | 18 | 0 |
-| Jack Mulroy | 83 | 83 | 33 |
+| Jack Mulroy | 84 | 84 | 34 |
 | Jay France | 25 | 25 | 6 |
 | Josh Evans | 4 | 4 | 3 |
 | Josh Menzies | 25 | 25 | 11 |
@@ -63,7 +63,7 @@ Strokes over par, which is the one measure available for every round. It is not 
 | Dom Mills | 26.0 | Manual | 22 | +26.5 | +26.6 | +28.2 | 7.9 |
 | Dave Huddleston | 19.4 | Squabbit | 8 | +26.6 | +26.6 | +26.6 | 10.4 |
 | Chris Best | 24 | Manual | 7 | +27.7 | +27.7 | +27.7 | 7.7 |
-| Jack Mulroy | 21.2 | Squabbit | 83 | +28.0 | +27.8 | +26.9 | 6.4 |
+| Jack Mulroy | 21.2 | Squabbit | 84 | +28.0 | +27.8 | +26.9 | 6.4 |
 | Tom Bucknall | 25.3 | Squabbit | 15 | +27.9 | +27.9 | +28.1 | 7.1 |
 | Rob Parfitt | 21.5 | Squabbit | 24 | +28.2 | +28.4 | +26.0 | 8.5 |
 

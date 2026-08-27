@@ -1783,7 +1783,7 @@ const MODEL=[
   "hcp": 20.6,
   "n": 91,
   "form": 24.83,
-  "sd": 6.01,
+  "sd": 6.0,
   "gap": 4.23,
   "probs": [
    0.0006,
@@ -1837,7 +1837,7 @@ const MODEL=[
   "hcp": 15.1,
   "n": 11,
   "form": 19.96,
-  "sd": 5.04,
+  "sd": 5.03,
   "gap": 4.86,
   "probs": [
    0.0,
@@ -2107,7 +2107,7 @@ const MODEL=[
   "hcp": 12.0,
   "n": 4,
   "form": 17.53,
-  "sd": 4.96,
+  "sd": 4.95,
   "gap": 5.53,
   "probs": [
    0.0139,
@@ -2213,26 +2213,26 @@ const MODEL=[
  {
   "name": "Jack Mulroy",
   "hcp": 21.2,
-  "n": 83,
-  "form": 27.79,
-  "sd": 5.54,
-  "gap": 6.59,
+  "n": 84,
+  "form": 27.65,
+  "sd": 5.52,
+  "gap": 6.45,
   "probs": [
    0.0007,
-   0.0151,
+   0.0149,
    0.1694,
-   0.3525,
-   0.2647,
-   0.1975
+   0.3537,
+   0.2642,
+   0.1972
   ],
-  "trend": -1.9,
+  "trend": -1.4,
   "dropped": 2,
   "lowSample": false,
-  "rawGap": 6.78,
-  "rawForm": 27.98,
-  "w": 0.874,
+  "rawGap": 6.62,
+  "rawForm": 27.82,
+  "w": 0.875,
   "avg": 100,
-  "last": "2026-08-15",
+  "last": "2026-08-26",
   "unknown": false,
   "team": "Red",
   "role": "C"
@@ -2267,7 +2267,7 @@ const MODEL=[
 ];
 /* The day the Squabbit scoring record was last read, stamped by the build script. Distinct from
    the build date: a rebuild that does not re-pull must not claim fresh form. */
-const SQUAB_PULLED="2026-08-25";
+const SQUAB_PULLED="2026-08-27";
 const SB={url:"https://nqewsjczuqnkqehcayzq.supabase.co",
           key:"sb_publishable_jZ3Iw2rYsGgCdsBqKmJqBw_vO00J2DO"};
 const DB={bets:[],mine:[],totals:[],ledger:[],accounts:[],settings:{},roster:[],claimed:[],
@@ -2295,7 +2295,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-25.4",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-08-27.1",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -3168,8 +3168,8 @@ let S=null;
    and every phone sees a version it already has, keeps its stale roster, and re-runs the model on
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
-const MODEL_V="6f07152c";
-const DATA_V="2026-08-25.4"+"/"+MODEL_V;
+const MODEL_V="7d9124a0";
+const DATA_V="2026-08-27.1"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -7144,7 +7144,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-08-25.4</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-08-27.1</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
