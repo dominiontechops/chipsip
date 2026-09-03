@@ -42,7 +42,7 @@
   for (const t of tids) {
     try {
       const rs = await F.getDocs(F.query(F.collection(db, "rounds"),
-                   F.where("tournamentId", "==", t), F.limit(400)));
+                   F.where("tournamentId", "==", t), F.limit(1500)));
       rs.docs.forEach(x => { const u = x.data().userId; if (u) ids.add(u); });
     } catch (e) { /* a tournament we cannot read is not worth stopping for */ }
   }
@@ -71,7 +71,15 @@
      PINNED BY DOCUMENT ID, not by the other name. Name matching is what caused this in the first
      place, and "Theo Harris" is common enough that a namesake could walk into one of Dom's other
      tournaments and quietly take his place in the model. An id cannot be mistaken for anybody. */
+  /* Matt Petty joined this list on 3 Sep 2026. Between 27 Aug and 3 Sep he dropped out of every
+     one of Dom's tournaments, so the tournament-based match found nothing and a 20-man model
+     would have quietly become 19 with Blue a man short. TWO accounts carry his name — one with a
+     single round from July 2025 — and Dom confirmed which is his.
+     The wider lesson: the tournament list is no longer only Chip & Sip. It now pulls 129 people
+     from open events, so "the right man by construction" is weaker than it was. A pinned id is
+     the only thing that cannot drift. */
   const SQUABBIT_ID = { "Theo Sims-Harris": "HERfU5b3UqXWr29TcGgK",
+                       "Matt Petty":        "WR2TRZD2QNowFmvOcIXI",
                        /* Josh has THREE accounts under his name on Squabbit: one plays in Virginia,
                           one has 2 rounds off 28, and this one is his. Confirmed by Dom. Note the
                           profile handicap on it reads 0.9, which his own cards do not support — see
@@ -83,11 +91,14 @@
   const out = [], missing = [];
 
   for (const nm of WANT) {
-    let e = map[norm(nm)];
+    /* Pin first, name second. The other way round, a namesake who wanders into one of Dom's open
+       events would beat the pin and never be noticed. */
+    let e = SQUABBIT_ID[nm] ? null : map[norm(nm)];
     if (!e && SQUABBIT_ID[nm]) {
       try { const u = await F.getDoc(F.doc(db, "users", SQUABBIT_ID[nm]));
             if (u.exists()) e = { id: SQUABBIT_ID[nm], d: u.data() }; } catch (err) {}
     }
+    if (!e) e = map[norm(nm)];              /* pin missed — fall back to the name */
     if (!e) { missing.push(nm); continue; }
     let docs = [];
     try {
