@@ -2313,7 +2313,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-11.3",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-11.4",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -3019,18 +3019,18 @@ const DEF_NOV=[
  {k:"nov_social",n:"Social MVP",
   d:"The one everybody argues about, and the only market where the room decides. Settled by a vote "+
     "of all 20 on the last night, one man one vote, and you cannot vote for yourself. A tie splits "+
-    "the pool. The tally is posted in full afterwards, so it is a count rather than a verdict. Alex "+
-    "Mulvin heads it on 3 years of evidence and Rob Parfitt has a birthday doing the heavy lifting. "+
-    "Chris Best comes in off the floor: he was 50/1 on a reading of the room that the group chat "+
-    "does not support at all, and 4am is 4am wherever you are standing. Jack Mulroy sends more "+
-    "messages than any man here by a distance, which has to be worth something on a 4 day trip. The "+
-    "prices are a starting shape and the room will move them soon enough — every year somebody "+
-    "arrives an outsider and leaves as the story of the trip",
+    "the pool. The tally is posted in full afterwards, so it is a count rather than a verdict. "+
+    "Priced off the trip rather than the build-up, because 3 years of group chat turns out to "+
+    "measure who organises a holiday rather than who shows up on it. On the 5 days of last year's "+
+    "trip Jack Mulroy sent 95 messages, Chris Best 78 and Rob Parfitt 78, and Alex Mulvin — the man "+
+    "this market has always had favourite — sent 20. Rob heads it with a birthday doing the heavy "+
+    "lifting. The prices are a starting shape and the room will move them soon enough: every year "+
+    "somebody arrives an outsider and leaves as the story of the trip",
   round:"",opts:[],
-  wts:{"Alex Mulvin":4.6,"Rob Parfitt":3.4,"Chris Best":2.4,"Jack Mulroy":2.0,"Eamonn Brady":1.9,
-   "Theo Sims-Harris":1.7,"Ben West":1.9,"Josh Menzies":1.6,"Josh Evans":1.55,"Luke Usher":1.35,
-   "Gabe Hills":1.3,"Matt Petty":1.3,"Tom Bucknall":1.2,"Dave Huddleston":0.9,
-   "Matt Holland":0.9,"Mark Sturgess":0.9,"Luke Holland":0.85,"Dom Mills":0.7,
+  wts:{"Rob Parfitt":4.0,"Jack Mulroy":3.6,"Chris Best":3.0,"Alex Mulvin":2.4,"Ben West":1.9,
+   "Eamonn Brady":1.8,"Dom Mills":1.7,"Josh Menzies":1.6,"Gabe Hills":1.5,"Josh Evans":1.35,
+   "Luke Usher":1.2,"Theo Sims-Harris":1.0,"Matt Petty":1.0,"Tom Bucknall":1.0,
+   "Dave Huddleston":0.9,"Matt Holland":0.9,"Mark Sturgess":0.9,"Luke Holland":0.7,
    "Dong Ming Lau":0.4,"Jay France":0.4}},
  {k:"nov_back",n:"Biggest Comeback",
   d:"The deepest hole anybody climbs out of all week. Go 4 down, drag it back, win or halve it — "+
@@ -3050,14 +3050,15 @@ const DEF_NOV=[
  {k:"nov_home",n:"First to Mention His Home Club",
   d:"Unprompted, out loud, in earshot of at least 2 witnesses, from wheels down in Malaga to the "+
     "last putt on Sunday. Chris Best is favourite and there is no honest way around it: he names a "+
-    "golf club in that group chat almost 4 times as often as the next man, and the next man is Alex "+
-    "Mulvin, who is a price here for the first time on exactly that evidence. Theo is next on his "+
-    "first trip with 4 days of introductions to get through, Mark Sturgess is there for the same "+
-    "reason, and Ben West is a price because he would rather tell you the number than the name. "+
-    "Somebody always does it before the bags are off the carousel",
+    "golf club in that group chat almost 4 times as often as the next man, and 21 of his 23 have "+
+    "come in the last year alone. Theo is next on his first trip, having joined the group in the "+
+    "summer with 4 days of introductions still to get through, and Mark Sturgess is there for the "+
+    "same reason. Alex Mulvin is second on the raw count and a price rather than a contender, "+
+    "because 7 of his 9 are more than a year old. Ben West is in because he would rather tell you "+
+    "the number than the name. Somebody always does it before the bags are off the carousel",
   round:"",opts:[],
-  wts:{"Chris Best":5.0,"Alex Mulvin":3.0,"Theo Sims-Harris":2.6,"Mark Sturgess":1.9,
-   "Gabe Hills":1.8,"Luke Usher":1.6,"Rob Parfitt":1.6,"Eamonn Brady":1.5,"Ben West":1.4,
+  wts:{"Chris Best":5.0,"Alex Mulvin":2.1,"Theo Sims-Harris":2.6,"Mark Sturgess":1.9,
+   "Gabe Hills":1.8,"Luke Usher":1.9,"Rob Parfitt":1.6,"Eamonn Brady":1.5,"Ben West":1.4,
    "Dong Ming Lau":1.4,"Josh Menzies":1.2,"Tom Bucknall":1.15,"Matt Petty":0.8,"Jay France":0.8}},
 
  {k:"nov_stat",n:"Ben West to Quote a Squabbit Stat",
@@ -3083,19 +3084,21 @@ const DEF_NOV=[
  {k:"nov_last",n:"Last Man Standing",
   d:"Last to bed wins the night. Whoever does it on the most nights of the 4 takes the pool, and a "+
     "tie splits it — a count rather than a verdict, settled by whoever is still awake to see it. "+
-    "Alex Mulvin heads it and talks about a night out more than anybody in the group, which over 3 "+
-    "years is not a small claim. Jack Mulroy is next and is third on the same measure while being "+
-    "first on messages sent overall, so the stamina is not in question. Rob Parfitt has a 30th "+
-    "birthday to defend and has already invited everybody to whatever he does instead if the dates "+
-    "move. Chris Best has been badly underrated here: this is a man who got in at 4am, teed off at "+
-    "7.30am in front of a crowd and parred the first, then noted that the hangover arrived around "+
-    "the 4th. At the other end sit Matt Petty and Dong Ming Lau, and neither of those prices is an "+
-    "insult",
+    "This one is priced off the only hard evidence anybody has: who was still sending messages "+
+    "after 23:00 on the last 2 trips. Dom Mills did it more than anyone, 12 times, which is either "+
+    "stamina or an inability to put the phone down and pays the same either way. Jack Mulroy is "+
+    "right behind him on 11 and sent more messages on the trip itself than any man alive. Ben West "+
+    "holds the single latest timestamp in 3 years of this group at 04:00. Rob Parfitt has a 30th "+
+    "birthday on top. Alex Mulvin drifts hard: he is the loudest man in this chat between trips and "+
+    "the 10th loudest on one, which is what happens when your contribution is flights and buggies. "+
+    "Josh Menzies and Tom Bucknall have never once sent a message after 23:00 on a trip, and that "+
+    "is what their prices are about",
   round:"",opts:[],
-  wts:{"Alex Mulvin":4.5,"Jack Mulroy":3.3,"Rob Parfitt":3.2,"Chris Best":2.7,"Eamonn Brady":2.2,
-   "Theo Sims-Harris":1.6,"Josh Evans":1.9,"Josh Menzies":1.5,"Ben West":1.3,"Gabe Hills":1.25,
-   "Luke Holland":1.15,"Tom Bucknall":1.1,"Matt Holland":0.95,"Dom Mills":0.9,
-   "Mark Sturgess":0.9,"Jay France":0.85,"Luke Usher":0.8,"Matt Petty":0.3,"Dong Ming Lau":0.25}},
+  wts:{"Jack Mulroy":4.0,"Dom Mills":3.6,"Rob Parfitt":3.2,"Ben West":3.0,"Alex Mulvin":2.6,
+   "Eamonn Brady":2.4,"Chris Best":2.2,"Gabe Hills":1.5,"Luke Usher":1.1,"Josh Evans":1.2,
+   "Theo Sims-Harris":1.0,"Matt Holland":0.9,"Mark Sturgess":0.9,"Jay France":0.85,
+   "Josh Menzies":0.7,"Tom Bucknall":0.6,"Luke Holland":0.6,"Matt Petty":0.3,
+   "Dong Ming Lau":0.25}},
 
  {k:"nov_cut",n:"The Cut",
   d:"Whose handicap comes down after the trip. Settles weeks later on Squabbit, in black and "+
@@ -3124,7 +3127,8 @@ const DEF_NOV=[
     "Hills has twice answered the charge by gesturing at somebody else, which is the only defence "+
     "anybody here has ever found. Josh Menzies is 50/1 on the strength of once telling the group "+
     "that a man having the round of his life is not a bandit, which nobody has forgotten and nobody "+
-    "has forgiven",
+    "has forgiven. Theo is the outsider because he only joined this group in the summer, not "+
+    "because he is quiet — on a per-month basis he talks as much as half the field",
   round:"",opts:[],pk:"moan",
   /* Every one of these is off the group chat or the scrape, not off a hunch. Chris Best carries
      more handicap talk than the next two men combined and has asked for another man's cut at
@@ -3133,11 +3137,11 @@ const DEF_NOV=[
      weighted as the accused who deflects, which he has done twice in writing. Josh Menzies is
      marked DOWN rather than up: he talks about handicaps as much as anybody and the one thing he
      is on record doing is arguing the other way. */
-  wts:{"Eamonn Brady":9.5,"Chris Best":7.0,"Dom Mills":3.0,"Ben West":3.2,"Alex Mulvin":2.6,
+  wts:{"Eamonn Brady":9.5,"Chris Best":7.0,"Dom Mills":3.0,"Ben West":3.2,"Alex Mulvin":2.1,
    "Luke Usher":2.4,"Rob Parfitt":2.2,"Gabe Hills":2.0,"Jack Mulroy":2.0,"Dong Ming Lau":1.6,
    "Luke Holland":1.3,"Josh Menzies":0.9,"Tom Bucknall":0.8,"Dave Huddleston":0.8,
    "Jay France":0.7,"Josh Evans":0.7,"Matt Petty":0.6,"Mark Sturgess":0.6,"Matt Holland":0.6,
-   "Theo Sims-Harris":0.5}},
+   "Theo Sims-Harris":0.9}},
 
  {k:"nov_water",n:"First in the Drink",
   d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it. "+
@@ -3236,7 +3240,7 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="e6d7e897";
-const DATA_V="2026-09-11.3"+"/"+MODEL_V;
+const DATA_V="2026-09-11.4"+"/"+MODEL_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -7328,7 +7332,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-09-11.3</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-09-11.4</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
