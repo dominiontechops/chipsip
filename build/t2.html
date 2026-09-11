@@ -1245,8 +1245,9 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         one is the one that bites: a stake cap on its own does nothing, because five tenners get to the same
         place as one fifty. Nobody is playing on credit and nobody is chasing anybody round a golf course.
         Settle up and the room reopens straight away.</li>
-      <li>You cannot back yourself. Markets shut 10 minutes before the relevant tee shot. Pay into the pot
-        with the button at the top.</li>
+      <li>You cannot back yourself. Markets shut 10 minutes before the relevant tee shot, except where a
+        card says otherwise &mdash; anything that settles before the golf starts shuts earlier, and its own
+        card gives the time. Pay into the pot with the button at the top.</li>
     </ul>
   </div>
   <div class="card">
@@ -1295,7 +1296,9 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         not a betting opportunity. Whole-trip markets — MVP, Team Result, Top Scorers, Perfect Record, The
         Blank — shut 10 minutes before Thursday's first ball, at <b>13:40 Spanish time, 12:40 UK</b>. A
         round's own markets shut 10 minutes before that round tees off, so the Sunday singles book stays
-        open until Sunday morning while Thursday's shut on Thursday.</li>
+        open until Sunday morning while Thursday's shut on Thursday. A market that settles before anybody
+        swings a club cannot wait for a tee shot and names its own closing time on its card: First Beer
+        Photo at the Airport shuts at <b>13:00 Spanish time, 12:00 UK, on the Wednesday</b>.</li>
       <li><b>It closes itself.</b> Nobody has to remember, and the organiser cannot "forget" to shut a market
         he fancies. The clock runs on the tee times, and those are stored as Spanish time — so it makes no
         difference whether your phone is on UK time, Spanish time, or still on last year's holiday. The
@@ -1848,7 +1851,10 @@ function blockReason(m,label){
    for its token and then wipes the hash, so a share link clicked by a man who is mid-sign-in
    would otherwise lose the market on the way through. Stashed in a variable that survives all of
    it, spent once, and cleared whether or not the market turns out to exist. */
-let DEEP_MK=(()=>{ const m=/[#&]m=([^&]+)/.exec(location.hash||""); return m?decodeURIComponent(m[1]):null; })();
+let DEEP_MK=(()=>{ try{
+  const m=/[#&]m=([^&]+)/.exec(location.hash||""); return m?decodeURIComponent(m[1]):null;
+ }catch(e){ return null; } })();   /* decodeURIComponent throws on a lone % — a link clipped by
+   WhatsApp would otherwise abort this whole script at module scope and leave a dead page. */
 function deepOpen(){
   if(!DEEP_MK) return;
   /* Not while anything owns the screen. The rules cards, the curtain and the wall all have to be
@@ -2528,11 +2534,11 @@ const DEF_NOV=[
     "of all 20 on the last night, one man one vote, and you cannot vote for yourself. A tie splits "+
     "the pool. The tally is posted in full afterwards, so it is a count rather than a verdict. "+
     "Priced off the trip rather than the build-up, because 3 years of group chat turns out to "+
-    "measure who organises a holiday rather than who shows up on it. On the 5 days of last year's "+
-    "trip Jack Mulroy sent 95 messages, Chris Best 78 and Rob Parfitt 78, and Alex Mulvin — the man "+
-    "this market has always had favourite — sent 20. Rob heads it with a birthday doing the heavy "+
-    "lifting. The prices are a starting shape and the room will move them soon enough: every year "+
-    "somebody arrives an outsider and leaves as the story of the trip",
+    "measure who organises a holiday rather than who shows up on it. Over the 5 days of last "+
+    "September: Jack Mulroy 95 messages, Chris Best 78, Rob Parfitt 78, and Alex Mulvin 20. Rob "+
+    "heads it with a birthday doing the heavy lifting. These prices are a starting shape and the "+
+    "room will move them soon enough: every year somebody arrives an outsider and leaves as the "+
+    "story of the trip",
   round:"",opts:[],
   wts:{"Rob Parfitt":4.0,"Jack Mulroy":3.6,"Chris Best":3.0,"Alex Mulvin":2.4,"Ben West":1.9,
    "Eamonn Brady":1.8,"Dom Mills":1.7,"Josh Menzies":1.6,"Gabe Hills":1.5,"Josh Evans":1.35,
@@ -2557,18 +2563,17 @@ const DEF_NOV=[
  {k:"nov_beer",n:"First Beer Photo at the Airport",
   d:"A photograph of a drink, posted in the group, from Gatwick, on the Wednesday. It has to be a "+
     "picture and it has to be his own drink &mdash; a photo of somebody else's pint is reporting, "+
-    "not competing. Any drink counts, so a man holding a coffee at bag drop is welcome to argue "+
-    "his case and will lose it. This is the only market on the board settled, paid and forgotten "+
-    "before anybody has swung a club, which is also why it shuts at midday rather than at the "+
-    "first tee: on the normal deadline it would still be taking bets hours after everyone had "+
-    "seen the answer. The thing to hold on to is that drinking a beer and posting a beer are two "+
-    "different skills. There are 967 photographs in that group chat and Jack Mulroy has sent 176 "+
-    "of them, which is why he heads a market about a photograph rather than about a pint. Chris "+
-    "Best is second only because he announced it: he asked what time people were getting to "+
-    "Gatwick and then said he would aim to be through security sipping a beer at 6. Rob Parfitt "+
-    "is the one to watch &mdash; a third of everything he has ever sent to this group is a "+
-    "picture, the highest rate of anybody. Luke Holland is the only other man on record putting "+
-    "the words beers and Gatwick in the same sentence. After that it is whoever parks first",
+    "not competing. Any drink counts, so a man holding a coffee at bag drop is welcome to argue his "+
+    "case and will lose it. It settles before anybody has swung a club, which is why it shuts at "+
+    "midday on the Wednesday rather than at the first tee: on the normal deadline it would still be "+
+    "taking bets a day and a half after everyone had seen the answer. The thing to hold on to is "+
+    "that drinking a beer and posting a beer are 2 different skills. There are 967 photos and videos "+
+    "in that group chat and Jack Mulroy has sent 176 of them, which is why he heads a market about a "+
+    "photograph rather than about a pint. Chris Best is second only because he announced it: he asked what time people were getting to Gatwick and then said he would aim to be through "+
+    "security sipping a beer at 6. Rob Parfitt is the one to watch, because a third of everything he "+
+    "sends to this group is a picture and nobody who posts regularly is anywhere near him. Luke "+
+    "Holland is the only other man on record putting the words beers and Gatwick in the same "+
+    "sentence. After that it is whoever parks first",
   round:"",opts:[],
   /* No handicap tilt at all here. There is no version of golf in which how a man strikes a 6 iron
      predicts how quickly he finds a bar, so the formula is left out entirely and the hand weights
@@ -2582,13 +2587,14 @@ const DEF_NOV=[
    "Dong Ming Lau":0.6}},
  {k:"nov_home",n:"First to Mention His Home Club",
   d:"Unprompted, out loud, in earshot of at least 2 witnesses, from wheels down in Malaga to the "+
-    "last putt on Sunday. Chris Best is favourite and there is no honest way around it: he names a "+
-    "golf club in that group chat almost 4 times as often as the next man, and 21 of his 23 have "+
-    "come in the last year alone. Theo is next on his first trip, having joined the group in the "+
-    "summer with 4 days of introductions still to get through, and Mark Sturgess is there for the "+
-    "same reason. Alex Mulvin is second on the raw count and a price rather than a contender, "+
-    "because 7 of his 9 are more than a year old. Ben West is in because he would rather tell you "+
-    "the number than the name. Somebody always does it before the bags are off the carousel",
+    "last putt on Sunday. Chris Best is favourite and there is no honest way around it: he has named "+
+    "a golf club in that group chat 23 times against 9 for the next man, and 21 of his 23 have come "+
+    "in the last year alone. That next man is Alex Mulvin, a price here for the first time on "+
+    "exactly that evidence, though 7 of his 9 are over a year old. Theo is next on his first trip, "+
+    "having joined the group at the end of June with 4 days of introductions still to get through. "+
+    "Mark Sturgess is a price on the same reasoning and a longer acquaintance. Ben West is in "+
+    "because he would rather tell you the number than the name. Somebody always does it before the "+
+    "bags are off the carousel",
   round:"",opts:[],
   wts:{"Chris Best":5.0,"Alex Mulvin":2.1,"Theo Sims-Harris":2.6,"Mark Sturgess":1.9,
    "Gabe Hills":1.8,"Luke Usher":1.9,"Rob Parfitt":1.6,"Eamonn Brady":1.5,"Ben West":1.4,
@@ -2616,19 +2622,17 @@ const DEF_NOV=[
 
  {k:"nov_last",n:"Last Man Standing",
   d:"Last to bed wins the night. Whoever does it on the most nights of the 4 takes the pool, and a "+
-    "tie splits it — a count rather than a verdict, settled by whoever is still awake to see it. "+
-    "This one is priced off the only hard evidence anybody has: who was still sending messages "+
-    "after 23:00 on the last 2 trips. Dom Mills did it more than anyone, 12 times, which is either "+
-    "stamina or an inability to put the phone down and pays the same either way. Jack Mulroy is "+
-    "right behind him on 11 and sent more messages on the trip itself than any man alive. Ben West "+
-    "holds the single latest timestamp in 3 years of this group at 04:00. Rob Parfitt has a 30th "+
-    "birthday on top. Alex Mulvin drifts hard: he is the loudest man in this chat between trips and "+
-    "the 10th loudest on one, which is what happens when your contribution is flights and buggies. "+
-    "Josh Menzies and Tom Bucknall have never once sent a message after 23:00 on a trip, and that "+
-    "is what their prices are about",
+    "tie splits it &mdash; a count rather than a verdict, settled by whoever is still awake to see "+
+    "it. Priced off the only hard evidence there is: who was still sending messages between 23:00 "+
+    "and 06:00 on the last 2 trips. Dom Mills did it most often, 12 times, which is either stamina "+
+    "or an inability to put the phone down and pays the same either way. Jack Mulroy is right behind "+
+    "him on 11 and sent more messages on the trip itself than anybody. Alex Mulvin holds the record "+
+    "that actually matters: 05:51, the latest anybody in this group has ever posted on a trip, with "+
+    "Chris Best second on 05:22 and Ben West third at 04:18. Rob Parfitt has a 30th birthday on top "+
+    "of 5 late nights. At the other end, Josh Menzies and Tom Bucknall have never once sent a message after 23:00 on a trip, and that is the whole of their price",
   round:"",opts:[],
-  wts:{"Jack Mulroy":4.0,"Dom Mills":3.6,"Rob Parfitt":3.2,"Ben West":3.0,"Alex Mulvin":2.6,
-   "Eamonn Brady":2.4,"Chris Best":2.2,"Gabe Hills":1.5,"Luke Usher":1.1,"Josh Evans":1.2,
+  wts:{"Jack Mulroy":4.0,"Dom Mills":3.6,"Alex Mulvin":3.4,"Rob Parfitt":3.2,"Chris Best":2.8,
+   "Eamonn Brady":2.4,"Ben West":2.2,"Gabe Hills":1.5,"Josh Evans":1.2,"Luke Usher":1.1,
    "Theo Sims-Harris":1.0,"Matt Holland":0.9,"Mark Sturgess":0.9,"Jay France":0.85,
    "Josh Menzies":0.7,"Tom Bucknall":0.6,"Luke Holland":0.6,"Matt Petty":0.3,
    "Dong Ming Lau":0.25}},
@@ -2658,10 +2662,11 @@ const DEF_NOV=[
     "different men and shown no sign of running out of men. Chris Best does it in words instead and "+
     "does it constantly. Dom Mills publishes the handicaps, which is cutting with extra steps. Gabe "+
     "Hills has twice answered the charge by gesturing at somebody else, which is the only defence "+
-    "anybody here has ever found. Josh Menzies is 50/1 on the strength of once telling the group "+
+    "anybody here has ever found. Josh Menzies is marked down rather than up, on the strength of "+
+    "once telling the group "+
     "that a man having the round of his life is not a bandit, which nobody has forgotten and nobody "+
-    "has forgiven. Theo is the outsider because he only joined this group in the summer, not "+
-    "because he is quiet — on a per-month basis he talks as much as half the field",
+    "has forgiven. Theo is a long price because he joined this group at the end of June, not "+
+    "because he is quiet &mdash; per month he talks as much as half the field",
   round:"",opts:[],pk:"moan",
   /* Every one of these is off the group chat or the scrape, not off a hunch. Chris Best carries
      more handicap talk than the next two men combined and has asked for another man's cut at
@@ -2764,7 +2769,12 @@ let S=null;
    last week's form while looking completely up to date. The fingerprint cannot be forgotten,
    because the build script derives it from model.json rather than from me remembering. */
 const MODEL_V="__MODELV__";
-const DATA_V="__BUILD__"+"/"+MODEL_V;
+/* A fingerprint of the MARKET DEFINITIONS, separate from the model's. It belongs in DATA_V, which
+   decides whether saved state survives, and deliberately NOT in MODEL_V, which decides whether the
+   published prices are stale: rewording a card must throw away a stale copy of the market list on
+   every phone, and must not tell the organiser his simulation needs re-running. */
+const MARKETS_V="__MARKETSV__";
+const DATA_V="__BUILD__"+"/"+MODEL_V+"/"+MARKETS_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -3638,7 +3648,7 @@ const NOV_ICON={
  /* and by market key, for the hand-priced ones that have no pricing model at all */
  shout:"club",row:"row",heat:"row",josh:"mouth",cunt:"mouth",rob:"pint",rob30:"pint",drunk:"pint",
  /* Social MVP is about company, not beer — the two-people glyph says that and a pint does not. */
- social:"pair",last:"pint",
+ social:"pair",last:"pint",beer:"pint",
  back:"rise",home:"flag",stat:"stat",shorts:"shorts"};
 /* The fallback used to be a pint, so every market nobody had thought to map turned up wearing a
    beer glass — 6 of them at one point, on markets about home clubs, handicap cuts and a man's
@@ -3734,10 +3744,11 @@ function drawPools(){
    </div>
    <h3>When each market shuts</h3>
    <p class="note">Nothing is live once it is under way, so nobody can back a result they have already
-   watched happen. Everything shuts <b>ten minutes before</b> the relevant tee shot: whole-trip markets before
-   the week's first ball, a round's own markets before that round tees off. Times are Spanish, UK in brackets.</p>
+   watched happen. Almost everything shuts <b>10 minutes before</b> the relevant tee shot: whole-trip markets
+   before the week's first ball, a round's own markets before that round tees off. Times are Spanish, UK in
+   brackets. The exceptions are listed underneath and they shut earlier, never later.</p>
    <div class="wrap"><table>${
-     [["Whole trip — MVP, Team Result, Top Scorers, Perfect Record, The Blank, and every novelty market not tied to one round","1"],
+     [["Whole trip — MVP, Team Result, Top Scorers, Perfect Record, The Blank, and every novelty market not tied to one round or listed below","1"],
       ["Round 1 markets","1"],["Round 2 markets","2"],["Round 3 markets","3"],
       ["Round 4 markets, including Sunday Singles","4"]]
      .map(([lbl,r])=>{
@@ -3746,6 +3757,15 @@ function drawPools(){
       const d=cutoffOf(ROUND_TEE[r]),shut=S.closed||new Date()>=d;
       return `<tr><td>${lbl}</td><td class="num small">${d.toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"Europe/Madrid"})} ${esTime(d)} <span class="small">(${ukTime(d)} UK)</span></td>
       <td class="num ${shut?"neg":"pos"}">${shut?"closed":untilStr(d)}</td></tr>`;}).join("")
+   }${
+     /* The exceptions, read off the markets themselves rather than typed out, so a market that
+        names its own closing time can never be quietly contradicted by this table again. */
+     allMarkets().filter(m=>m.shutAt)
+       .sort((a,b)=>deadline(a)-deadline(b))
+       .map(m=>{const d=deadline(m),shut=S.closed||new Date()>=d;
+         return `<tr><td>${esc(m.n)} <span class="tag low">its own time</span></td>
+         <td class="num small">${d.toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"Europe/Madrid"})} ${esTime(d)} <span class="small">(${ukTime(d)} UK)</span></td>
+         <td class="num ${shut?"neg":"pos"}">${shut?"closed":untilStr(d)}</td></tr>`;}).join("")
    }</table></div></details>`;
  const mk=$("#fMarket").value,rd=$("#fRound").value,ty=$("#fType").value,st=$("#fStatus").value;
  const vf=($("#fValue")||{}).value||"";
@@ -4427,7 +4447,7 @@ function openPay(ev){
 document.addEventListener("click",e=>{
  const b=e.target.closest(".mkshare");
  if(b){ e.preventDefault(); e.stopPropagation();   /* stop it folding the card shut under the thumb */
-   shareText(shareMarketText(b.dataset.share),"#shmsg_"+CSS.escape(b.dataset.share)); }
+   shareText(shareMarketText(b.dataset.share),"#shmsg_"+CSS.escape(b.dataset.share),null); }
 });
 document.addEventListener("click",e=>{
  const a=e.target.closest("#payChip,#payGo");
@@ -5284,6 +5304,9 @@ function drawWall(){
   /* The curtain owns the screen when both are up: it is the more specific message and it already
      carries a sign-up card of its own. */
   if(gateUp()){
+    /* Hand the card back before standing down, or it is left inside a hidden subtree and every
+       later drawAuth() renders into something nobody can see. */
+    if(host&&wrap&&host.contains(wrap)){ host.innerHTML=""; $("#acctPanel").appendChild(wrap); }
     if(!el.hidden){ el.hidden=true; document.body.classList.remove("walled"); }
     return;
   }
@@ -6906,8 +6929,11 @@ function drawStrip(){
    in drawKpis and take every panel after it down with it — including the betting board, which
    is the only screen that actually matters. A broken panel should be a broken panel. */
 function drawAll(){
- drawGate();
- drawWall();
+ /* These two used to run outside the guard below, which is exactly backwards: a throw in the
+    curtain or the wall took down the redraw INCLUDING the curtain and the wall, leaving a blank
+    page with body.gated or body.walled still on it — everything hidden and nothing to click. */
+ try{ drawGate(); }catch(e){ reportError("panel:curtain",(e&&e.message)||String(e),{stack:e&&e.stack}); }
+ try{ drawWall(); }catch(e){ reportError("panel:wall",(e&&e.message)||String(e),{stack:e&&e.stack}); }
  /* Nothing below matters while the curtain is up, but it all still runs: the moment it lifts the
     board has to be there already rather than assembling itself in front of twenty people. */
  const steps=[["header",drawHeader],["account",drawAuth],["score",drawScore],["figures",drawKpis],
@@ -7285,14 +7311,25 @@ function shareMarketText(k){
  const rows=withStakedOutcomes(m).map(o=>{
    const v=bet(k,o.label), wt=weighted(v);
    const imp=(!hid&&wt>0)?money/WN/wt:0;
-   return {l:o.label, price:imp>0?imp:(o.prob!=null?1/o.prob:0), live:imp>0};
+   /* prob can be exactly 0 — most of the field never goes 4 from 4 in the simulation — and 1/0
+      is Infinity, which fmtDec prints as "1000/1+" while the card correctly prints a dash. */
+   return {l:o.label, price:imp>0?imp:(o.prob>0?1/o.prob:0), live:imp>0};
  }).filter(r=>r.price>0).sort((a,b)=>a.price-b.price).slice(0,3);
  const when=new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",
    timeZone:"Europe/London"});
- const shut=RES?"":`\n${money?"£"+money.toFixed(0)+" in the pot":"nothing in it yet"} · shuts ${bothTime(deadline(m))}`;
+ /* A SETTLED MARKET SENDS THE RESULT, NOT A PRICE LIST. It used to suppress the pot line and
+    print "Settled." underneath three live pool-derived prices, which reads exactly like an open
+    book, and it never named the winner or said a word about a void. */
+ if(RES){
+   const body = RES.void
+     ? "Void — every stake refunded in full."
+     : `Won by ${(RES.outcomes||[]).join(" and ")||"nobody"}.`
+       + (money?` £${money.toFixed(0)} in the pool.`:"");
+   return `🎯 ${m.n}\n${body}\n${BOARD_URL}#m=${encodeURIComponent(k)}`;
+ }
+ const shut=`\n${money?"£"+money.toFixed(0)+" in the pot":"nothing in it yet"} · shuts ${bothTime(deadline(m))}`;
  const list=rows.length?"\n\n"+rows.map(r=>`${r.l}  ${fmtDec(r.price)}`).join("\n"):"";
- const tail=RES?"\n\nSettled.":`\n\nPrices at ${when} UK and they move.`;
- return `🎯 ${m.n}${shut}${list}${tail}\n${BOARD_URL}#m=${encodeURIComponent(k)}`;
+ return `🎯 ${m.n}${shut}${list}\n\nPrices at ${when} UK and they move.\n${BOARD_URL}#m=${encodeURIComponent(k)}`;
 }
 /* Share, not send. The board cannot post to WhatsApp and should not pretend it can — this hands
    the message to the phone's own share sheet, where WhatsApp is the first icon. On a laptop there
@@ -7306,7 +7343,11 @@ async function shareText(text,msgEl,label){
  }
  try{ await navigator.clipboard.writeText(text);
    if(m) m.innerHTML='<span class="pos">No share sheet on this device &mdash; copied instead. Paste it in the group.</span>'; }
- catch(e){ const t=$(label); if(t){t.select();} if(m) m.innerHTML='<span class="warn">Selected it — copy with Cmd/Ctrl+C.</span>'; }
+ /* There is no textarea to fall back on when a market card asks to share, so `label` is null
+    and the old line told the man to press Cmd+C over nothing at all. */
+ catch(e){ const t=label?$(label):null; if(t){t.select();}
+   if(m) m.innerHTML=t?'<span class="warn">Selected it &mdash; copy with Cmd/Ctrl+C.</span>'
+                      :'<span class="warn">This browser would not let go of it. Screenshot it instead.</span>'; }
 }
 if($("#repShare")) $("#repShare").addEventListener("click",()=>{
  const t=$("#repOut"); if(!t.value) t.value=buildReport($("#repPools").checked);
@@ -7783,11 +7824,17 @@ paintFmt();paintTheme();setAdmPane(S.admPane||"settle");
  const g=$("#gFold"); if(g){
  g.open = S.gFold==null ? !matchMedia("(max-width:719px)").matches : !!S.gFold;
  g.addEventListener("toggle",()=>{S.gFold=g.open;save();});}})();
+/* THE SESSION IS RESTORED BEFORE ANYTHING IS DRAWN. This used to run the other way round, and
+   the moment the sign-in wall existed that ordering meant every man who was already signed in
+   got a full-screen "Members only, sign in" on every single launch — held there until four
+   network calls came back. On villa wifi that is several seconds of being told you are not
+   welcome, every time you open the app, and on a dead connection it never clears at all.
+   authLoad() is synchronous and reads localStorage, so there is no cost to doing it first. */
+authLoad();
 drawAll();drawInstall();tick();setInterval(tick,30000);
 /* The odds live in the database. A punter's phone reads them; it never computes them,
    so every screen shows the same price and nobody can reroll their way to a better one.
    Only the organiser simulates, and only to publish. */
-authLoad();
 /* ORDER MATTERS. The session arrives in the URL fragment and the chosen name in the query
    string. Tidying the URL first throws the fragment away with it, which silently ate the
    whole sign-in: the account verified server-side and the page never saw the token. */
