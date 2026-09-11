@@ -2561,6 +2561,35 @@ const DEF_NOV=[
   wts:{"Gabe Hills":2.0}},
 
 
+ {k:"nov_moan",n:"First to Say Somebody Else Wants Cutting",
+  d:"Out loud, about another man on this trip, in earshot of at least 2 witnesses, from the first "+
+    "tee shot on Thursday to the last putt on Sunday. It has to be somebody else's handicap: "+
+    "moaning about your own does not count and neither does agreeing with the man who got there "+
+    "first. A question counts, because \"what's he off?\" said in that tone is the same sentence. "+
+    "The Cut asks whose handicap comes down. This asks who says it first, which is a different "+
+    "market and, on the evidence, a different man. Chris Best is favourite and it is not close: "+
+    "he has been calling for other men's cuts in the group chat for over a year, and did it again "+
+    "13 days before the flight. Eamonn Brady is next, on a longer record and a drier delivery. "+
+    "Gabe Hills is there because the best defence anybody has found is to point somewhere else, "+
+    "and because his own scoring is 3.9 shots worse than his earlier rounds, the biggest slide in "+
+    "the field. Jack Mulroy talks more than anybody in this group by a distance, which has to "+
+    "count for something. Josh Menzies is 50/1 as the only man on record defending somebody "+
+    "against the charge. Theo is the outsider on 4 days of introductions and the quietest phone "+
+    "in the group",
+  round:"",opts:[],pk:"moan",
+  /* Every one of these is off the group chat or the scrape, not off a hunch. Chris Best carries
+     more handicap talk than the next two men combined and has asked for another man's cut at
+     least five times; Eamonn Brady three times; Ben West, Alex Mulvin, Luke Usher, Rob Parfitt,
+     Dong Ming Lau, Luke Holland and Jack Mulroy once each that is on the record. Gabe Hills is
+     weighted as the accused who deflects, which he has done twice in writing. Josh Menzies is
+     marked DOWN rather than up: he talks about handicaps as much as anybody and the one thing he
+     is on record doing is arguing the other way. */
+  wts:{"Chris Best":9.0,"Eamonn Brady":4.0,"Ben West":3.2,"Alex Mulvin":2.6,"Luke Usher":2.4,
+   "Rob Parfitt":2.2,"Gabe Hills":2.0,"Jack Mulroy":2.0,"Dong Ming Lau":1.6,"Dom Mills":1.6,
+   "Luke Holland":1.3,"Tom Bucknall":0.8,"Dave Huddleston":0.8,"Jay France":0.7,"Josh Evans":0.7,
+   "Matt Petty":0.6,"Mark Sturgess":0.6,"Matt Holland":0.6,"Josh Menzies":0.5,
+   "Theo Sims-Harris":0.5}},
+
  {k:"nov_water",n:"First in the Drink",
   d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it. "+
     "Josh Menzies heads it because there is no shot on earth he loves more than a 4 iron he has no "+
@@ -3218,7 +3247,7 @@ const NOV_TUNE={air:[0.85,0.45,1.15],water:[0.70,0.55,1.10],clubs:[0.55,0.35,1.0
  };
 function noveltyProbs(m){
  const t=m.pk?NOV_TUNE[m.pk]:null, wts=m.wts||null;
- if(!t&&!wts&&m.pk!=="sun"&&m.pk!=="cut") return null;
+ if(!t&&!wts&&m.pk!=="sun"&&m.pk!=="cut"&&m.pk!=="moan") return null;
  const ps=S.players.filter(p=>p.in); if(ps.length<2) return null;
  const hs=ps.map(p=>p.hcp).slice().sort((a,b)=>a-b);
  const med=hs.length%2?hs[(hs.length-1)/2]:(hs[hs.length/2-1]+hs[hs.length/2])/2;
@@ -3243,6 +3272,21 @@ function noveltyProbs(m){
         market, and a novelty book that reads like a certainty is not a market at all. */
      const e=Math.max(-2.6,Math.min(1.8,-0.45*(gap-5.0)-0.55*tr));
      w=Math.exp(e); }
+  }
+  /* FIRST TO SAY IT. The Cut run backwards: the same two inputs off the same scrape, both signs
+     flipped. A wide gap between a man's scoring and his own mark, plus a trend going the wrong
+     way, is the profile of somebody who has concluded that everybody else is getting away with
+     it. The 0.28 is not a guess. At that value the scoring record accounts for 30% of the spread
+     of this book and the hand weights account for the other 70%, measured on the log scale,
+     which is the split that was asked for. Turn it up to 0.50 and the formula starts shouting
+     over the joke, which is the mistake the buggy market made once already.
+     Bounds are not needed here the way they are in The Cut: the coefficients are small enough
+     that the widest and narrowest runners in the field sit a factor of 3 apart, and it is the
+     hand weights that decide the front of the market. */
+  else if(m.pk==="moan"){
+   if(p.unknown||p.form==null) w=1;
+   else{ const gap=p.form-p.hcp, tr=(p.trend==null?0:p.trend);
+     w=Math.exp(0.28*(0.45*(gap-5.0)+0.55*tr)); }
   }
   else if(t){const h=(p.hcp-med)/6, v=((p.sd||5)-5)/5;
    w=Math.exp(t[0]*h+t[1]*v);

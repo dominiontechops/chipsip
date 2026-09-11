@@ -109,6 +109,11 @@
 
     const rounds = [];
     let pairs = 0, sim = 0, short = 0, nines = 0, dupes = 0;
+    /* The hole-by-hole distribution: eagle-or-better, birdie, par, bogey, double, worse. This is
+       what the simulation actually plays with, and it used to be built by a separate script that
+       was never committed — so a clean clone of this repo could produce the aggregates and not
+       the thing the model is made of. It belongs here, next to the rounds it is counted from. */
+    const MIX = [0, 0, 0, 0, 0, 0];
     /* DEDUPE. Reading `rounds` by userId is a single source — a round played inside a tournament
        is the SAME document whether you reach it from the tournament page or the man's profile, so
        there is no double-count by construction. What DOES happen is a man entering the same round
@@ -138,6 +143,12 @@
       const dk = d + "|" + g + "|" + holes.length;
       if (seenRound.has(dk)) { dupes++; continue; }
       seenRound.add(dk);
+      /* Counted only for rounds that survived every filter above, so a pairs round or an
+         abandoned nine contributes no holes either. Par 1 and par 2 do not exist: a hole with no
+         readable par is skipped rather than counted as an eagle. */
+      sc.forEach(e2 => { const par = +pars[(+e2[0]) - 1] || 0; if (!(par > 2)) return;
+        const v = (+e2[1]) - par;
+        MIX[v <= -2 ? 0 : v === -1 ? 1 : v === 0 ? 2 : v === 1 ? 3 : v === 2 ? 4 : 5]++; });
       const sl = r.tee && +r.tee.slope, ra = r.tee && +r.tee.rating;
       /* Everything is expressed PER 18 HOLES, so nines and full rounds sit on one scale.
          Differentials come from full rounds only: a nine sometimes carries the 18-hole course
@@ -147,7 +158,12 @@
         ovp: (g - parPlayed) * (half ? 2 : 1),
         diff: (!half && sl > 0 && ra > 60) ? (113 / sl) * (g - ra) : null });
     }
-    rounds.sort((a, b) => String(b.d).localeCompare(String(a.d)));
+    /* SORTED ON THE DATE AND THEN ON THE SCORE. Date alone is not a total order: two rounds
+       played on the same day came back in whatever order Firestore felt like, so consecutive
+       pulls swapped them and the recency weighting in refit.py — 0.92 to the power of position —
+       moved a man's form for no reason at all. Three men wobbled that way between 7 and 11 Sep
+       with identical scores, sums and hole mixes. A second key makes a rerun reproducible. */
+    rounds.sort((a, b) => String(b.d).localeCompare(String(a.d)) || (b.ovp - a.ovp));
 
     const ov = rounds.map(r => r.ovp);
     const m = mean(ov);
@@ -166,7 +182,12 @@
       sd: r1(sd),
       since2026: rounds.filter(r => r.d && r.d >= "2026-01-01").length,
       last: rounds.length ? rounds[0].d : null,
-      whs8of20: best8.length ? r1(mean(best8)) : null
+      whs8of20: best8.length ? r1(mean(best8)) : null,
+      /* OLDEST FIRST, which is the order refit.py's recency weighting expects. Everything else on
+         this record reads newest first; this one does not, and reversing it by accident would
+         weight a man's 2023 golf as though he played it last week. */
+      diffs: rounds.map(r => r.ovp).reverse(),
+      mix: MIX
     });
   }
   console.log("MISSING (no Squabbit account found in Dom's tournaments):", missing.join(", ") || "none");
