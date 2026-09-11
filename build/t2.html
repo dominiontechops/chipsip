@@ -376,6 +376,17 @@ tr:last-child td{border-bottom:0}
 @keyframes gateRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes gateTick{0%{transform:translateY(-6px);opacity:.25}60%{opacity:1}100%{transform:none}}
 body.gated > header,body.gated > nav,body.gated > main,body.gated > footer,
+#wall{position:fixed;inset:0;z-index:60;overflow:auto;background:var(--bg)}
+#wall .gatein{position:relative;z-index:1}
+#wallSky{position:absolute;inset:0;width:100%;height:100%}
+#wallAuth{margin-top:14px}
+/* The card somebody was sent to. A ring rather than a colour, so it reads the same in both
+   themes and says "this one" without redesigning the card. */
+.mkcard.justshared{outline:2px solid var(--acc);outline-offset:2px;border-radius:10px}
+body.walled > header,body.walled > nav,body.walled > main,body.walled > #acctPanel,
+body.walled > #installWrap,body.walled > #sinceWrap,body.walled > #onbWrap,
+body.walled > #slipBar{display:none!important}
+body.walled{overflow:hidden}
 body.gated > #acctPanel,body.gated > #installWrap,body.gated > #sinceWrap,body.gated > #onbWrap,
 body.gated > #slipBar{display:none!important}
 body.gated{overflow:hidden}
@@ -991,6 +1002,21 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <p class="gatesmall" id="gateSmall"></p>
     <div id="gateDoor"></div>
     <div id="gateAuth"></div>
+  </div>
+</div>
+
+<div id="wall" hidden>
+  <canvas id="wallSky" aria-hidden="true"></canvas>
+  <div class="gatein">
+    <img class="gatelogo" alt="Chip &amp; Sip Championship" src="data:image/png;base64,__LOGO__">
+    <h1 class="gatewords">CHIP <em>&amp;</em> SIP <span>2026</span></h1>
+    <p class="gatewhere">Costa del Sol &middot; 24&ndash;27 September</p>
+    <p class="gatelabel">Members only</p>
+    <p class="gateopen" id="wallWhy">This board is for the 20 men on the trip. Sign in, or create
+      an account against your own name on the list.</p>
+    <div id="wallAuth"></div>
+    <p class="gatesmall">The sign-in link often lands in junk &mdash; look there before giving up
+      on it. If your name is not on the list, or somebody has already claimed it, tell Dom.</p>
   </div>
 </div>
 
@@ -1817,6 +1843,36 @@ function blockReason(m,label){
 /* Held in memory only, never written to disk. For the organiser it holds a SENTINEL rather than
    the real passphrase: the database recognises him from his signed-in session via is_owner(), so
    nothing secret ever reaches his browser and a screenshot of his screen gives nobody anything. */
+/* A SHARED LINK. #m=nov_beer means open that market and take me to it.
+   Read here, at the top, and never later: the sign-in handler further down reads location.hash
+   for its token and then wipes the hash, so a share link clicked by a man who is mid-sign-in
+   would otherwise lose the market on the way through. Stashed in a variable that survives all of
+   it, spent once, and cleared whether or not the market turns out to exist. */
+let DEEP_MK=(()=>{ const m=/[#&]m=([^&]+)/.exec(location.hash||""); return m?decodeURIComponent(m[1]):null; })();
+function deepOpen(){
+  if(!DEEP_MK) return;
+  /* Not while anything owns the screen. The rules cards, the curtain and the wall all have to be
+     dealt with first, and the target waits rather than firing into a hidden board. */
+  if(wallUp()||gateUp()||!rulesAccepted()) return;
+  const k=DEEP_MK, m=allMarkets().find(x=>x.k===k);
+  DEEP_MK=null;
+  if(location.hash) history.replaceState(null,"",location.pathname+location.search);
+  if(!m) return;
+  /* Switch to the betting tab the same way a thumb does, so there is one code path for it. */
+  const tb=document.querySelector('body > nav button[data-t="pools"]'); if(tb) tb.click();
+  /* The fold this market lives in, by the same rule drawPools groups them — that list is local
+     to drawPools and deliberately not exported, so the rule is restated rather than reached for. */
+  const gid = m.type==="novelty" ? "nov" : !m.round ? "trip" : "r"+m.round;
+  if((S.openGrp||[]).indexOf(gid)<0){ S.openGrp=[...(S.openGrp||[]),gid]; }
+  if((S.openMk||[]).indexOf(k)<0){ S.openMk=[...(S.openMk||[]),k]; }
+  save(); drawPools();
+  /* The card body is injected on open, so it has to be in the DOM before anything can scroll to
+     it. One frame is enough; the fallback below covers a slow phone. */
+  const go=()=>{ const c=document.querySelector('#poolWrap .mkcard[data-k="'+CSS.escape(k)+'"]');
+    if(c){ c.scrollIntoView({behavior:"smooth",block:"center"}); c.classList.add("justshared");
+      setTimeout(()=>c.classList.remove("justshared"),2600); } };
+  requestAnimationFrame(()=>{ go(); setTimeout(go,400); });
+}
 const OWNER_SENTINEL="__owner__";
 let ADMIN_TOKEN=null;
 let CAN_SCORE=false;      /* captains and vices may enter the card, and nothing else */
@@ -2262,7 +2318,11 @@ const CUTOFF_MIN=10;
 const cutoffOf=d=>new Date(d.getTime()-CUTOFF_MIN*60000);
 const BOOK_CLOSE=cutoffOf(TEE_OFF);
 const LAST_CLOSE=new Date(Math.max.apply(null,Object.keys(ROUND_TEE).map(k=>cutoffOf(ROUND_TEE[k]).getTime())));
-const deadline=m=>cutoffOf(ROUND_TEE[m.round||"1"]||TEE_OFF);
+/* Most markets shut 10 minutes before the round they belong to. A few cannot: anything that
+   settles at the airport is over before the first tee shot, so leaving it on the default would
+   mean a market still taking bets hours after everybody knew the answer. `shutAt` is an absolute
+   instant, exactly like the tee times above, so it means the same moment on every phone. */
+const deadline=m=>m.shutAt?new Date(m.shutAt):cutoffOf(ROUND_TEE[m.round||"1"]||TEE_OFF);
 /* Spain is one hour ahead of the UK all trip. Show both, or somebody will read a UK clock and
    swear blind the book shut early. */
 const T2=n=>String(n).padStart(2,"0");
@@ -2420,19 +2480,7 @@ const MARKETS=[
       2024 singles. 2025's widest was 5&4. Both read off the leaderboard, not estimated. */
    d:"Which match is won by the widest margin. 5&4 beats 3&2 beats 1 up. A halved match has no margin "+
      "and cannot win it. The record is Luke Holland's 7&6 over Alex Mulvin in Portugal in 2024, and "+
-     "nothing in 2025 got wider than 5&4. Mulvin has never explained it. Ties share the pool"},
-  {k:"swp"+R,n:"Clean Sweep "+R,type:"model",round:R,team:true,dyn:"sweep",
-   /* Both recorded years checked session by session on Squabbit.
-      2024 (Rimmed It Roundup, Portugal, 12 men, teams named Mulvin and Lukey): R1 alternate shot
-      3-0 — a genuine clean sweep. Then 1-2, 2-1, 3.5-2.5, final 9.5-5.5.
-      2025 (Chip & Sip Championship): R1 2-2, R2 2.5-1.5, R3 2.5-1.5, R4 5-3. Nothing swept.
-      TEAM CONTINUITY: Dom confirms the 2024 sides are the same 2 sides, just under different
-      names — Team Lukey is the side that is now Red, Team Mulvin the side that is now Blue. So
-      the sweep and the 2024 win are both Red's, and the copy says so. */
-   d:"Does either side take every single match on "+dayOnly+"? All of them, no halves, no "+
-     "exceptions. Red have done it once, in the opening session in Portugal in 2024, and have "+
-     "brought it up roughly weekly ever since. That was 3 matches though, and this is "+
-     (r===4?"10":"5")+" — one halved match anywhere and it is gone, which is why it pays what it pays"}
+     "nothing in 2025 got wider than 5&4. Mulvin has never explained it. Ties share the pool"}
  );
  /* MATCH OUTRIGHTS. The bet most men actually want: back a match, not a statistic. One market per
     match, 25 across the week.
@@ -2506,6 +2554,32 @@ const DEF_NOV=[
      market rather than a lottery: on a strict win-only rule, "nobody" comes in at 18.5% and
      7-or-more at 0.1%, which is a dead runner and a pool that fails to settle one week in five. */
   oprobs:{"2 down or less":0.049,"3 down":0.384,"4 down":0.409,"5 down":0.135,"6 or more":0.023}},
+ {k:"nov_beer",n:"First Beer Photo at the Airport",
+  d:"A photograph of a drink, posted in the group, from Gatwick, on the Wednesday. It has to be a "+
+    "picture and it has to be his own drink &mdash; a photo of somebody else's pint is reporting, "+
+    "not competing. Any drink counts, so a man holding a coffee at bag drop is welcome to argue "+
+    "his case and will lose it. This is the only market on the board settled, paid and forgotten "+
+    "before anybody has swung a club, which is also why it shuts at midday rather than at the "+
+    "first tee: on the normal deadline it would still be taking bets hours after everyone had "+
+    "seen the answer. The thing to hold on to is that drinking a beer and posting a beer are two "+
+    "different skills. There are 967 photographs in that group chat and Jack Mulroy has sent 176 "+
+    "of them, which is why he heads a market about a photograph rather than about a pint. Chris "+
+    "Best is second only because he announced it: he asked what time people were getting to "+
+    "Gatwick and then said he would aim to be through security sipping a beer at 6. Rob Parfitt "+
+    "is the one to watch &mdash; a third of everything he has ever sent to this group is a "+
+    "picture, the highest rate of anybody. Luke Holland is the only other man on record putting "+
+    "the words beers and Gatwick in the same sentence. After that it is whoever parks first",
+  round:"",opts:[],
+  /* No handicap tilt at all here. There is no version of golf in which how a man strikes a 6 iron
+     predicts how quickly he finds a bar, so the formula is left out entirely and the hand weights
+     carry all of it. Two names come off the group chat directly; the rest is how often each man
+     posts a photograph, which is the thing this market actually settles on. */
+  shutAt:"2026-09-23T12:00:00+01:00",
+  wts:{"Jack Mulroy":4.6,"Chris Best":4.0,"Rob Parfitt":3.4,"Dom Mills":2.8,"Luke Holland":2.6,
+   "Eamonn Brady":2.4,"Alex Mulvin":2.0,"Ben West":1.4,"Gabe Hills":1.4,"Josh Menzies":1.3,
+   "Luke Usher":0.9,"Matt Petty":0.9,"Tom Bucknall":0.8,"Theo Sims-Harris":0.8,"Josh Evans":0.8,
+   "Dave Huddleston":0.7,"Jay France":0.7,"Mark Sturgess":0.7,"Matt Holland":0.7,
+   "Dong Ming Lau":0.6}},
  {k:"nov_home",n:"First to Mention His Home Club",
   d:"Unprompted, out loud, in earshot of at least 2 witnesses, from wheels down in Malaga to the "+
     "last putt on Sunday. Chris Best is favourite and there is no honest way around it: he names a "+
@@ -2673,15 +2747,6 @@ const DEF_NOV=[
   round:"",winners:2.2,opts:[],
   wts:{"Josh Menzies":2.35,"Eamonn Brady":2.25,"Luke Holland":2.05,"Matt Holland":1.9,
    "Ben West":1.3,"Gabe Hills":1.3,"Mark Sturgess":0.6,"Dong Ming Lau":0.5,"Matt Petty":0.45}},
- {k:"nov_miss3",n:"First Missed Three-Footer — Singles",
-  d:"Sunday only, and it has to be inside 3 feet and genuinely missed. Gimmes are not missed, they "+
-    "are conceded, and anyone claiming otherwise on Sunday afternoon is showing you exactly who he "+
-    "is. Jay France and Dong Ming Lau head it on current form, one just back from injury and the "+
-    "other going the wrong way for a while now. Luke Usher is in with a newborn at home, so by "+
-    "Sunday he is on 4 hours a night, and Dom Mills is there from a great height. The short ones "+
-    "are where the week is won and lost",
-  round:"4",opts:[],pk:"miss3",
-  wts:{"Jay France":13.67,"Dong Ming Lau":3.48,"Luke Usher":5.53,"Dom Mills":0.81}},
  {k:"nov_josh",n:"Josh Menzies to Call Someone a C**t Before the First Tee",
   d:"Any target, any tone, affectionate counts. Window opens on landing and shuts when the first ball is "+
     "placed on Thursday. Odds-on for a reason and the market is not apologising for it",
@@ -3929,7 +3994,11 @@ function drawPools(){
         points total is provisional, which is the one people most needed to read. Em dashes go in
         as the character itself. */""}
    <p class="note">${esc(m.d||"")}${S.apBonus>1&&rows.some(r=>r.a>0)?` &middot; ante-post stakes carry a ${S.apBonus}× share`:""}
-    ${mp==="settled"||mp==="off"?"":`&middot; betting shuts ${CUTOFF_MIN} minutes before the tee shot, ${bothTime(deadline(m))}`}</p>
+    ${mp==="settled"||mp==="off"?"":`&middot; betting shuts ${m.shutAt?"":CUTOFF_MIN+" minutes before the tee shot, "}${bothTime(deadline(m))}`}</p>
+   <div class="row" style="margin:-2px 0 8px">
+     <button class="ghost mkshare" data-share="${esc(m.k)}" style="padding:4px 10px;font-size:12px">
+       Send this one to the group</button>
+     <span class="small" id="shmsg_${esc(m.k)}"></span></div>
    ${(()=>{const mineHere=(DB.detail||[]).filter(b=>b.market===m.k).reduce((a,b)=>a+b.stake,0);
      if(!mineHere||mineHere<money-0.005) return "";
      return `<p class="note" style="color:var(--warn)"><b>You are the only money in this market.</b>
@@ -4355,6 +4424,11 @@ function openPay(ev){
  try{ location.href=url; return; }catch(e){}
  payFallback(url);
 }
+document.addEventListener("click",e=>{
+ const b=e.target.closest(".mkshare");
+ if(b){ e.preventDefault(); e.stopPropagation();   /* stop it folding the card shut under the thumb */
+   shareText(shareMarketText(b.dataset.share),"#shmsg_"+CSS.escape(b.dataset.share)); }
+});
 document.addEventListener("click",e=>{
  const a=e.target.closest("#payChip,#payGo");
  if(a&&!a.classList.contains("pending")) openPay(e);
@@ -5029,6 +5103,20 @@ const LAUNCH_UK = d => d.toLocaleString("en-GB",{weekday:"long",timeZone:"Europe
    one man who could check the curtain was the one man who never looked at it. He lands on it like
    the other nineteen and steps through by hand, for this tab only — never remembered, so every
    fresh load puts him back in front of it. */
+/* THE WALL. Everything on this board is about 20 named men — what they are off, what they have
+   been backed to do, and who owes what. It was public because that was the quickest thing to
+   ship, and it should not have stayed that way. Signed out, you get this screen and nothing else.
+
+   It is deliberately NOT a setting. A wall you can switch off is a wall somebody switches off at
+   11pm to show a mate, and the three men who have not made an account yet are exactly the men a
+   locked door is supposed to move. The organiser lands on it like everybody else, because the one
+   man who can check it is otherwise the one man who never sees it.
+
+   Two things this is not. It is not a lock on the DATA — the pools and settings are also revoked
+   from anonymous readers server-side, because a curtain over the page does nothing about the API
+   behind it. And it is not a lock on the roster or the claimed names, which have to stay readable
+   or nobody could ever see the list to sign up from. */
+const wallUp = () => !(AUTH.tok && AUTH.name);
 const gateWanted = () => !!(S.launchAt && srvNow() < S.launchAt);
 const gateUp     = () => gateWanted() && !GATE_PASS;
 
@@ -5182,6 +5270,26 @@ function gateAuthOpen(){
   const showing=host.contains(wrap);
   gateAct();
   if(showing) host.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+/* The sign-up card is the SAME one the app and the curtain use, moved rather than rebuilt. Three
+   copies of an auth flow is three places for it to go wrong. */
+function drawWall(){
+  const el=$("#wall"); if(!el) return;
+  const wrap=$("#authWrap"), host=$("#wallAuth");
+  if(!wallUp()){
+    if(host&&wrap&&host.contains(wrap)){ host.innerHTML=""; $("#acctPanel").appendChild(wrap); }
+    if(!el.hidden){ el.hidden=true; document.body.classList.remove("walled"); }
+    return;
+  }
+  /* The curtain owns the screen when both are up: it is the more specific message and it already
+     carries a sign-up card of its own. */
+  if(gateUp()){
+    if(!el.hidden){ el.hidden=true; document.body.classList.remove("walled"); }
+    return;
+  }
+  if(host&&wrap&&!host.contains(wrap)){ host.appendChild(wrap); S.authMode=""; save(); }
+  el.hidden=false; document.body.classList.add("walled");
+  drawAuth();
 }
 function drawGate(){
   const el=$("#gate"); if(!el) return;
@@ -6799,6 +6907,7 @@ function drawStrip(){
    is the only screen that actually matters. A broken panel should be a broken panel. */
 function drawAll(){
  drawGate();
+ drawWall();
  /* Nothing below matters while the curtain is up, but it all still runs: the moment it lifts the
     board has to be there already rather than assembling itself in front of twenty people. */
  const steps=[["header",drawHeader],["account",drawAuth],["score",drawScore],["figures",drawKpis],
@@ -6818,6 +6927,10 @@ function drawAll(){
    <p class="note">The ${broke.join(", ")} panel${broke.length===1?"":"s"} could not be drawn, so
    ${broke.length===1?"it is":"they are"} showing stale or empty. Everything else on this page is
    live and correct. Tell the organiser.</p></div>`);
+ /* Last, and inside its own guard. A shared link is a nicety; it must never be the reason the
+    board fails to draw. It runs on every redraw because the thing it is waiting for — the wall,
+    the curtain, the rules — clears on a redraw, and it spends itself the first time it fires. */
+ try{ deepOpen(); }catch(e){ DEEP_MK=null; reportError("deepOpen",(e&&e.message)||String(e),{}); }
 }
 
 /* The AES-GCM / PBKDF2 helpers went with it. Nothing on this board is encrypted any more,
@@ -7157,6 +7270,30 @@ $("#repCopy").addEventListener("click",async()=>{
  try{ await navigator.clipboard.writeText(t.value); $("#repMsg").innerHTML='<span class="pos">Copied. Paste it in the group.</span>'; }
  catch(e){ /* clipboard is blocked without a secure context or a gesture the browser trusts */
    t.select(); $("#repMsg").innerHTML='<span class="warn">Selected it — copy with Cmd/Ctrl+C.</span>'; }});
+/* The address the app is actually served from, with any hash or query stripped, so a link shared
+   from a phone that arrived on one does not carry it along. */
+const BOARD_URL = location.origin + location.pathname;
+/* ONE MARKET, ready to paste into the group. The pot total goes in and the split never does, so
+   this cannot undo the masking: a man sharing a market he is the subject of sends the same pot
+   figure as everybody else and no direction. The prices are stamped with the time because they
+   move the moment anybody backs anything, and an unstamped list of prices is an argument waiting
+   to happen on the Saturday. */
+function shareMarketText(k){
+ const m=allMarkets().find(x=>x.k===k); if(!m) return "";
+ const {money,w}=poolTotals(k), WN=winnersOf(m), RES=resultOf(k);
+ const hid=!RES&&moneyHidden(k);
+ const rows=withStakedOutcomes(m).map(o=>{
+   const v=bet(k,o.label), wt=weighted(v);
+   const imp=(!hid&&wt>0)?money/WN/wt:0;
+   return {l:o.label, price:imp>0?imp:(o.prob!=null?1/o.prob:0), live:imp>0};
+ }).filter(r=>r.price>0).sort((a,b)=>a.price-b.price).slice(0,3);
+ const when=new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",
+   timeZone:"Europe/London"});
+ const shut=RES?"":`\n${money?"£"+money.toFixed(0)+" in the pot":"nothing in it yet"} · shuts ${bothTime(deadline(m))}`;
+ const list=rows.length?"\n\n"+rows.map(r=>`${r.l}  ${fmtDec(r.price)}`).join("\n"):"";
+ const tail=RES?"\n\nSettled.":`\n\nPrices at ${when} UK and they move.`;
+ return `🎯 ${m.n}${shut}${list}${tail}\n${BOARD_URL}#m=${encodeURIComponent(k)}`;
+}
 /* Share, not send. The board cannot post to WhatsApp and should not pretend it can — this hands
    the message to the phone's own share sheet, where WhatsApp is the first icon. On a laptop there
    is no share sheet, so it falls back to the clipboard without making a fuss about it. */
