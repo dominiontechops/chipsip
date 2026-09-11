@@ -1534,6 +1534,24 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
           countdown and nothing else. They can sign in and create accounts through it; the database
           refuses any bet placed before it, so the screen is not the only thing holding them.</p>
       </div>
+      <!-- READ THEM AGAIN. Same shape as the curtain: one moment, set once, fires itself. Set it
+           for the Thursday morning in Spain and everybody meets the terms over breakfast rather
+           than arguing about them on the Sunday night. -->
+      <div class="card" style="margin-top:12px">
+        <h2>Make everyone read the rules again</h2>
+        <p class="note">A card they cannot dismiss without accepting, on the morning of the golf.
+          Different wording from the sign-up cards: what shuts when, the &pound;<b id="rrStake">10</b> line cap,
+          the &pound;<b id="rrUnpaid">50</b> outstanding cap, and that ante-post is over. Who has accepted
+          shows in the <b>Accounts</b> table.</p>
+        <div class="row">
+          <label class="small">Show it from
+            <input type="datetime-local" id="rulesAgainAt" style="min-width:210px"></label>
+          <button class="go" id="rulesAgainSet">Set</button>
+          <button class="ghost" id="rulesAgainClear">Never</button>
+        </div>
+        <div class="ok" id="rulesAgainMsg"></div>
+        <div class="note" id="rulesAgainNow" style="margin-top:8px"></div>
+      </div>
       <div class="row">
         <label class="small">Ante-post share multiplier
           <input type="number" id="apBonus" min="1" max="3" step="0.05" value="1.25"></label>
@@ -2027,6 +2045,7 @@ async function refresh(){
     DB.online=true; DB.err="";
     S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
     S.launchAt=DB.settings.launchAt?+DB.settings.launchAt:null;
+    S.rulesAgainAt=DB.settings.rulesAgainAt?+DB.settings.rulesAgainAt:null;
     if(DB.settings.apBonus!=null)   S.apBonus=DB.settings.apBonus;
     if(DB.settings.blindScale!=null)S.blindScale=DB.settings.blindScale;
     if(DB.settings.payLink!=null)   S.payLink=DB.settings.payLink;
@@ -2060,6 +2079,7 @@ async function refresh(){
         PUB = DB.settings.prices || null;
         S.declared=!!DB.settings.declared; S.closed=!!DB.settings.closed;
         S.launchAt=DB.settings.launchAt?+DB.settings.launchAt:null;
+    S.rulesAgainAt=DB.settings.rulesAgainAt?+DB.settings.rulesAgainAt:null;
         if(DB.settings.apBonus!=null) S.apBonus=DB.settings.apBonus;
         if(DB.settings.payLink!=null) S.payLink=DB.settings.payLink;
         applyPublishedHcp();
@@ -2633,7 +2653,7 @@ function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
  admPane:"settle",poView:"market",fbView:"",fbHow:false,gFold:null,gCol:"gap",gDir:0,openGrp:[],poDone:false,alSeen:[],phaseOpen:false,howOpen:false,filtOpen:false,paidClaim:0,
- onboarded:false,onbStep:0,rulesV:0,rulesAt:0,openMk:[],me:"",authMode:"",pendingName:"",
+ onboarded:false,onbStep:0,rulesV:0,rulesAt:0,rulesAgainAt:null,rulesDayAt:0,openMk:[],me:"",authMode:"",pendingName:"",
  courses:JSON.parse(JSON.stringify(DEF_COURSES)),
  players:MODEL.map(p=>({name:p.name,hcp:p.hcp,form:p.form,sd:p.sd,probs:normProbs(p.probs,p.name),n:p.n,
    low:p.lowSample,unknown:!!p.unknown,rawGap:p.rawGap,team:p.team,role:p.role||null,avg:p.avg||null,
@@ -2666,6 +2686,7 @@ function load(){
     is the whole point: change the rules and everyone reads them again. The onboarded flag is
     carried across only so it can be read; acceptance is judged on rulesV alone. */
  if(saved.rulesV)      { S.rulesV=+saved.rulesV; S.rulesAt=+saved.rulesAt||0; }
+ if(saved.rulesDayAt)  { S.rulesDayAt=+saved.rulesDayAt||0; }
  if(saved.onboarded)   { S.onboarded=true; }
  if(saved.installHide) S.installHide=true;
  if(saved.installDone) S.installDone=true;
@@ -2693,6 +2714,15 @@ const allMarkets=()=>MARKETS.concat((S.novelty||[]).map(m=>({...m,type:"novelty"
 function bet(k,o){const r=DB.totals.find(x=>x.market===k&&x.outcome===o);
  return r?{a:r.ap_staked||0,o:r.open_staked||0}:{a:0,o:0};}
 const cash=v=>(v.a||0)+(v.o||0);
+/* THE SUBJECT CANNOT SEE HIS OWN MARKET'S MONEY.
+   Rob Parfitt's point, and a good one: refusing to let a man BET on a market about himself was
+   never the whole protection. He could still see £1 sitting on "Yes" and simply decide not to say
+   the thing. The database now collapses those rows into one sentinel carrying the pot total, so
+   he keeps the size of the pot — which says nothing about direction — and loses the split.
+   This flag exists so the screen says "hidden" rather than printing £0 against every outcome,
+   which would be a lie rather than a blank. Nobody else's view changes by a penny. */
+const HIDDEN_ROW="__hidden__";
+const moneyHidden=k=>(DB.totals||[]).some(r=>r.market===k&&r.outcome===HIDDEN_ROW);
 const weighted=v=>(v.a||0)*(S.apBonus||1)+(v.o||0);
 function poolTotals(k){let money=0,w=0;
  DB.totals.filter(r=>r.market===k).forEach(r=>{
@@ -3236,7 +3266,11 @@ function noveltyProbs(m){
 function withStakedOutcomes(m){
  const outs=marketOutcomes(m);
  const have=new Set(outs.map(o=>o.label));
- const extra=(DB.totals||[]).filter(r=>r.market===m.k&&(r.staked||0)>0&&!have.has(r.outcome));
+ /* The masked sentinel is not a runner. It carries the pot total for a market the reader is the
+    subject of, and without this guard it would be listed as an outcome called "__hidden__" with
+    every penny in the market sitting on it — which is both ugly and a hint. */
+ const extra=(DB.totals||[]).filter(r=>r.market===m.k&&(r.staked||0)>0&&!have.has(r.outcome)
+   &&r.outcome!==HIDDEN_ROW);
  if(!extra.length) return outs;
  return outs.concat(extra.map(r=>({label:r.outcome,prob:null,
    player:S.players.find(p=>p.name===r.outcome)||null, gone:true})));
@@ -3696,6 +3730,10 @@ function drawPools(){
      in English: what is on it, what it pays now, what it ought to pay, and the gap. */
   let t=`<div class="mkhead"><span></span><span>Outcome</span><span class="num"></span>
    <span class="num">Money on</span><span class="num">Should pay</span><span class="num">Value</span><span></span></div>`;
+  /* On his own market the live price, the value figure and "what a tenner would collect" are all
+     computed from where the money is, so printing any of them hands back what the split was
+     hidden to protect. Lifted out of the price block because the collect line needs it too. */
+  const HID=!RES&&moneyHidden(m.k);
   rows.forEach(r=>{const ec=r.ev===null?"":r.ev>0.05?"pos":r.ev<-0.05?"neg":"";
    const inSlip=S.slip.find(x=>x.market===m.k&&x.outcome===r.label);
    const blocked=blockReason(m,r.label);
@@ -3730,6 +3768,10 @@ function drawPools(){
          /* With nothing in the pot yet a £10 bet collects its own £10 back, which is true and
             completely useless. Say nothing until there is a pool to have a share of. */
          if(!(money>0)) return "";
+         /* Every outcome on a masked market carries wt=0, so this would tell him a tenner
+            collects the whole pot on every row. Uniform, so it leaks no direction, but it is
+            still a number that is not true. Say nothing. */
+         if(HID) return "";
          const take=np/WN*(st*f)/nw;
          return `<div class="small" style="opacity:.78">a £${st} bet now would collect
            <b>${money0(take)}</b> if it lands</div>`;})():""}
@@ -3746,14 +3788,19 @@ function drawPools(){
        /* No money and no model price either: there is nothing to headline, so it shrinks out of
           the way rather than printing a dash the size of a price. */
        const heroNone =!RES&&!r.imp&&r.prob==null;
-       const heroLab=RES?(RES.void?"Refunded":"Paid"):heroNone?"No price yet":heroModel?"Should pay":"Pays now";
-       const heroVal=RES&&RES.void?"stake back":heroModel?dec(r.prob):(r.imp?fmtDec(r.imp):"—");
-       return `<div class="mkprice"><span class="mkfig big${heroModel?" model":""}${heroNone?" none":""}"
+       /* On his own market the live price and the value figure are both computed from where the
+          money is, so printing them would hand back exactly what the split was hidden to protect.
+          The model's own "should pay" is safe: it comes from the simulation, not the pot. */
+       const hid=HID;
+       const heroModel2=heroModel||hid;
+       const heroLab=RES?(RES.void?"Refunded":"Paid"):heroNone?"No price yet":heroModel2?"Should pay":"Pays now";
+       const heroVal=RES&&RES.void?"stake back":heroModel2?(r.prob!=null?dec(r.prob):"—"):(r.imp?fmtDec(r.imp):"—");
+       return `<div class="mkprice"><span class="mkfig big${heroModel2?" model":""}${heroNone?" none":""}"
            data-l="${heroLab}">${heroVal}</span></div>
      <div class="mkfigs">
-       <span class="mkfig" data-l="Money on">${r.cash?"£"+r.cash:"—"}</span>
-       <span class="mkfig strong${heroModel?" dupe":""}" data-l="Should pay">${r.prob!=null?dec(r.prob):"manual"}</span>
-       <span class="mkfig ${ec}" data-l="Value">${r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%"}</span>
+       <span class="mkfig" data-l="Money on">${hid?"hidden":(r.cash?"£"+r.cash:"—")}</span>
+       <span class="mkfig strong${heroModel2?" dupe":""}" data-l="Should pay">${r.prob!=null?dec(r.prob):"manual"}</span>
+       <span class="mkfig ${hid?"":ec}" data-l="Value">${hid?"hidden":(r.ev===null?"—":(r.ev>0?"+":"")+(r.ev*100).toFixed(0)+"%")}</span>
      </div>`;})()}
      <div class="mkact">${mp==="settled"?`<span class="small">${RES&&RES.void?"refunded":win?'<b class="pos">won</b>':"beaten"}</span>`
       :mp==="off"?'<span class="small">withdrawn</span>'
@@ -3763,7 +3810,7 @@ function drawPools(){
            data-q="${v}" data-mk="${esc(m.k)}" data-pl="${esc(r.label)}">£${v}</button>`).join("")}
          ${inSlip?`<button class="ghost slipdel on" data-mk="${esc(m.k)}" data-pl="${esc(r.label)}"
            title="Take it off the slip">£${inSlip.stake} &#10005;</button>`:""}</div>`}</div>
-     <div class="mkbar"><div class="bar"><i style="width:${w?(r.wt/w*100):0}%"></i></div></div>
+     <div class="mkbar"><div class="bar"><i style="width:${HID?0:(w?(r.wt/w*100):0)}%"></i></div></div>
    </div>`;});
   const chip=mp==="settled"?'<span class="tag settled">SETTLED</span>'
     :mp==="off"?'<span class="tag red">withdrawn</span>'
@@ -4519,6 +4566,23 @@ const ONB=[
      "Your selections gather in the bar at the bottom. Press <b>Place</b> when you are happy.",
      "<b>Every line is its own bet.</b> 3 selections is 3 singles, not a treble.",
      "Then pay into the pot with the button in the header. It shows what you owe."]}];
+/* THE DAY ITSELF. Shown once the moment on settings.rulesAgainAt has passed, which is the
+   Thursday morning in Spain. Deliberately NOT the two cards above: those explain a pool to a man
+   signing up in August. On the first tee what he needs is the half dozen terms that are about to
+   start costing him money, and a card he will actually read beats three he will tap through. */
+const ONB_DAY={h:"You're in Spain. Rules, once more.",
+  sub:"You have all agreed to these before. Today they start to bite.",
+  b:["<b>Ante-post is over.</b> Everything staked before today counted at "+
+     "&times;<b>__APB__</b> at settlement. From now on a pound is a pound.",
+     "<b>Every market shuts "+CUTOFF_MIN+" minutes before its tee shot.</b> Miss it and you are watching, "
+     +"not betting. The countdown on each card is the real one.",
+     "<b>£"+MAX_STAKE+" is the most on any one line</b>, and you cannot owe the pot more than "
+     +"<b>£"+MAX_UNPAID+"</b> at a time. Settle up and carry on.",
+     "<b>Nobody takes a cut.</b> Every pound in comes back out to somebody. The odds show how the "
+     +"pot would split right now, not what you are promised.",
+     "<b>You cannot back yourself</b>, and you cannot bet on a market that is about you. The book "
+     +"refuses both, so do not waste the tee time trying.",
+     "Scores go in through the captains and vice-captains. Argue with them, not the app."]};
 /* Bump this if the rules materially change and everyone should have to read and accept them
    again. Anyone whose stored acceptance is for an older version gets the card back. */
 /* Bumped from 1: a £10 line cap and a £50 outstanding cap are terms, not tweaks, and 20 people
@@ -4527,21 +4591,38 @@ const RULES_V=2;
 /* The address the sign-in links actually leave from. Named on screen so a man can search his junk
    folder for it rather than scrolling it. One place, because it appears in three. */
 const MAIL_FROM="dom@dominiontechops.com";
-const rulesAccepted=()=>+S.rulesV>=RULES_V;
+/* Two separate gates, and a man has to be through both.
+   rulesV is the BUILD's version — bumped when the terms themselves change.
+   rulesAgainAt is a MOMENT the organiser sets, so the re-read can be scheduled for the Thursday
+   morning in Spain rather than firing whenever a build happens to go out. Judged on the server
+   clock, like the curtain, because twenty phones in two time zones do not agree with each other. */
+const dayReadWanted = () => !!(S.rulesAgainAt && srvNow() >= S.rulesAgainAt);
+const dayReadDone   = () => !!(S.rulesAgainAt && +S.rulesDayAt >= S.rulesAgainAt);
+const rulesAccepted = () => (+S.rulesV >= RULES_V) && (!dayReadWanted() || dayReadDone());
+/* Which cards this man is actually short of. A late sign-up on the Thursday needs the lot; a man
+   who signed up in August needs only the new one. Built as a list rather than an index so the
+   dots, the numbering and the Back button all stay honest whichever case he is in. */
+function onbCards(){
+  const out = (+S.rulesV >= RULES_V) ? [] : ONB.slice();
+  if(dayReadWanted() && !dayReadDone()) out.push(ONB_DAY);
+  return out;
+}
 function drawOnboarding(){
  const el=$("#onbWrap"); if(!el) return;
  /* There is no Skip. It behaves like a cookie banner: it comes back every single time the board
     is opened until the man actually presses accept, because "I never saw the rules" is an
     argument nobody wants at the bar on Sunday night. */
  if(rulesAccepted()){ el.innerHTML=""; return; }
- const i=Math.max(0,Math.min(S.onbStep||0,ONB.length-1)), o=ONB[i], last=i===ONB.length-1;
+ const CARDS=onbCards();
+ if(!CARDS.length){ el.innerHTML=""; return; }
+ const i=Math.max(0,Math.min(S.onbStep||0,CARDS.length-1)), o=CARDS[i], last=i===CARDS.length-1;
  el.innerHTML=`<div class="onb"><div class="onbcard">
-   <div class="step">Chip &amp; Sip &middot; ${i+1} of ${ONB.length}</div>
+   <div class="step">Chip &amp; Sip &middot; ${i+1} of ${CARDS.length}</div>
    <h2>${o.h}</h2>
    ${o.sub?`<p class="note" style="margin:0">${o.sub}</p>`:""}
-   <ul>${o.b.map(x=>`<li>${x}</li>`).join("")}</ul>
+   <ul>${o.b.map(x=>`<li>${x.replace("__APB__",(S.apBonus||1.25))}</li>`).join("")}</ul>
    <div class="row" style="justify-content:space-between;margin-top:16px">
-     <div class="onbdots">${ONB.map((_,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</div>
+     <div class="onbdots">${CARDS.map((_,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</div>
      <div class="row" style="margin:0">
        ${i>0?`<button class="ghost" id="onbBack">Back</button>`:""}
        <button class="go" id="onbNext">${last?"I accept":"Next"}</button></div>
@@ -4551,7 +4632,15 @@ function drawOnboarding(){
    </div></div>`;
  const bk=$("#onbBack"); if(bk) bk.addEventListener("click",()=>{S.onbStep=i-1;save();drawOnboarding();});
  $("#onbNext").addEventListener("click",()=>{
-   if(last){ S.rulesV=RULES_V; S.rulesAt=Date.now(); S.onboarded=true; S.onbStep=null; }
+   if(last){
+     S.rulesV=RULES_V; S.rulesAt=Date.now(); S.onboarded=true; S.onbStep=null;
+     if(dayReadWanted()) S.rulesDayAt=srvNow();
+     /* Recorded against the man as well as his phone. Fire and forget on purpose: the card must
+        close on the tee even with no signal, and a stamp that failed to save is a smaller problem
+        than a modal that will not go away. Signed-out readers simply have nothing to stamp. */
+     if(typeof AUTH!=="undefined" && AUTH.tok && AUTH.name)
+       rpc("accept_rules",{}).catch(()=>{});
+   }
    else S.onbStep=i+1;
    save();drawOnboarding();});
 }
@@ -5719,12 +5808,25 @@ function drawSched(){
 function drawAccounts(){
  const el=$("#acctTbl"); if(!el) return;
  const A=DB.accounts||[];
- let h=`<tr><th>Email</th><th>Claimed</th><th>Last in</th><th class="num">Bets</th>
+ let h=`<tr><th>Email</th><th>Claimed</th><th>Rules</th><th>Last in</th><th class="num">Bets</th>
    <th class="num">Staked</th><th></th></tr>`;
  if(!A.length){ el.innerHTML=`<tr><td class="small">Nobody has signed up yet.</td></tr>`; return; }
  A.forEach(a=>{
   h+=`<tr><td>${esc(a.email)}</td>
    <td>${a.claimed_name?esc(a.claimed_name):'<span class="warn">not chosen</span>'}</td>
+   <td class="small">${(()=>{
+     /* This column only starts meaning something once the moment has passed. Everybody accepted
+        the rules on the way in, but that was recorded on their phone and not against them, so a
+        blank stamp today means "no server record", not "has not read them" — and a table of 17
+        amber warnings for the next fortnight is crying wolf. Quiet until it matters. */
+     if(!S.rulesAgainAt || srvNow() < S.rulesAgainAt) return a.rules_at
+       ? esc(new Date(a.rules_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"}))
+       : '<span style="opacity:.45">&mdash;</span>';
+     if(!a.rules_at) return '<span class="warn">not accepted</span>';
+     const t=new Date(a.rules_at);
+     const ok=!S.rulesAgainAt||t.getTime()>=S.rulesAgainAt;
+     return `<span class="${ok?"pos":"warn"}">${esc(t.toLocaleDateString("en-GB",{day:"numeric",month:"short"}))}</span>`;
+   })()}</td>
    <td class="small">${a.last_sign_in?new Date(a.last_sign_in).toLocaleDateString("en-GB",{day:"numeric",month:"short"}):"—"}</td>
    <td class="num">${a.bet_count||0}</td><td class="num">£${a.staked||0}</td>
    <td><button class="ghost acctDel" data-e="${esc(a.email)}" style="padding:3px 9px">Delete</button></td></tr>`;});
@@ -6366,6 +6468,26 @@ function drawLaunch(){
    : `<b class="warn">Up.</b> Lifts ${esc(d.toLocaleString("en-GB",{weekday:"long",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))}
       &mdash; in <b>${esc(untilStr(d))}</b>. Everybody else is looking at a countdown.`;
 }
+function drawRulesAgain(){
+ const f=$("#rulesAgainAt"), n=$("#rulesAgainNow"); if(!f||!n) return;
+ const st=$("#rrStake"), su=$("#rrUnpaid");
+ if(st) st.textContent=MAX_STAKE; if(su) su.textContent=MAX_UNPAID;
+ if(document.activeElement!==f) f.value = S.rulesAgainAt ? toLocalField(S.rulesAgainAt) : "";
+ if(!S.rulesAgainAt){ n.innerHTML='<b>Not set.</b> Nobody is being asked to read anything again.'; return; }
+ const d=new Date(S.rulesAgainAt), gone=srvNow()>=S.rulesAgainAt;
+ const acc=(DB.accounts||[]).filter(a=>a.claimed_name);
+ const done=acc.filter(a=>a.rules_at&&new Date(a.rules_at).getTime()>=S.rulesAgainAt).length;
+ const when=esc(d.toLocaleString("en-GB",{weekday:"long",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}));
+ n.innerHTML = gone
+   ? `<b class="pos">Live.</b> Showing since ${when}. <b>${done} of ${acc.length}</b> have accepted since.`
+   : `<b class="warn">Armed.</b> Shows ${when} &mdash; in <b>${esc(untilStr(d))}</b>.`;
+}
+async function setRulesAgain(ms,msg){
+ const el=$("#rulesAgainMsg"); if(el) el.textContent="saving…";
+ try{ await pushSettings({rulesAgainAt:ms}); S.rulesAgainAt=ms; save();
+      if(el) el.textContent=msg; drawAll(); }
+ catch(e){ if(el) el.textContent=String(e.message||e).slice(0,140); }
+}
 async function setLaunch(ms,msg){
  const el=$("#launchMsg"); if(el) el.textContent="saving…";
  try{ await pushSettings({launchAt:ms}); S.launchAt=ms; save();
@@ -6515,7 +6637,7 @@ function drawAdmin(){
  const bA=bonusAwarded(), cap=bonusPts();
  [["#bonusB",bA.blue],["#bonusR",bA.red]].forEach(([sel,v])=>{
   const el=$(sel); if(!el) return; el.value=v; el.max=cap||0; el.disabled=!cap;});
- drawSwitches(); drawLaunch();
+ drawSwitches(); drawLaunch(); drawRulesAgain();
  $("#blindScale").value=S.blindScale==null?1:S.blindScale;
  drawLedger(); drawAccounts(); drawSettle();
 }
@@ -6758,7 +6880,9 @@ function shapeOf(){
       fingerprint could see, so twenty phones already sitting open would poll, find "no change",
       and carry on showing the board — the curtain only appearing for whoever happened to reload.
       Same in reverse at 10:00 on the Saturday. */
-   [!!st.declared,!!st.closed,+st.launchAt||0,(st.suspended||[]).join("/"),st.hcpModelV||"",
+   /* rulesAgainAt belongs here for the same reason launchAt does: a phone left open on the
+      breakfast table must notice the moment pass without being reloaded. */
+   [!!st.declared,!!st.closed,+st.launchAt||0,+st.rulesAgainAt||0,(st.suspended||[]).join("/"),st.hcpModelV||"",
     (st.prices&&st.prices.at)||0,st.payLink||"",st.apBonus,st.blindScale,
     st.bonusPts,st.bonusB,st.bonusR,st.holder],
    DB.stand?[DB.stand.blue,DB.stand.red,DB.stand.played,DB.stand.scheduled]:null,
@@ -6783,6 +6907,9 @@ function patchPools(){
   const {money}=poolTotals(k);
   const WINN=winnersOf(m);
   const mp=mPhase(m), live=mLive(m);
+  /* A masked market must survive the poll. Without this the first refresh overwrites "hidden"
+     with a dash and swaps the model price back for a live one computed off a zero weight. */
+  const HID=moneyHidden(k);
    /* withStakedOutcomes, not marketOutcomes — the same list the card was drawn from. A runner
      carrying money who has since been taken off the roster still gets a row in the markup, and
      matching on marketOutcomes silently skipped it here: his price stayed frozen at whatever it
@@ -6795,13 +6922,13 @@ function patchPools(){
    const imp=wt>0?money/WINN/wt:0;
    const ev=(c>0&&o.prob>0)?o.prob*imp-1:null;
    const set=(sel,txt)=>{const el=row.querySelector(sel); if(el&&el.innerHTML!==txt) el.innerHTML=txt;};
-   set('.mkfig[data-l="Money on"]', c?"£"+c:"&mdash;");
+   set('.mkfig[data-l="Money on"]', HID?"hidden":(c?"£"+c:"&mdash;"));
    /* The headline slot swaps the moment the first pound lands: model price while the pool is
       empty, live price the instant there is one. Done here rather than by a redraw, so a market
       coming to life mid-poll flips over without the page rebuilding underneath anybody. */
    const big=row.querySelector(".mkfig.big");
    if(big){
-     const heroModel=!(imp>0)&&o.prob!=null;
+     const heroModel=HID?(o.prob!=null):(!(imp>0)&&o.prob!=null);
      const heroNone =!(imp>0)&&o.prob==null;
      const lab=heroNone?"No price yet":heroModel?"Should pay":"Pays now";
      const val=heroModel?dec(o.prob):(imp?fmtDec(imp):"&mdash;");
@@ -6817,9 +6944,9 @@ function patchPools(){
    }
    const evEl=row.querySelector('.mkfig[data-l="Value"]');
    if(evEl){
-     evEl.className="mkfig "+(ev===null?"":ev>0.05?"pos":ev<-0.05?"neg":"")+" ";
+     evEl.className="mkfig "+(HID?"":ev===null?"":ev>0.05?"pos":ev<-0.05?"neg":"")+" ";
      evEl.setAttribute("data-l","Value");
-     const t=ev===null?"&mdash;":(ev>0?"+":"")+(ev*100).toFixed(0)+"%";
+     const t=HID?"hidden":(ev===null?"&mdash;":(ev>0?"+":"")+(ev*100).toFixed(0)+"%");
      if(evEl.innerHTML!==t) evEl.innerHTML=t;
    }
    row.dataset.imp=imp||0;
@@ -6827,7 +6954,7 @@ function patchPools(){
    const coll=[...row.querySelectorAll(".mkname .small")]
      .find(el=>/would collect/.test(el.textContent||""));
    if(coll){
-     if(!live||!(money>0)){ coll.remove(); }
+     if(!live||!(money>0)||HID){ coll.remove(); }
      else{
        const f=mp==="antepost"?(S.apBonus||1):1, stk=10, np=money+stk, nw=wt+stk*f;
        const WN=winnersOf(m);
@@ -7004,6 +7131,14 @@ $("#bkGo").addEventListener("click",async e=>{
    setLaunch(ms,"Set. Everybody else now sees the countdown.");});
  if(lf) lf.addEventListener("click",()=>setLaunch(srvNow()-1000,"Lifted. The board is open."));
  if(cl) cl.addEventListener("click",()=>setLaunch(null,"Curtain removed."));
+ const rs=$("#rulesAgainSet"), rc=$("#rulesAgainClear");
+ if(rs) rs.addEventListener("click",()=>{
+   const v=$("#rulesAgainAt").value;
+   if(!v){ $("#rulesAgainMsg").textContent="Pick a date and time first."; return; }
+   const ms=new Date(v).getTime();
+   if(!isFinite(ms)){ $("#rulesAgainMsg").textContent="That date did not parse."; return; }
+   setRulesAgain(ms,"Set. They will all have to read and accept from that moment.");});
+ if(rc) rc.addEventListener("click",()=>setRulesAgain(null,"Cleared. Nobody will be asked again."));
 })();
 $("#acctChip").addEventListener("click",()=>{
  S.acctOpen=!S.acctOpen; save(); drawAuth();
