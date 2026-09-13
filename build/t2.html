@@ -2520,7 +2520,10 @@ const DEF_NOV=[
  {k:"nov_rob",n:"Rob's 30th",
   d:"He turns 30 on the Wednesday, the day we fly, and he is the one driving to the airport — so "+
     "he spends his own 30th birthday stone cold sober behind a wheel, which is a bet in itself. "+
-    "Then he tees off in the alternate shot at 13:50 on Thursday. He is 21.5 off the stick and playing "+
+    /* A HANDICAP IN STATIC COPY GOES STALE ON EVERY SCRAPE. This read 21.5 until the 13 Sep pull moved
+      him to 21.4, which is the sort of small wrongness nobody notices and everybody trusts. Phrased
+      so the next scrape cannot make a liar of it. */
+    "Then he tees off in the alternate shot on Thursday, off a mark in the low 20s and playing "+
     "alternate shot, so his partner is on this bet too whether he likes it or not. Rob cannot back "+
     "it — he has too much say in the outcome, and not in a good way",
   round:"1",opts:["Wins his Thursday match","Halves it","Loses it","Does not make the tee at all"],
