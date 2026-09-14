@@ -2392,7 +2392,8 @@ DEF_COURSES.forEach(c=>{
    (prOk?"":" — pars sum to "+pr.reduce((a,b)=>a+b,0)+", not "+c.par));
 });
 /* Display names only. The keys below them — "foursomes", "fourball" — are what the scoring
-   branches on (fourball takes 90% of each man's mark, foursomes half the pair's combined)
+   branches on (fourball takes 90% of each man's mark, foursomes half the pair's combined, which
+   is the same thing as the midpoint between the two of them; scramble takes nothing at all)
    and must not be touched. The group kept reading the schedule and asking which one was
    which, so the board now calls them what everybody says out loud. */
 const FMT={foursomes:"Alternate Shot",fourball:"Best Ball",scramble:"Scramble",singles:"Singles"};
@@ -2476,17 +2477,7 @@ const MARKETS=[
  MARKETS.push(
   {k:"day"+R,n:"Day "+R+" Winner",type:"model",round:R,team:true,dyn:"day",
    d:"Who takes "+day+". Blue, Red, or honours even. The simplest bet on the whole board and the one "+
-     "to have if you have never had a bet in your life — it settles the moment the last putt of the day drops"},
-  {k:"motd"+R,n:"Match of the Day "+R,type:"model",round:R,dyn:"match",
-   d:"Which match goes the furthest — the one still alive on the highest hole. A match that goes down "+
-     "the last beats one that finished 4&3 on the 15th. If two go up the last they share it. Settles "+
-     "straight off the card, no argument"},
-  {k:"marg"+R,n:"Biggest Hiding "+R,type:"model",round:R,dyn:"match",
-   /* Widest on record across both years on Squabbit: Luke Holland beat Alex Mulvin 7&6 in the
-      2024 singles. 2025's widest was 5&4. Both read off the leaderboard, not estimated. */
-   d:"Which match is won by the widest margin. 5&4 beats 3&2 beats 1 up. A halved match has no margin "+
-     "and cannot win it. The record is Luke Holland's 7&6 over Alex Mulvin in Portugal in 2024, and "+
-     "nothing in 2025 got wider than 5&4. Mulvin has never explained it. Ties share the pool"}
+     "to have if you have never had a bet in your life — it settles the moment the last putt of the day drops"}
  );
  /* MATCH OUTRIGHTS. The bet most men actually want: back a match, not a statistic. One market per
     match, 25 across the week.
@@ -2688,6 +2679,61 @@ const DEF_NOV=[
    "Luke Holland":1.3,"Josh Menzies":0.9,"Tom Bucknall":0.8,"Dave Huddleston":0.8,
    "Jay France":0.7,"Josh Evans":0.7,"Matt Petty":0.6,"Mark Sturgess":0.6,"Matt Holland":0.6,
    "Theo Sims-Harris":0.9}},
+
+ /* ---- THE FOUR MINIGAMES ---------------------------------------------------------------
+    One a day, agreed by the captains, 2 sleeves of TP5s riding on each. Priced PER MAN rather
+    than per pair: the pairings are now picked reactively minutes before each round, so a pair
+    market would have no runners to bet on until the moment it shut. If the captains mean these
+    to be a pair total, these become the individual version of the same thing and the pair prize
+    settles alongside. */
+ {k:"mg_putts",n:"Fewest Putts, Thursday",
+  d:"Fewest putts over 18 at Marbella. Putts only, so a chip that runs in from off the green is "+
+    "not one and a 3 wood along the deck certainly is not. The one game on this board where the "+
+    "low markers are genuinely favoured, which is why the field is priced the other way up from "+
+    "everything else here. It is also the most volatile: ball striking travels, putting does not, "+
+    "and anybody in this 20 can hole out for 26 on a good day",
+  round:"1",opts:[],pk:"putts"},
+
+ {k:"mg_par3",n:"Lowest Par 3 Total, Friday",
+  d:"Fewest gross strokes across the 3 par 3s at Cabopino, the 7th, the 13th and the 15th. Gross, "+
+    "not net, so there are no shots and no hiding place. Jay France heads it off the lowest mark "+
+    "in the field and the model makes him a clear favourite, because 3 short holes is the "+
+    "smallest sample on the board and the man who hits it best wins it most often. Ties share",
+  round:"2",opts:[],
+  /* Straight off the simulation: each man's gross total on those 3 holes over 4,000 rounds. */
+  wts:{"Jay France":14.4,"Luke Holland":10.3,"Josh Menzies":9.3,"Alex Mulvin":8.0,"Luke Usher":8.0,
+   "Josh Evans":7.4,"Matt Petty":6.4,"Eamonn Brady":5.8,"Theo Sims-Harris":4.5,"Gabe Hills":4.1,
+   "Ben West":4.0,"Dong Ming Lau":3.2,"Dave Huddleston":2.6,"Jack Mulroy":2.4,
+   "Mark Sturgess":2.1,"Matt Holland":2.1,"Rob Parfitt":2.0,"Chris Best":1.4,"Dom Mills":1.0,
+   "Tom Bucknall":0.9}},
+
+ {k:"mg_par5",n:"Lowest Par 5 Total, Saturday",
+  d:"Fewest gross strokes across the 4 par 5s at La Cala, the 5th, the 9th, the 10th and the "+
+    "16th. Gross again. 4 long holes on the hardest course of the week, and on a slope of 139 "+
+    "they are where the big numbers live. Anybody who can reach in 3 and 2 putt is in this; "+
+    "anybody who cannot is paying for it 4 times. Ties share",
+  round:"3",opts:[],
+  wts:{"Jay France":17.1,"Luke Holland":11.5,"Luke Usher":9.3,"Alex Mulvin":8.7,"Josh Menzies":8.4,
+   "Josh Evans":8.0,"Matt Petty":6.7,"Eamonn Brady":5.7,"Theo Sims-Harris":4.4,"Ben West":3.7,
+   "Gabe Hills":3.5,"Dong Ming Lau":2.6,"Dave Huddleston":2.1,"Mark Sturgess":1.8,
+   "Matt Holland":1.7,"Jack Mulroy":1.6,"Rob Parfitt":1.2,"Dom Mills":0.9,"Chris Best":0.6,
+   "Tom Bucknall":0.4}},
+
+ {k:"mg_net",n:"Longest Net Par or Better, Sunday",
+  d:"The longest hole on which a man makes net par or better at Santa Maria, and the only "+
+    "minigame of the 4 played off handicap. That is what keeps it honest: a high marker with a "+
+    "shot on a par 5 needs a 6, a scratch man needs a 5, so the field is close to level and the "+
+    "prices say so. Longest hole wins outright, and if 2 men do it on the same hole they share. "+
+    "The market that rewards one good swing on the right hole rather than a good round",
+  round:"4",opts:[],
+  /* A shallow hump centred on 18. Enough shots to be given one on the long holes, enough golf to
+     actually make the 6 when you get it. The spread top to bottom is under 2 to 1, which is the
+     point: this is the closest thing to a level market on the board. */
+  wts:{"Theo Sims-Harris":0.999,"Gabe Hills":0.999,"Dong Ming Lau":0.99,"Eamonn Brady":0.988,
+   "Mark Sturgess":0.979,"Matt Petty":0.969,"Dave Huddleston":0.966,"Ben West":0.961,
+   "Jack Mulroy":0.941,"Rob Parfitt":0.934,"Josh Menzies":0.905,"Luke Usher":0.901,
+   "Matt Holland":0.892,"Luke Holland":0.831,"Alex Mulvin":0.82,"Josh Evans":0.808,
+   "Chris Best":0.808,"Tom Bucknall":0.73,"Dom Mills":0.685,"Jay France":0.652}},
 
  {k:"nov_water",n:"First in the Drink",
   d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it. "+
@@ -3048,9 +3094,15 @@ function sideNet(side,c,fmt,allow){
  if(fmt==="foursomes"){const sm=strokeMap((ca+cb)*0.5,c);
   /* one ball between two: errors compound, so average the pair and add an occasional extra */
   return ha.map((v,i)=>Math.round((v+hb[i])/2)+(Math.random()<0.18?1:0)-sm[i]);}
- /* scramble: play the better ball each time, and being able to choose is worth a shot or so a round */
- const lo=Math.min(ca,cb),hi=Math.max(ca,cb),sm=strokeMap(lo*0.35+hi*0.15,c);
- return ha.map((v,i)=>Math.max(-3,Math.min(v,hb[i])-(Math.random()<0.22?1:0))-sm[i]);}
+ /* SCRAMBLE IS PLAYED OFF SCRATCH. It used to carry the standard 35/15 two-man allowance, and
+    the captains have taken it off: the Saturday is gross, best ball between the two of them and
+    no shots for anybody. That is a bigger change than it sounds. A scramble allowance is small in
+    absolute terms but it is the ONLY thing keeping a 25 handicapper's pair in touch with a 12's
+    on the hardest course of the week, so removing it moves the Saturday towards the low markers
+    on both sides and away from everybody else.
+    Being able to choose the better of two balls is still worth about a shot a round, and that
+    stays — it is a property of the format, not of the handicap. */
+ return ha.map((v,i)=>Math.max(-3,Math.min(v,hb[i])-(Math.random()<0.22?1:0)));}
 /* Stableford points from a net score against par: 2 for a net par, one more for each shot better,
    one fewer for each shot worse, and never below nought. Net double bogey and net nine both score
    the same blank, which is the entire reason Stableford differs from strokes. */
@@ -3343,6 +3395,12 @@ const roleTag=n=>{const r=roleOf(n); return r
 */
 const NOV_TUNE={air:[0.85,0.45,1.15],water:[0.70,0.55,1.10],clubs:[0.55,0.35,1.05],
  miss3:[0.80,0.40,1.15],
+ /* FEWEST PUTTS runs the other way to everything else here. Every other novelty is something a
+    bad golfer does more often; putting is the one part of the game where the low markers are
+    reliably better, so both coefficients are negative and a man with no scoring record is marked
+    DOWN rather than up. The tilt is deliberately gentle: putting correlates with handicap far
+    less than ball striking does, and anybody can have the day of his life on the greens. */
+ putts:[-0.55,-0.20,0.88],
  /* A buggy finds a flowerbed because of the man driving it, not his handicap, so the mark counts
     for very little here. At 0.50 the formula was shouting over the history and putting a 25
     handicap in front of the man who has actually done it. */
