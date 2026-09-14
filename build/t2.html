@@ -2480,12 +2480,21 @@ const MARKETS=[
      "to have if you have never had a bet in your life — it settles the moment the last putt of the day drops"}
  );
  /* MATCH OUTRIGHTS. The bet most men actually want: back a match, not a statistic. One market per
-    match, 25 across the week.
+    match, 5 a day for the 3 pairs sessions.
     The outcomes are Blue, Red and Halved and they NEVER change — not when the draw goes up, not
     when somebody drops out. A bet stores the outcome it was placed on as text, so a label that
     changed on the Wednesday night would orphan every ante-post bet placed before it. The names
-    appear underneath the moment the pairing is entered, and before that the card says so. */
- const slots=(r===4)?10:5;
+    appear underneath the moment the pairing is entered, and before that the card says so.
+
+    SUNDAY HAS NONE, and that is deliberate. It used to carry 10 of these, which made 13 markets
+    for one afternoon against 7 for each of the other days, and every one of the 10 was a third way
+    to bet a thing the board already offered twice: Day 4 Winner takes the session, and Sunday
+    Singles lets a man back any individual to win his own match, which is the same event with 20
+    runners instead of 3. Rounds 1 to 3 have no per-man equivalent, so their match markets are the
+    only way to back a specific tie and they stay. The Sunday matches are still played, still
+    entered by the captains and still settle Day 4 Winner and the trophy — they are simply not
+    something you can put a pound on any more. Nothing was staked on any of the 10 when they went. */
+ const slots=(r===4)?0:5;
  for(let i=1;i<=slots;i++){
   MARKETS.push({k:"mch"+R+"_"+i,n:dayOnly+" Match "+i,type:"model",round:R,team:true,
    dyn:"outright",slot:i,

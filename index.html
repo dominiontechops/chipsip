@@ -2342,7 +2342,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-14.4",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-14.5",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -3021,12 +3021,21 @@ const MARKETS=[
      "to have if you have never had a bet in your life — it settles the moment the last putt of the day drops"}
  );
  /* MATCH OUTRIGHTS. The bet most men actually want: back a match, not a statistic. One market per
-    match, 25 across the week.
+    match, 5 a day for the 3 pairs sessions.
     The outcomes are Blue, Red and Halved and they NEVER change — not when the draw goes up, not
     when somebody drops out. A bet stores the outcome it was placed on as text, so a label that
     changed on the Wednesday night would orphan every ante-post bet placed before it. The names
-    appear underneath the moment the pairing is entered, and before that the card says so. */
- const slots=(r===4)?10:5;
+    appear underneath the moment the pairing is entered, and before that the card says so.
+
+    SUNDAY HAS NONE, and that is deliberate. It used to carry 10 of these, which made 13 markets
+    for one afternoon against 7 for each of the other days, and every one of the 10 was a third way
+    to bet a thing the board already offered twice: Day 4 Winner takes the session, and Sunday
+    Singles lets a man back any individual to win his own match, which is the same event with 20
+    runners instead of 3. Rounds 1 to 3 have no per-man equivalent, so their match markets are the
+    only way to back a specific tie and they stay. The Sunday matches are still played, still
+    entered by the captains and still settle Day 4 Winner and the trophy — they are simply not
+    something you can put a pound on any more. Nothing was staked on any of the 10 when they went. */
+ const slots=(r===4)?0:5;
  for(let i=1;i<=slots;i++){
   MARKETS.push({k:"mch"+R+"_"+i,n:dayOnly+" Match "+i,type:"model",round:R,team:true,
    dyn:"outright",slot:i,
@@ -3384,8 +3393,8 @@ const MODEL_V="ce46396d";
    decides whether saved state survives, and deliberately NOT in MODEL_V, which decides whether the
    published prices are stale: rewording a card must throw away a stale copy of the market list on
    every phone, and must not tell the organiser his simulation needs re-running. */
-const MARKETS_V="bade56e4";
-const DATA_V="2026-09-14.4"+"/"+MODEL_V+"/"+MARKETS_V;
+const MARKETS_V="c5e0da1b";
+const DATA_V="2026-09-14.5"+"/"+MODEL_V+"/"+MARKETS_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -7553,7 +7562,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-09-14.4</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-09-14.5</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
