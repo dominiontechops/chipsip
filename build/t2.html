@@ -1012,7 +1012,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     <h1 class="gatewords">CHIP <em>&amp;</em> SIP <span>2026</span></h1>
     <p class="gatewhere">Costa del Sol &middot; 24&ndash;27 September</p>
     <p class="gatelabel">Members only</p>
-    <p class="gateopen" id="wallWhy">This board is for the 20 men on the trip. Sign in, or create
+    <p class="gateopen" id="wallWhy">This board is for the <span data-live="squad">20</span> men on the trip. Sign in, or create
       an account against your own name on the list.</p>
     <div id="wallAuth"></div>
     <p class="gatesmall">The sign-in link often lands in junk &mdash; look there before giving up
@@ -1318,13 +1318,13 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
     </ul>
     <h3>Scoring</h3>
     <ul>
-      <li><b>25 points</b> at 10 a side: 5 best ball, 5 alternate shot, 5 scramble, 10 singles. A win is
+      <li><b><span data-live="points">25</span> points</b> at <span data-live="aside">10</span> a side: <span data-live="pairsDay">5</span> best ball, <span data-live="pairsDay">5</span> alternate shot, <span data-live="pairsDay">5</span> scramble, <span data-live="aside">10</span> singles. A win is
         one point, a half is a half. Change the squad size and the board recalculates; the numbers on this
         page follow the roster, not the other way round.</li>
       <li><b>Red are the holders, and that makes the 2 targets different.</b> Red won it in 2024 by
         9.5 to 5.5 &mdash; under the old team names, but the same 2 sides &mdash; and retained it in
-        2025 on a 12 apiece tie. So this year <b>Blue need 13 to take it and Red need only
-        12.5 to keep it</b>. Anyone quoting "13 to win" at both teams is giving Red half a point they do not
+        2025 on a 12 apiece tie. So this year <b>Blue need <span data-live="blueTarget">13</span> to take it and Red need only
+        <span data-live="redTarget">12.5</span> to keep it</b>. Anyone quoting "13 to win" at both teams is giving Red half a point they do not
         need. The scoreboard shows the two targets separately for exactly this reason.</li>
       <li><b>A tie is its own outcome in the betting, whatever it does to the trophy.</b> Team Result settles
         on <b>the score</b>: 12.5 apiece pays out on <b>Tie</b>, not on Red, even though Red walk home with
@@ -2407,9 +2407,12 @@ const DEC={strokes:"Net strokes",stableford:"Stableford points"};
 const MARKETS=[
  {k:"mvp",n:"MVP",
   d:"Most points across the 4 sessions, maximum 4. Bragging rights until next September, and the "+
+    /* A HANDICAP TYPED INTO COPY IS WRONG BY THE NEXT SCRAPE. Gabe Hills read 17.5 here until this
+     sweep; he will read something else the moment anybody declares. Phrased so no refit can make a
+     liar of it, the same way Rob's mark is phrased on his own card. */
     "one market where the man who plays above himself for 4 days gets properly paid for it. Gabe "+
-    "Hills off 17.5 is the one everybody points at when the word bandit comes up, and Mark "+
-    "Sturgess arrives with no history on this trip at all, which cuts both ways",
+    "Hills off a mid teens mark is the one everybody points at when the word bandit comes up, and "+
+    "Mark Sturgess arrives with no history on this trip at all, which cuts both ways",
   type:"model",round:""},
  {k:"team",n:"Team Result",
   d:"Blue, Red, or the unbearable anticlimax of 12.5 apiece. Settles on THE SCORE, not on the trophy: "+
@@ -2769,8 +2772,12 @@ const DEF_NOV=[
   d:"First ball in the water. Hitting another one after it does not undo the first, we all saw it. "+
     "Josh Menzies heads it because there is no shot on earth he loves more than a 4 iron he has no "+
     "business taking. Chris Best is next in, with clubs that have never seen a hazard at "+
-    "Windlesham. Jay France is in off a 9.5 mark, which is what a summer out injured does to a "+
-    "man's judgement, and Tom Bucknall is there because 25 shots have to go somewhere",
+    /* Both marks were typed. Jay has already told the group his England Golf number is higher than
+     the one the board holds, and Tom has said he will declare lower, so BOTH of these were going
+     to be wrong within the week. Neither number is needed to make the joke. */
+    "Windlesham. Jay France is in off the lowest mark in the field, which is what a summer out "+
+    "injured does to a man's judgement, and Tom Bucknall is there because a mark in the mid "+
+    "twenties has to go somewhere",
   round:"",opts:[],pk:"water",
   wts:{"Josh Menzies":6.45,"Chris Best":1.81,"Jay France":7.09,"Tom Bucknall":1.04}},
  {k:"nov_air",n:"First Air Shot",
@@ -6009,7 +6016,13 @@ function drawForm(){
  const tripCell=(p)=>{const r=RK.tr.rank.get(p), w=wldHtml(p.name);
    if(!w) return `<span class="tag">first trip</span>`;
    return `<span class="rankcell"><span class="rk">${ord(r)}</span> <span class="tag">of ${RK.tr.total}</span></span><br>${w}`;};
- const TRIP={rating:69.7,slope:133.25};             /* average of the four courses we are playing */
+ /* "Likely in Spain" is worked off the average course of the week, and that average was typed in
+    by hand: 69.7 and 133.25. Both were right, and both would have quietly stopped being right the
+    moment a tee or a course moved, with nothing on any screen to say so. Averaged off the course
+    table itself now, which is the same table the simulation plays. */
+ const TRIP=(()=>{const cs=S.courses||[]; if(!cs.length) return {rating:69.7,slope:133.25};
+   return {rating:cs.reduce((a,c)=>a+c.rating,0)/cs.length,
+           slope: cs.reduce((a,c)=>a+c.slope ,0)/cs.length};})();
  const typical=p=>Math.round(p.form*TRIP.slope/113+TRIP.rating);
  /* Every heading sorts. First click uses the sensible direction for that column, second click
     reverses it, and the arrow says which way you are looking. */
@@ -7078,6 +7091,20 @@ function drawStrip(){
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
    in drawKpis and take every panel after it down with it — including the betting board, which
    is the only screen that actually matters. A broken panel should be a broken panel. */
+/* THE RULES TAB PROMISED SOMETHING IT DID NOT DO. Two lines under a hand-typed 25, 13 and 12.5
+   it said "change the squad size and the board recalculates; the numbers on this page follow the
+   roster, not the other way round". They did not. One man dropping out would have left the one
+   page everybody is told to read as the only thing on the board still quoting the old fixture
+   list, and it would have been quoting it in bold. Every figure in that sentence now comes from
+   the same 2 functions the scoreboard and the header use, so the promise is true. */
+function drawRuleFigures(){
+ const n=S.players.filter(p=>p.in).length, side=Math.floor(n/2);
+ const T=TARGET();
+ const put=(k,v)=>document.querySelectorAll('[data-live="'+k+'"]').forEach(e=>{
+   if(e.textContent!==String(v)) e.textContent=v; });
+ put("squad",n); put("aside",side); put("pairsDay",Math.floor(side/2));
+ put("points",pointsOnOffer()); put("blueTarget",T.blue); put("redTarget",T.red);
+}
 function drawAll(){
  /* These two used to run outside the guard below, which is exactly backwards: a throw in the
     curtain or the wall took down the redraw INCLUDING the curtain and the wall, leaving a blank
@@ -7092,7 +7119,7 @@ function drawAll(){
    /* Admin used to be drawn only by the unlock handler. The organiser is now let in without
       clicking it, so the panel appeared with nothing in it. */
    ["admin",()=>{if(ADMIN_TOKEN)drawAdmin();}],
-   ["what changed",drawSince],["first run",drawOnboarding]];
+   ["what changed",drawSince],["first run",drawOnboarding],["rules figures",drawRuleFigures]];
  const broke=[];
  steps.forEach(([name,fn])=>{try{fn();}catch(e){broke.push(name);
    console.error("panel failed:",name,e);
