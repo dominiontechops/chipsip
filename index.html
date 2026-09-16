@@ -1124,8 +1124,13 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 <section id="form">
   <div class="card">
     <h2>Form book</h2>
-    <p class="note">Built from <b>602 rounds</b> pulled from Squabbit &mdash; every player's whole history,
-    not just the trips. <b>18 of the 20</b> have a scoring record. The workings are under the table.</p>
+    <!-- BOTH FIGURES ARE COUNTED AT BUILD TIME. They were typed by hand once and were wrong within
+         a week: three scrapes took the round count from 602 to 654 and the last of them gave Josh
+         Evans his fifth card, which made "18 of the 20" into all 20. Nobody would ever have
+         noticed, which is exactly the problem — a stale number in small print is trusted more
+         than a big one. Counted from model.json now, so a refit cannot make a liar of it. -->
+    <p class="note">Built from <b>654 rounds</b> pulled from Squabbit &mdash; every player's whole history,
+    not just the trips. <b>20 of the 20</b> have a scoring record. The workings are under the table.</p>
     <p class="note" id="squabAge"></p>
     <div class="kpi" id="kpis"></div>
   </div>
@@ -2342,7 +2347,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-15.1",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-16.1",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -3394,7 +3399,7 @@ const MODEL_V="ce46396d";
    published prices are stale: rewording a card must throw away a stale copy of the market list on
    every phone, and must not tell the organiser his simulation needs re-running. */
 const MARKETS_V="c5e0da1b";
-const DATA_V="2026-09-15.1"+"/"+MODEL_V+"/"+MARKETS_V;
+const DATA_V="2026-09-16.1"+"/"+MODEL_V+"/"+MARKETS_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -7608,7 +7613,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-09-15.1</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-09-16.1</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw

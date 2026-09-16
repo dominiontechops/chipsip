@@ -1124,8 +1124,13 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 <section id="form">
   <div class="card">
     <h2>Form book</h2>
-    <p class="note">Built from <b>602 rounds</b> pulled from Squabbit &mdash; every player's whole history,
-    not just the trips. <b>18 of the 20</b> have a scoring record. The workings are under the table.</p>
+    <!-- BOTH FIGURES ARE COUNTED AT BUILD TIME. They were typed by hand once and were wrong within
+         a week: three scrapes took the round count from 602 to 654 and the last of them gave Josh
+         Evans his fifth card, which made "18 of the 20" into all 20. Nobody would ever have
+         noticed, which is exactly the problem — a stale number in small print is trusted more
+         than a big one. Counted from model.json now, so a refit cannot make a liar of it. -->
+    <p class="note">Built from <b>__ROUNDS__ rounds</b> pulled from Squabbit &mdash; every player's whole history,
+    not just the trips. <b>__WITHREC__ of the 20</b> have a scoring record. The workings are under the table.</p>
     <p class="note" id="squabAge"></p>
     <div class="kpi" id="kpis"></div>
   </div>

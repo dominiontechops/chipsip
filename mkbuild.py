@@ -2,7 +2,7 @@ import json,datetime,re
 t=open('build/t2.html').read()
 model=open('model.json').read()
 logo=open('logo_b64.txt').read().strip()
-build="2026-09-15.1"
+build="2026-09-16.1"
 # The Squabbit read date comes off the raw pull file itself, so a rebuild that does not re-pull
 # cannot quietly claim fresh form. Nothing to remember to update: the file's own timestamp is the
 # only honest record of when the scoring history was actually read.
@@ -25,6 +25,12 @@ marketsv=hashlib.sha1(t[_m0:_m1].encode()).hexdigest()[:8]
 
 t=t.replace('__MODEL__',model).replace('__PULLED__',pulled).replace('__MODELV__',modelv)
 t=t.replace('__MARKETSV__',marketsv)
+# The Form Book's two headline figures, counted rather than remembered. `n` is the number of
+# 18-hole rounds behind each man after pairs formats, 9s and short courses are thrown out, and a
+# man has a scoring record when he has any rounds at all and is not running on an assumed form.
+_m=json.loads(model)
+t=t.replace('__ROUNDS__',str(sum(p.get('n',0) for p in _m)))
+t=t.replace('__WITHREC__',str(sum(1 for p in _m if p.get('n',0)>0 and not p.get('unknown'))))
 t=t.replace('__LOGO__',logo).replace('__BUILD__',build)
 open('index.html','w').write(t)
 
