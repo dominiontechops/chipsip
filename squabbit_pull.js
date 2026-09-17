@@ -163,6 +163,22 @@
        pulls swapped them and the recency weighting in refit.py — 0.92 to the power of position —
        moved a man's form for no reason at all. Three men wobbled that way between 7 and 11 Sep
        with identical scores, sums and hole mixes. A second key makes a rerun reproducible. */
+    /* TWO NINES ON ONE DAY ARE ONE ROUND, NOT TWO. Every nine is doubled so it sits on the same
+       18-hole scale as everything else, which is right for a man who played a twilight nine and
+       went home. It is wrong when he played both halves: Matt Petty went 28 over on one nine and
+       1 under on the other on 13 Sep 2026, and doubling each recorded a 56 and a -2 where the
+       day was actually 27 over for 18 holes. The 56 alone moved his form 2.26 shots and made him
+       the fastest-declining man in the field off a round he did not play. Pair them by date
+       first, and only double what is genuinely left on its own. The hole mix is untouched either
+       way: it counts holes, and the same 18 holes are counted once however they are grouped. */
+    const halves = {};
+    rounds.filter(r => r.half).forEach(r => { (halves[r.d] = halves[r.d] || []).push(r); });
+    Object.values(halves).filter(v => v.length === 2).forEach(([x, y]) => {
+      x.ovp = (x.ovp / 2) + (y.ovp / 2);       /* back to raw, then summed: the real 18 */
+      x.half = false; x.diff = null;            /* no reliable rating across two nines */
+      y.drop = true; nines--;
+    });
+    for (let i = rounds.length - 1; i >= 0; i--) if (rounds[i].drop) rounds.splice(i, 1);
     rounds.sort((a, b) => String(b.d).localeCompare(String(a.d)) || (b.ovp - a.ovp));
 
     const ov = rounds.map(r => r.ovp);
