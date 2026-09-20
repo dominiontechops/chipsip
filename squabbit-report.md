@@ -1,53 +1,60 @@
-# Squabbit refresh — 2026-09-17
+# Squabbit refresh — 2026-09-20
 
-Fourth read in 10 days, 7 days before the flight. All 20 accounts matched, none missing. Transfer
-verified byte-for-byte against an in-page checksum before anything was written.
+Fifth read, 3 days before the flight, taken after the last weekend of golf anybody will play
+before Spain. All 20 accounts matched, none missing, transfer checksummed in-page before writing.
 
-## What actually moved
+## Seven men played
 
-17 of the 20 are unchanged to the penny. Three are not.
+| Player | Team | Board | Now | Rounds | Last |
+|---|---|---:|---:|---:|---|
+| Josh Menzies | Blue | 13.9 | **14.4** | 28 → 30 | 19 Sep |
+| Ben West | Blue | 20.6 | **19.9** | 93 → 94 | 19 Sep |
+| Matt Holland | Blue | 22.4 | **20.9** | 7 → 8 | 18 Sep |
+| Luke Usher | Blue | 13.8 | 13.8 | 33 → 34 | 18 Sep |
+| Rob Parfitt | Blue | 20.0 | 20.0 | 26 → 27 | 19 Sep |
+| Chris Best | Red | 24.0 | 24.0 | 8 → 9 | 18 Sep |
+| Josh Evans | Red | 12.0 held | 3.7 | 6 → 7 | **20 Sep** |
 
-| Player | Board before | Board now | Rounds | Last logged |
-|---|---:|---:|---:|---|
-| Rob Parfitt | 21.4 | **20.0** | 25 → 26 | 2026-09-15 |
-| Matt Petty | 15.7 | 15.7 | 14 → 15 | 2026-09-13 |
-| Josh Evans | 12.0 | 12.0 | 5 → 6 | 2026-09-16 |
+Every handicap that moved is Blue, and 2 of the 3 moved the wrong way. **Ben West cut 0.7 and
+Matt Holland cut 1.5**, which is 2.2 shots off Blue's allowance between them. Josh Menzies going
+out 0.5 gives a little back.
 
-Rob's cut is real and he flagged it himself before the scrape found it. It is the single biggest
-change on the board this week, and it costs Blue shots on every hole he plays.
+Red logged 2 rounds and neither man's mark moved.
 
-## A round nobody played
+## Josh Evans went round 28 over this morning
 
-Matt Petty played TWO nines on 13 September: 28 over on one and 1 under on the other. Every nine
-is doubled so it sits on the same 18-hole scale as everything else, which is right for a man who
-plays a twilight nine and goes home. It is wrong when he played both halves. The puller recorded
-a **56 over** and a **-2**, where the day was 27 over for 18 holes.
+His seven cards now read 14, 17, 3, 23, 18, 4 and 28. That is the widest spread in the field by
+some distance, a standard deviation of 9.2 against a field average under 7.
 
-The 56 alone moved his form 2.26 shots, made him the fastest-declining man in the field, and took
-Blue's win probability down 3 points off a round that does not exist. He is the only man in the
-field it has ever hit, and only on that one date.
-
-**Fixed in the puller.** Two nines on one date are now paired into the 18 holes they actually
-were, and only a nine that is genuinely on its own is doubled. The hole mix is untouched either
-way, because it counts holes and the same 18 holes are counted once however they are grouped.
-
-## Josh Evans, still the one deliberate disagreement
-
-His Squabbit profile now reads **3.7**, up from the 0.9 it read in August. It is computed off six
-cards: 14, 17, 3, 23, 18 and 4 over par. Two good rounds in six does not make a 3.7 golfer, and a
-six-round record swings that far on a single card.
-
-The board holds the group's mark of 12.0 and prices him off the scoring, as it has since the
-start. His average is 13.2 over.
-
-Worth knowing for Thursday: **3.7 is what Squabbit will show him if he declares off it.** His two
-best rounds are 3 and 4 over, and the 4 was logged on 16 September.
+His Squabbit profile still reads **3.7** and the board still holds 12.0, which is the same
+deliberate disagreement recorded in the last three reports. Worth knowing for the declaration:
+he has now posted his best round and his worst round inside 4 days.
 
 ## Where it leaves the board
 
 | | Blue | Red |
 |---|---:|---:|
-| Before this scrape | 46.0% | 45.6% |
-| After | **42.1%** | **49.9%** |
+| 16 Sep | 46.0% | 45.6% |
+| 17 Sep | 42.1% | 49.9% |
+| **20 Sep** | **46.9%** | **44.8%** |
 
-Red are now favourites. Rob's cut is most of it, with Josh Evans' new card doing the rest.
+Blue are narrow favourites again. Josh Evans' 28 is most of the move; the 2 Blue cuts pull the
+other way and nearly cancel it.
+
+By day, Blue: Thursday 44.0%, Friday 50.5%, Saturday 29.8%, Sunday 48.7%. The Saturday scramble
+off scratch remains the problem and has barely moved all week.
+
+## QA at the same time
+
+- 49 markets, every book at 100%, no page errors, all six suites pass
+- 49 deadline keys for 49 markets, and no bet has ever landed after its market's deadline
+- Pool totals reconcile against the bets table to the penny
+- No bet sits on a market this build does not carry
+- **Zero client errors from any phone in 7 days**
+- Betting has moved: 32 bets, £109, still 7 punters of 20
+- Gabe Hills and Eamonn Brady still have no account, 3 days out
+- The Form Book's headline figures now read 665 rounds and 20 of 20, both counted at build time
+
+**The published prices are two refits behind.** They were fitted to model ce46396d on 16 Sep and
+this build carries b1b14ff1. The board flags this itself on the Admin screen, and the fix is one
+press of Apply, re-run and publish.
