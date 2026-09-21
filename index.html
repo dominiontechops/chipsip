@@ -1170,7 +1170,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       which has to include the 12 in the bin. Price a golf match off everybody's best eight and you have
       priced a tournament nobody is playing in.</p>
       <p class="note">Which is also why <b>nearly everyone's average sits above his handicap</b> &mdash; the
-      middle of this group is about 4 shots above, and that is completely normal rather than evidence that
+      middle of this group is about <b data-live="gapMed">&mdash;</b> shots above, and that is completely normal rather than evidence that
       anyone is at it. A man is supposed to beat his handicap roughly 1 round in 4. If you want to know
       who is genuinely getting more shots than his golf deserves, that is what the verdict in the last column is
       telling you. The number behind it is the organiser's homework.</p>
@@ -1200,13 +1200,13 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       his own game this month. A high handicapper who has found something can top the form table while
       still being 19th on the card, and the best golfer in the group can sit near the bottom of it because
       he has been off his own pace since June. Both are worth knowing and neither replaces the other.
-      2 men have no scoring record and cannot be ranked on form at all.</p>
+      <span data-live="noForm">&mdash;</span></p>
       <p class="note">Pairs-format rounds are excluded everywhere, because identical scores across
       a pairing say nothing about either man; nine-hole rounds count, doubled onto an 18-hole scale.</p>
       <p class="note">Handicaps are the marks on each player's <b>Squabbit profile</b>, taken from the account that actually
       played the last two trips, not from whatever was keyed in after the last round. <b>Form</b> is a recency-weighted scoring differential, lower is better. <b>Raw</b> is form
       minus handicap straight from the data; <b>Gap</b> is that after thin samples are discounted towards the field
-      median &mdash; 7 rounds should not carry the same weight as 89. <b>Spread</b> is day-to-day volatility.</p>
+      median &mdash; <b data-live="minN">&mdash;</b> rounds should not carry the same weight as <b data-live="maxN">&mdash;</b>. <b>Spread</b> is day-to-day volatility.</p>
     </details>
     <div id="fbookWrap">
     <div class="wrap formtable"><table id="formTbl"></table></div>
@@ -1299,11 +1299,12 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
       <li><b>Closed.</b> <b>There is no in-play betting.</b> Every market shuts <b>10 minutes before the
         relevant tee shot</b> — not on it. Standing on the tee watching the first drive being addressed is
         not a betting opportunity. Whole-trip markets — MVP, Team Result, Top Scorers, Perfect Record, The
-        Blank — shut 10 minutes before Thursday's first ball, at <b>13:40 Spanish time, 12:40 UK</b>. A
+        Blank — shut 10 minutes before Thursday's first ball, at <b data-live="bookShut">&mdash;</b>. A
         round's own markets shut 10 minutes before that round tees off, so the Sunday singles book stays
         open until Sunday morning while Thursday's shut on Thursday. A market that settles before anybody
         swings a club cannot wait for a tee shot and names its own closing time on its card: First Beer
-        Photo at the Airport shuts at <b>13:00 Spanish time, 12:00 UK, on the Wednesday</b>.</li>
+        Photo of the Trip shuts at <b data-live="beerShut">&mdash;</b> on the Wednesday, as the early
+        flight lands.</li>
       <li><b>It closes itself.</b> Nobody has to remember, and the organiser cannot "forget" to shut a market
         he fancies. The clock runs on the tee times, and those are stored as Spanish time — so it makes no
         difference whether your phone is on UK time, Spanish time, or still on last year's holiday. The
@@ -2347,7 +2348,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-21.1",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-21.2",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -3126,8 +3127,9 @@ const DEF_NOV=[
     "and the 12 on the night flight can only win it if 8 men on a golf trip go the whole day "+
     "without photographing a drink. It shuts at 05:30 UK, before bag drop even opens, because on "+
     "any later deadline half the group would be betting on something they had already watched "+
-    "happen. Jack Mulroy heads it: he has sent 176 of the 967 photos in that group, more than "+
-    "anybody, and he is on the early flight and already knows his bag drop time. Eamonn Brady is "+
+    "happen. Jack Mulroy heads it: he has sent more photos to that group than anybody else on the "+
+    "trip, roughly 1 in every 6 ever posted, and he is on the early flight and already knows his "+
+    "bag drop time. Eamonn Brady is "+
     "next and is the only other man on the early flight in the top 3 for photos sent. After that "+
     "it is whoever gets through security first",
   round:"",opts:[],
@@ -3360,7 +3362,8 @@ const DEF_NOV=[
     "friend. Alex Mulvin heads the market having bought his driver second hand off another man on "+
     "this trip 3 weeks before the flight, which gives him somebody to blame who will be standing "+
     "right there. Tom Bucknall is next on the sunglasses. Chris Best has new irons, 3 new wedges and "+
-    "a 4 week old putter with a fresh bend in the shaft that he says suits it, and a man who talks "+
+    "a putter he had barely broken in before it picked up a bend in the shaft that he says suits "+
+    "it, and a man who talks "+
     "that fondly about his golf expects rather more from it than it has ever given him. Luke Usher "+
     "is short for his mark, because a low handicap makes a bad shot somebody else's fault, Ben West "+
     "has a new driver on the way and Eamonn Brady is only a price because he tends to blame the "+
@@ -3405,8 +3408,8 @@ const MODEL_V="dfcf5d9a";
    decides whether saved state survives, and deliberately NOT in MODEL_V, which decides whether the
    published prices are stale: rewording a card must throw away a stale copy of the market list on
    every phone, and must not tell the organiser his simulation needs re-running. */
-const MARKETS_V="7b6d850f";
-const DATA_V="2026-09-21.1"+"/"+MODEL_V+"/"+MARKETS_V;
+const MARKETS_V="e20d20f6";
+const DATA_V="2026-09-21.2"+"/"+MODEL_V+"/"+MARKETS_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -7626,7 +7629,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-09-21.1</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-09-21.2</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
@@ -7645,6 +7648,26 @@ function drawRuleFigures(){
    if(e.textContent!==String(v)) e.textContent=v; });
  put("squad",n); put("aside",side); put("pairsDay",Math.floor(side/2));
  put("points",pointsOnOffer()); put("blueTarget",T.blue); put("redTarget",T.red);
+ /* THE FORM BOOK EXPLAINER USED TO CARRY 4 HAND-TYPED FIGURES and every one of them went stale.
+    "2 men have no scoring record" survived a scrape that gave the last 2 men a record; "about 4
+    shots above" was the median gap before three refits moved it; "7 rounds against 89" was the
+    sample range two scrapes ago. They are all read off the same model the table is drawn from, so
+    a refit can no longer make a liar of the paragraph explaining it. */
+ const sq=S.players.filter(p=>p.in), mod=n2=>(MODEL||[]).find(x=>x.name===n2)||{};
+ const noForm=sq.filter(p=>{const m=mod(p.name); return m.form==null||!m.n||m.unknown;}).length;
+ put("noForm", noForm===0
+   ? "Every man in the squad has a scoring record, so all "+sq.length+" can be ranked on form."
+   : noForm+(noForm===1?" man has":" men have")+" no scoring record and cannot be ranked on form at all.");
+ const gaps=sq.map(p=>mod(p.name).rawGap).filter(v=>v!=null).sort((a,b)=>a-b);
+ if(gaps.length) put("gapMed", Math.round(gaps.length%2
+   ? gaps[(gaps.length-1)/2] : (gaps[gaps.length/2-1]+gaps[gaps.length/2])/2));
+ const ns=sq.map(p=>mod(p.name).n).filter(v=>v>0).sort((a,b)=>a-b);
+ if(ns.length){ put("minN",ns[0]); put("maxN",ns[ns.length-1]); }
+ /* Both closing times are read off the same constants the countdowns use, so the prose cannot
+    disagree with the clock on the card. */
+ put("bookShut", bothTime(BOOK_CLOSE));
+ const beer=allMarkets().find(m=>m.k==="nov_beer");
+ if(beer) put("beerShut", bothTime(deadline(beer)));
 }
 function drawAll(){
  /* These two used to run outside the guard below, which is exactly backwards: a throw in the
