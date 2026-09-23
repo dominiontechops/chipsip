@@ -1332,6 +1332,12 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         it. Back Red and you are backing Red to <em>outscore</em> Blue. If you think the week ends level,
         back the Tie — it is the outcome that has actually happened once in two years.</li>
       <li><b>MVP</b> is most points contributed across the 4 sessions. Maximum 4.</li>
+      <li><b>Minigame points are team points and never reach a man's own tally.</b> They are won by the
+        whole side or by a pair, so they count towards the trophy and towards Team Result, and they count
+        towards nothing else. <b>MVP</b>, <b>Wooden Spoon</b>, <b>Blue</b> and <b>Red Top Scorer</b>,
+        <b>Perfect Record</b> and <b>The Blank</b> all read a man's own 4 matches and nothing more: his
+        ceiling is 4 and his floor is 0 however the side games fall. A man on nil from his 4 matches is
+        still a Blank even if his team wins all 4 minigames around him.</li>
       <li>Ties on points are settled by head-to-head singles result, then by a coin toss in the bar.</li>
     </ul>
     <h3>Settlement</h3>
@@ -2348,7 +2354,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-21.2",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-23.1",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2948,7 +2954,8 @@ const DEC={strokes:"Net strokes",stableford:"Stableford points"};
 
 const MARKETS=[
  {k:"mvp",n:"MVP",
-  d:"Most points across the 4 sessions, maximum 4. Bragging rights until next September, and the "+
+  d:"Most points across the 4 sessions, maximum 4. Minigames are TEAM points. They are won by the whole side or by a pair, never by a man on his own, so no minigame point ever reaches an individual tally here. A man's own 4 matches are the whole of it. "+
+   "Bragging rights until next September, and the "+
     /* A HANDICAP TYPED INTO COPY IS WRONG BY THE NEXT SCRAPE. Gabe Hills read 17.5 here until this
      sweep; he will read something else the moment anybody declares. Phrased so no refit can make a
      liar of it, the same way Rob's mark is phrased on his own card. */
@@ -2969,13 +2976,15 @@ const MARKETS=[
      Grep for "12.5" before you publish a new total: it appears here and in the Rules tab. */
   type:"model",round:"",team:true},
  {k:"blueTop",n:"Blue Top Scorer",
-  d:"Best of the Blues. 10 runners rather than 20, so the prices are half as long as MVP for a man "+
+  d:"Best of the Blues, on his own 4 matches. Minigames are TEAM points. They are won by the whole side or by a pair, never by a man on his own, so no minigame point ever reaches an individual tally here. "+
+    "10 runners rather than 20, so the prices are half as long as MVP for a man "+
     "you probably rate anyway. Somebody has to be",
   type:"model",round:"",only:"Blue"},
  {k:"redTop",n:"Red Top Scorer",
   /* Word for word the same as Blue Top Scorer, on purpose. The old copy was written from a Blue
      seat — "you get to enjoy it in front of them" — and half the board is Red. */
-  d:"Best of the Reds. 10 runners rather than 20, so the prices are half as long as MVP for a man "+
+  d:"Best of the Reds, on his own 4 matches. Minigames are TEAM points. They are won by the whole side or by a pair, never by a man on his own, so no minigame point ever reaches an individual tally here. "+
+    "10 runners rather than 20, so the prices are half as long as MVP for a man "+
     "you probably rate anyway. Somebody has to be",
   type:"model",round:"",only:"Red"},
  {k:"perfect",n:"Perfect Record",
@@ -3006,7 +3015,8 @@ const MARKETS=[
     "pays, and it is not a margin",
   type:"model",round:"4"},
  /* ---- the whole trip, added 2026 ---------------------------------------------------------- */
- {k:"spoon",n:"Wooden Spoon",d:"Fewest points across the 4 sessions. The mirror of MVP and, on past form, the more popular "+
+ {k:"spoon",n:"Wooden Spoon",d:"Fewest points across the 4 sessions, from his own 4 matches only. Minigames are TEAM points. They are won by the whole side or by a pair, never by a man on his own, so no minigame point ever reaches an individual tally here. "+
+   "The mirror of MVP and, on past form, the more popular "+
    "market of the two. A halved match still counts as half, so the only way to win this is to lose nearly everything",type:"model",round:""},
  {k:"pairs",n:"Top Partnership",d:"Which 2 men take the most points playing together across the 3 pairs sessions. Runners appear "+
    "as each draw goes up — a pairing nobody has drawn yet cannot be backed, because it does not exist yet. "+
@@ -3408,8 +3418,8 @@ const MODEL_V="dfcf5d9a";
    decides whether saved state survives, and deliberately NOT in MODEL_V, which decides whether the
    published prices are stale: rewording a card must throw away a stale copy of the market list on
    every phone, and must not tell the organiser his simulation needs re-running. */
-const MARKETS_V="e20d20f6";
-const DATA_V="2026-09-21.2"+"/"+MODEL_V+"/"+MARKETS_V;
+const MARKETS_V="eb1d3f14";
+const DATA_V="2026-09-23.1"+"/"+MODEL_V+"/"+MARKETS_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -7629,7 +7639,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-09-21.2</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-09-23.1</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw
