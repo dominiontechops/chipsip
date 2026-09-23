@@ -2354,7 +2354,7 @@ function reportError(kind,msg,extra){
   fetch(SB.url+"/rest/v1/client_errors",{method:"POST",keepalive:true,
    headers:{apikey:SB.key,Authorization:"Bearer "+((typeof AUTH!=="undefined"&&AUTH.tok)||SB.key),
     "Content-Type":"application/json",Prefer:"return=minimal"},
-   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-23.1",
+   body:JSON.stringify({who:(typeof AUTH!=="undefined"&&AUTH.name)||null,build:"2026-09-23.2",
     kind:String(kind).slice(0,40),msg:msg,src:x.src||null,
     line:Number.isFinite(+x.line)?+x.line:null,col:Number.isFinite(+x.col)?+x.col:null,
     stack:x.stack?String(x.stack).slice(0,1500):null,
@@ -2927,11 +2927,22 @@ const DEF_COURSES=[
   pars:[ 4, 4, 4, 4, 4, 4, 3, 4, 4,  4, 4, 5, 3, 5, 3, 4, 4, 4]},
  {n:"La Cala Golf, Asia",d:"Sat 26 Sep",par:72,slope:139,rating:69.1,fmt:"scramble",dec:"strokes",est:false,
   tee:"Yellow",
-  si:  [12,16,18, 2,10, 4,14, 8, 6,  1,13, 3, 5,17,11, 7,15, 9],
+  /* Index off the club's own hole pages (lacala.com, Campo Asia, one page per hole), which is
+     what is printed on the tee signs. The older card that circulates on the scorecard sites
+     (12,16,18,2,10,4,14,8,6,1,13,3,5,17,11,7,15,9) differs on 7 holes. It makes no difference
+     to the board: Saturday is a scramble off scratch, so no stroke is ever allocated here. */
+  si:  [12,16,18, 4,10, 6,14, 8, 2,  3,13, 5, 7,17,11, 1,15, 9],
   pars:[ 4, 4, 3, 4, 5, 4, 3, 4, 5,  5, 3, 4, 4, 4, 4, 5, 3, 4]},
  {n:"Santa Maria Golf Club",d:"Sun 27 Sep",par:72,slope:137,rating:71.7,fmt:"singles",dec:"stableford",est:false,
   tee:"Yellow",
-  si:  [15,10, 2,12,11, 6, 8, 7, 1,  9,14,17, 3,13,18, 4,16, 5],
+  /* MEN'S STROKE INDEX, off the yellow and white card. The row that was here before
+     (15,10,2,12,11,6,8,7,1,9,14,17,3,13,18,4,16,5) is the index printed against the blue and red
+     tees, which is the ladies' allocation, and it disagreed with the men's card on 12 of the 18
+     holes. Three independent copies of the card agree on this row: the club's own hole pages, the
+     18birdies white-tee card and the golfingholiday card. Caught on 23 Sep from Ben's course guide,
+     which had it right. Sunday is the only day played off individual handicap and it also carries
+     the net-par-streak minigame, so this is the one course where the index actually matters. */
+  si:  [17, 9, 2,11,15, 5,13, 7, 1,  3,10,14, 8,12,18, 4,16, 6],
   pars:[ 4, 5, 4, 4, 4, 4, 3, 5, 5,  4, 4, 3, 5, 4, 3, 4, 3, 4]}
 ];
 /* A transposed stroke index or a par that does not add up is silently wrong for the whole week, so
@@ -3419,7 +3430,7 @@ const MODEL_V="dfcf5d9a";
    published prices are stale: rewording a card must throw away a stale copy of the market list on
    every phone, and must not tell the organiser his simulation needs re-running. */
 const MARKETS_V="eb1d3f14";
-const DATA_V="2026-09-23.1"+"/"+MODEL_V+"/"+MARKETS_V;
+const DATA_V="2026-09-23.2"+"/"+MODEL_V+"/"+MARKETS_V;
 function freshState(){return{ v:DATA_V,
  minStake:1,allowance:1,oddsFmt:"frac",payLink:"",payLabel:"Pay into the pot",
  declared:false,closed:false,launchAt:null,gateInstHide:false,override:false,   /* the control was removed: nothing reads or sets this any more */apBonus:1.25,blindScale:1,slip:[],slipOpen:false,acctOpen:false,
@@ -7639,7 +7650,7 @@ function drawStrip(){
  const to=TEE_OFF-new Date();
  if(to>0) cells.push(`<div class="hs"><u>First tee</u><b class="cdown">&mdash;</b><i>Thu 24 Sep, 13:50</i></div>`);
  el.innerHTML=cells.join("")+`<div class="hs" style="border-style:dashed"><u>Build</u>
-   <b style="font-size:12px">2026-09-23.1</b><i>tap Rules for the full terms</i></div>`;
+   <b style="font-size:12px">2026-09-23.2</b><i>tap Rules for the full terms</i></div>`;
  tick();
 }
 /* Each panel draws inside its own guard. One bad field in a published price set used to throw

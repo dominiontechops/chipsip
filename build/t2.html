@@ -2386,11 +2386,22 @@ const DEF_COURSES=[
   pars:[ 4, 4, 4, 4, 4, 4, 3, 4, 4,  4, 4, 5, 3, 5, 3, 4, 4, 4]},
  {n:"La Cala Golf, Asia",d:"Sat 26 Sep",par:72,slope:139,rating:69.1,fmt:"scramble",dec:"strokes",est:false,
   tee:"Yellow",
-  si:  [12,16,18, 2,10, 4,14, 8, 6,  1,13, 3, 5,17,11, 7,15, 9],
+  /* Index off the club's own hole pages (lacala.com, Campo Asia, one page per hole), which is
+     what is printed on the tee signs. The older card that circulates on the scorecard sites
+     (12,16,18,2,10,4,14,8,6,1,13,3,5,17,11,7,15,9) differs on 7 holes. It makes no difference
+     to the board: Saturday is a scramble off scratch, so no stroke is ever allocated here. */
+  si:  [12,16,18, 4,10, 6,14, 8, 2,  3,13, 5, 7,17,11, 1,15, 9],
   pars:[ 4, 4, 3, 4, 5, 4, 3, 4, 5,  5, 3, 4, 4, 4, 4, 5, 3, 4]},
  {n:"Santa Maria Golf Club",d:"Sun 27 Sep",par:72,slope:137,rating:71.7,fmt:"singles",dec:"stableford",est:false,
   tee:"Yellow",
-  si:  [15,10, 2,12,11, 6, 8, 7, 1,  9,14,17, 3,13,18, 4,16, 5],
+  /* MEN'S STROKE INDEX, off the yellow and white card. The row that was here before
+     (15,10,2,12,11,6,8,7,1,9,14,17,3,13,18,4,16,5) is the index printed against the blue and red
+     tees, which is the ladies' allocation, and it disagreed with the men's card on 12 of the 18
+     holes. Three independent copies of the card agree on this row: the club's own hole pages, the
+     18birdies white-tee card and the golfingholiday card. Caught on 23 Sep from Ben's course guide,
+     which had it right. Sunday is the only day played off individual handicap and it also carries
+     the net-par-streak minigame, so this is the one course where the index actually matters. */
+  si:  [17, 9, 2,11,15, 5,13, 7, 1,  3,10,14, 8,12,18, 4,16, 6],
   pars:[ 4, 5, 4, 4, 4, 4, 3, 5, 5,  4, 4, 3, 5, 4, 3, 4, 3, 4]}
 ];
 /* A transposed stroke index or a par that does not add up is silently wrong for the whole week, so
