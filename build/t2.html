@@ -1328,7 +1328,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         <span data-live="redTarget">12.5</span> to keep it</b>. Anyone quoting "13 to win" at both teams is giving Red half a point they do not
         need. The scoreboard shows the two targets separately for exactly this reason.</li>
       <li><b>A tie is its own outcome in the betting, whatever it does to the trophy.</b> Team Result settles
-        on <b>the score</b>: 12.5 apiece pays out on <b>Tie</b>, not on Red, even though Red walk home with
+        on <b>the score</b>: <span data-live="halfPts">12.5</span> apiece pays out on <b>Tie</b>, not on Red, even though Red walk home with
         it. Back Red and you are backing Red to <em>outscore</em> Blue. If you think the week ends level,
         back the Tie — it is the outcome that has actually happened once in two years.</li>
       <li><b>MVP</b> is most points contributed across the 4 sessions. Maximum 4.</li>
@@ -1360,7 +1360,11 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
         win. Winning shares are 40 × 1.25 = 50, plus 20, so 70 in total. The ante-post backers hold 50 of
         those 70 shares and take £71.43 of the pool; the open backers hold 20 and take £28.57. Nothing is
         left over, because nothing is taken out.</li>
-      <li><b>Dead heat.</b> Pool splits equally between tied outcomes, then between backers within each.</li>
+      <li><b>Dead heat.</b> Every ticket on a tied outcome is a winning ticket, and the winning tickets split
+        the <b>whole</b> pool between them in proportion to stake, ante-post shares counting their multiplier.
+        Nothing is set aside for a tied outcome that nobody backed: money only goes unclaimed when
+        <em>none</em> of the tied outcomes had a penny on it. That is how the board has settled since the
+        pool-share change and it is how every dead heat on this board was paid.</li>
       <li><b>Nobody wins the market.</b> It can happen: The Blank pays the man who scores nothing and
         everybody scores something; Perfect Record pays a four-from-four and nobody manages it. There is no
         house here — nobody is on the other side of these bets, the backers are betting each other, so an
@@ -1598,7 +1602,7 @@ padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
           <input type="number" id="apBonus" min="1" max="3" step="0.05" value="1.25"></label>
         <label class="small">Blind uncertainty
           <input type="number" id="blindScale" min="0" max="3" step="0.1" value="1"></label>
-        <label class="small">Side games worth a point each
+        <label class="small">Side games on the board (0 to 4, a point each)
           <input type="number" id="bonusPts" min="0" max="4" step="1" value="0" style="width:64px"></label>
         <label class="small">Side games won by Blue
           <input type="number" id="bonusB" min="0" max="4" step="0.5" value="0" style="width:64px"></label>
@@ -2434,16 +2438,15 @@ const MARKETS=[
     "Mark Sturgess arrives with no history on this trip at all, which cuts both ways",
   type:"model",round:""},
  {k:"team",n:"Team Result",
-  d:"Blue, Red, or the unbearable anticlimax of 12.5 apiece. Settles on THE SCORE, not on the trophy: "+
-    "12.5 each pays Tie, not Red, even though Red keep the thing. Back Tie if you fancy the draw. "+
+  d:"Blue, Red, or the unbearable anticlimax of a dead-level finish. Settles on THE SCORE, not on the trophy: "+
+    "level pays Tie, not Red, even though Red keep the thing. Back Tie if you fancy the draw. "+
     "The points total is provisional while the captains settle the side games and the social "+
     "markets: if it moves, what counts as a draw moves with it, bets already placed stand, and the "+
     "prices are re-run",
-  /* !! STANDING NOTE — READ BEFORE CHANGING THE POINTS TOTAL !!
-     This description hard-codes the draw at 12.5 apiece and the holder rule that goes with it.
-     The moment the points on offer move off 25 — side games switched on, a format changed, a
-     session added — this copy is WRONG and has to be rewritten by hand. Nothing computes it.
-     Grep for "12.5" before you publish a new total: it appears here and in the Rules tab. */
+  /* The draw used to be typed in here as "12.5 apiece" and it read that way for the whole of a
+     29-point week, where a draw was 14.5. Descriptions are plain text with nothing live in them,
+     so the number is gone: "level" is right whatever the total is. The Rules tab carries the
+     figure and reads it off pointsOnOffer(). */
   type:"model",round:"",team:true},
  {k:"blueTop",n:"Blue Top Scorer",
   d:"Best of the Blues, on his own 4 matches. Minigames are TEAM points. They are won by the whole side or by a pair, never by a man on his own, so no minigame point ever reaches an individual tally here. "+
@@ -7128,6 +7131,7 @@ function drawRuleFigures(){
    if(e.textContent!==String(v)) e.textContent=v; });
  put("squad",n); put("aside",side); put("pairsDay",Math.floor(side/2));
  put("points",pointsOnOffer()); put("blueTarget",T.blue); put("redTarget",T.red);
+ put("halfPts",pointsOnOffer()/2);
  /* THE FORM BOOK EXPLAINER USED TO CARRY 4 HAND-TYPED FIGURES and every one of them went stale.
     "2 men have no scoring record" survived a scrape that gave the last 2 men a record; "about 4
     shots above" was the median gap before three refits moved it; "7 rounds against 89" was the

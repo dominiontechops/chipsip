@@ -126,6 +126,13 @@
       if (r.isSimRound) { sim++; continue; }
       /* Pairs formats are excluded throughout: two men sharing a ball say nothing about either. */
       if (r.holesPartner && Object.keys(r.holesPartner).length) { pairs++; continue; }
+      /* FOUND ON THE 2026 TRIP: the alternate shot and scramble cards were saved with an EMPTY
+         holesPartner and the pair's shared score copied on to every man's own round, so the filter
+         above let them straight through — Dom's Saturday scramble, an 81 gross off 26, would have
+         read as the round of his life. Squabbit itself flags them: countsTowardsHandicap is false on
+         every card it will not count, and that is the same set this model should not count. The
+         Thursday best ball and the Sunday singles are true and stay in. */
+      if (r.countsTowardsHandicap === false) { pairs++; continue; }
       const pars = r.courseHolesPars || [];
       /* WHICH holes he actually played. This is the bit that used to throw away every nine:
          numHoles was tested against 18 and a twilight nine was binned. Worse, a 9-hole card still
